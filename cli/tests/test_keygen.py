@@ -16,16 +16,14 @@
 import argparse
 import os
 import unittest
-import sys
-
+import tempfile
 import shutil
+
 
 from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
 
-from sawtooth_cli.admin_command import keygen
-from sawtooth_cli.admin_command.config import get_key_dir
+from sawtooth_cli import keygen
 from sawtooth_cli.exceptions import CliException
-
 
 
 class TestKeygen(unittest.TestCase):
@@ -33,38 +31,27 @@ class TestKeygen(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._parser = None
-        cls._key_dir = get_key_dir()
+        cls._key_dir = None
+        cls._priv_filename = None
+        cls._pub_filename = None
         cls._key_name = 'test_key'
-        cls._temp_dir = None
-        cls._priv_filename = os.path.join(cls._key_dir,
-                                          cls._key_name + '.priv')
-        cls._pub_filename = os.path.join(cls._key_dir,
-                                         cls._key_name + '.pub')
-        cls._default_priv_filename = os.path.join(cls._key_dir,
-                                          'validator' + '.priv')
-        cls._default_pub_filename = os.path.join(cls._key_dir,
-                                          'validator' + '.pub')
-        if not os.path.exists(cls._key_dir):
-            try:
-                os.makedirs(cls._key_dir, exist_ok=True)
-            except OSError as e:
-                print('Unable to create {}: {}'.format(cls._key_dir, e),
-                      file=sys.stderr)
-                sys.exit(1)
 
     def setUp(self):
         self._parser = argparse.ArgumentParser(add_help=False)
-
+        self._key_dir = tempfile.mkdtemp()
+        self._priv_filename = os.path.join(self._key_dir,
+                                          self._key_name + '.priv')
+        self._pub_filename = os.path.join(self._key_dir,
+                                         self._key_name + '.pub')
         parent_parser = argparse.ArgumentParser(prog='test_keygen',
                                                 add_help=False)
-
         subparsers = self._parser.add_subparsers(title='subcommands',
                                                  dest='command')
-
         keygen.add_keygen_parser(subparsers, parent_parser)
 
     def tearDown(self):
         self.remove_key_files()
+        shutil.rmtree(self._key_dir)
 
     def _parse_keygen_command(self, *args):
         cmd_args = ['keygen']
@@ -75,71 +62,59 @@ class TestKeygen(unittest.TestCase):
         """Remove existing test files before creating new keys.
         """
         self.remove_key_files()
-        args = self._parse_keygen_command(self._key_name)
+        args = self._parse_keygen_command(self._key_name,
+                     '--key-dir', self._key_dir)
         keygen.do_keygen(args)
         private_key = _read_signing_keys(self._priv_filename)
+        self.assertIsNotNone(private_key)
+
+    def test_wrong_directory(self):
+        self.remove_key_files()
+        key_dir = os.path.join(self._key_dir, "temp")
+        args = self._parse_keygen_command(self._key_name, '--key-dir', key_dir)
+        self.assertRaises(CliException, keygen.do_keygen, args)
+
+    def test_default_directory(self):
+        key_dir = os.path.join(os.path.expanduser('~'), '.sawtooth', 'keys')
+        _test_priv_filename = os.path.join(key_dir,
+                                          self._key_name + '.priv')
+        shutil.rmtree(key_dir)
+        args = self._parse_keygen_command('--force', self._key_name)
+        keygen.do_keygen(args)
+        private_key = _read_signing_keys(_test_priv_filename)
+        self.assertIsNotNone(private_key)
+
+    def test_default_directory_quiet(self):
+        key_dir = os.path.join(os.path.expanduser('~'), '.sawtooth', 'keys')
+        _test_priv_filename = os.path.join(key_dir,
+                                          self._key_name + '.priv')
+        shutil.rmtree(key_dir)
+        args = self._parse_keygen_command('--force',
+                                          self._key_name, '-q')
+        keygen.do_keygen(args)
+        private_key = _read_signing_keys(_test_priv_filename)
         self.assertIsNotNone(private_key)
 
     def test_force_write(self):
         """Write key files to be overwritten by test of --force option.
         """
         self.remove_key_files()
-        args = self._parse_keygen_command(self._key_name)
+        args = self._parse_keygen_command(self._key_name,
+                                           '--key-dir', self._key_dir)
         keygen.do_keygen(args)
-        args = self._parse_keygen_command('--force', self._key_name)
+        args = self._parse_keygen_command(self._key_name,
+                                          '--key-dir', self._key_dir, '--force')
         keygen.do_keygen(args)
         private_key = _read_signing_keys(self._priv_filename)
         self.assertIsNotNone(private_key)
 
-    def test_writes_default_key(self):
-        """Remove existing default files before creating new keys
-        """
-        try:
-            os.remove(self._default_priv_filename)
-            os.remove(self._default_pub_filename)
-        except FileNotFoundError:
-            pass
-        args = self._parse_keygen_command()
-        keygen.do_keygen(args)
-        private_key = _read_signing_keys(self._default_priv_filename)
-        self.assertIsNotNone(private_key)
-
-    def test_writes_default_key_force(self):
-        """Write default key files to be overwritten by test of --force option.
-        """
-        try:
-            os.remove(self._default_priv_filename)
-            os.remove(self._default_pub_filename)
-        except FileNotFoundError:
-            pass
-        args = self._parse_keygen_command()
-        keygen.do_keygen(args)
-        args = self._parse_keygen_command('--force')
-        keygen.do_keygen(args)
-        private_key = _read_signing_keys(self._default_priv_filename)
-        self.assertIsNotNone(private_key)
-
-    def test_no_directory(self):
-        """test for exception when no directory is present"""
-        key_dir = self._key_dir
-        shutil.rmtree(key_dir)
-        args = self._parse_keygen_command(self._key_name)
-        self.assertRaises(CliException, keygen.do_keygen, args)
-        if not os.path.exists(key_dir):
-            try:
-                os.makedirs(key_dir, exist_ok=True)
-            except OSError as e:
-                print('Unable to create {}: {}'.format(key_dir, e),
-                      file=sys.stderr)
-                sys.exit(1)
-
     def test_file_exists(self):
-        """test whether file is present without
-        force otherwise raise exception"""
+        """Write key files to be overwritten by test of --force option.
+        """
         self.remove_key_files()
-        args = self._parse_keygen_command(self._key_name)
+        args = self._parse_keygen_command(self._key_name,
+                                           '--key-dir', self._key_dir)
         keygen.do_keygen(args)
-        args = self._parse_keygen_command(self._key_name)
         self.assertRaises(CliException, keygen.do_keygen, args)
 
     def remove_key_files(self):
@@ -150,7 +125,6 @@ class TestKeygen(unittest.TestCase):
             os.remove(self._pub_filename)
         except FileNotFoundError:
             pass
-
 
 def _read_signing_keys(key_filename):
     """Reads the given file as a HEX formatted key.
