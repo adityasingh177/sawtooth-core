@@ -15,11 +15,10 @@
 
 import argparse
 import unittest
-import asyncio
 import logging
+import time
 
-
-
+from sawtooth_cli.rest_client import RestClient
 from sawtooth_cli import batch
 
 LOGGER = logging.getLogger(__name__)
@@ -54,21 +53,82 @@ class TestBatch(unittest.TestCase):
         cmd_args = ['batch']
         cmd_args += args
         return self._parser.parse_args(cmd_args)
-      
-    async def test_batch_list_default(self):
+        
+    def test_batch_list_default(self):
         args = self._parse_batch_command('list' , '--url', self._rest_endpoint)
+        time.sleep(3)
         batch.do_batch(args)
-
+      
+    def test_batch_list_csv(self):
+        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'csv')
+        time.sleep(3)
+        batch.do_batch(args) 
+        
+    def test_batch_list_yaml(self):
+        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'yaml')
+        time.sleep(3)
+        batch.do_batch(args) 
+     
+    def test_batch_list_json(self):
+        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
+        time.sleep(3)
+        batch.do_batch(args)
+              
+    def test_batch_show(self):
+        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
+        keys = ('batch_id', 'txns', 'signer')
+         
+        def parse_batch_row(batch):
+            return (
+                batch['header_signature'],
+                len(batch.get('transactions', [])),
+                batch['header']['signer_public_key'])
+         
+         
+        rest_client = RestClient(args.url, args.user)
+        batches = rest_client.list_batches()
+         
+        time.sleep(3)
+         
+        data = [{k: d for k, d in zip(keys, parse_batch_row(b))}
+                for b in batches]
+         
+        batch_id = data[0]['batch_id']
+         
+     
+        args = self._parse_batch_command('show' , batch_id , '--url', self._rest_endpoint , '--format' , 'json')
+        batch.do_batch(args) 
+         
+        args = self._parse_batch_command('show' , batch_id , '--url', self._rest_endpoint , '--format' , 'yaml')
+        batch.do_batch(args)
+     
+    def test_batch_status(self):
+        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
+        keys = ('batch_id', 'txns', 'signer')
+           
+        def parse_batch_row(batch):
+            return (
+                batch['header_signature'],
+                len(batch.get('transactions', [])),
+                batch['header']['signer_public_key'])
+           
+           
+        rest_client = RestClient(args.url, args.user)
+        batches = rest_client.list_batches()
+           
+        time.sleep(3)
+           
+        data = [{k: d for k, d in zip(keys, parse_batch_row(b))}
+                for b in batches]
+           
+        batch_id = data[0]['batch_id']
+           
+       
+        args = self._parse_batch_command('status' , batch_id , '--url', self._rest_endpoint , '--format' , 'json')
+        batch.do_batch(args)
+        args = self._parse_batch_command('status' , batch_id , '--url', self._rest_endpoint , '--format' , 'yaml')
+        batch.do_batch(args)
     
-#     async def test_batch_list_csv(self):
-#         args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
-#         batch.do_batch(args) 
-#     
-#     async def test_batch_list_yaml(self):
-#         args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'yaml')
-#         batch.do_batch(args) 
-#      
-#           
-#     def test_batch_show(self):
-#         args = self._parse_batch_command('show' , 'batch_id' , '--url', self._rest_endpoint)
-#         batch.do_batch(args) 
+    def test_batch_submit(self):
+        pass
+          
