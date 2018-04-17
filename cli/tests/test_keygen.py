@@ -69,12 +69,15 @@ class TestKeygen(unittest.TestCase):
         self.assertIsNotNone(private_key)
 
     def test_wrong_directory(self):
+        """test for wrong key directory.
+        """
         self.remove_key_files()
         key_dir = os.path.join(self._key_dir, "temp")
         args = self._parse_keygen_command(self._key_name, '--key-dir', key_dir)
         self.assertRaises(CliException, keygen.do_keygen, args)
 
     def test_default_directory(self):
+        """test for keys with default names"""
         key_dir = os.path.join(os.path.expanduser('~'), '.sawtooth', 'keys')
         _test_priv_filename = os.path.join(key_dir,
                                           self._key_name + '.priv')
@@ -85,6 +88,7 @@ class TestKeygen(unittest.TestCase):
         self.assertIsNotNone(private_key)
 
     def test_default_directory_quiet(self):
+        """test for keys with default with quiet option"""
         key_dir = os.path.join(os.path.expanduser('~'), '.sawtooth', 'keys')
         _test_priv_filename = os.path.join(key_dir,
                                           self._key_name + '.priv')
@@ -109,7 +113,7 @@ class TestKeygen(unittest.TestCase):
         self.assertIsNotNone(private_key)
 
     def test_file_exists(self):
-        """Write key files to be overwritten by test of --force option.
+        """test whether key files are already present in the directory
         """
         self.remove_key_files()
         args = self._parse_keygen_command(self._key_name,
