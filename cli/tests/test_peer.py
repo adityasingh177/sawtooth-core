@@ -54,8 +54,8 @@ class TestBatch(unittest.TestCase):
         cmd_args += args
         return self._parser.parse_args(cmd_args)
     
-    def test_peer_list(self):
-        """ test for list of peers with different formats"""
-        args = self._parse_peer_command('list' , '--url', self._rest_endpoint)
-        time.sleep(3)
-        peer.do_peer_list(args)
+#     def test_peer_list(self):
+#         """ test for list of peers with different formats"""
+#         args = self._parse_peer_command('list' , '--url', self._rest_endpoint)
+#         time.sleep(3)
+#         peer.do_peer_list(args)
