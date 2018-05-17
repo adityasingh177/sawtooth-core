@@ -16,31 +16,22 @@
 import argparse
 import unittest
 import logging
-import time
+import subprocess
+import shlex
+import json
+import yaml
+import csv
 
 from sawtooth_cli.rest_client import RestClient
 from sawtooth_cli import batch
+from sawtooth_cli import format_utils as fmt
 from sawtooth_signing import CryptoFactory
-
-from utils import Mock
-
-import sawtooth_cli.protobuf.batch_pb2 as batch_pb2
-
-
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-REST_API = "rest-api:8008"
-
-
-ID_A = 'a' * 128
-ID_B = 'b' * 128
-ID_C = 'c' * 128
-ID_D = 'd' * 128
-
-
+REST_API = "localhost:8008"
 
 class TestBatch(unittest.TestCase):
     @classmethod
@@ -67,106 +58,82 @@ class TestBatch(unittest.TestCase):
         cmd_args = ['batch']
         cmd_args += args
         return self._parser.parse_args(cmd_args)
-        
+         
     def test_batch_list(self):
-        """ test for list batch with different formats"""
-        args = self._parse_batch_command('list' , '--url', self._rest_endpoint)
-        time.sleep(1)
-        batch.do_batch(args)
+        """Test for list of batches for specified formats
+        """
+        output = _run_batch_command('sawtooth batch list --url {} --format {}'.format(
+                    self._rest_endpoint , 'default'))
+        print(output)
+         
+        output = _run_batch_command('sawtooth batch list --url {} --format {}'.format(
+                    self._rest_endpoint , 'csv'))    
+        reader = csv.DictReader(output.split('\n'), delimiter=',')
+        data = [json.dumps(row) for row in reader]
+        self.assertTrue(data, "Batch csv list not found")
+         
+        output = _run_batch_command('sawtooth batch list --url {} --format {}'.format(
+                    self._rest_endpoint , 'yaml'))
+        data = yaml.load(output)
+        self.assertTrue(data, "Batch yaml list not found")
         
-        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'csv')
-        time.sleep(1)
-        batch.do_batch(args) 
-        
-        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'yaml')
-        time.sleep(1)
-        batch.do_batch(args)
-        
-        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
-        time.sleep(1)
-        batch.do_batch(args)
-        
+        output = _run_batch_command('sawtooth batch list --url {} --format {}'.format(
+                    self._rest_endpoint , 'json'))
+        data = json.loads(output)
+        self.assertTrue(data, "Batch json list not found")
+             
     def test_batch_show(self):
-        """test for batch show command"""
+        """Test for batch show command for specified formats
+        """
         args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
         keys = ('batch_id', 'txns', 'signer')
-         
-        def parse_batch_row(batch):
-            return (
-                batch['header_signature'],
-                len(batch.get('transactions', [])),
-                batch['header']['signer_public_key'])
-         
-         
-        rest_client = RestClient(args.url, args.user)
-        batches = rest_client.list_batches()
-         
-        time.sleep(1)
-         
-        data = [{k: d for k, d in zip(keys, parse_batch_row(b))}
-                for b in batches]
-         
-        batch_id = data[0]['batch_id']
-         
-     
-        args = self._parse_batch_command('show' , batch_id , '--url', self._rest_endpoint , '--format' , 'json')
-        batch.do_batch(args) 
-         
-        args = self._parse_batch_command('show' , batch_id , '--url', self._rest_endpoint , '--format' , 'yaml')
-        batch.do_batch(args)
-     
-    def test_batch_status(self):
-        """test for batch status"""
-        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
-        keys = ('batch_id', 'txns', 'signer')
-           
-        def parse_batch_row(batch):
-            return (
-                batch['header_signature'],
-                len(batch.get('transactions', [])),
-                batch['header']['signer_public_key'])
-           
-           
-        rest_client = RestClient(args.url, args.user)
-        batches = rest_client.list_batches()
-           
-        time.sleep(1)
-           
-        data = [{k: d for k, d in zip(keys, parse_batch_row(b))}
-                for b in batches]
-           
-        batch_id = data[0]['batch_id']
-           
-       
-        args = self._parse_batch_command('status' , batch_id , '--url', self._rest_endpoint , '--format' , 'json')
-        batch.do_batch(args)
-        args = self._parse_batch_command('status' , batch_id , '--url', self._rest_endpoint , '--format' , 'yaml')
-        batch.do_batch(args)
-    
-    def test_batch_submit(self):
-        batches = Mock.make_batches(ID_A, ID_C)
-        batch_size_limit = 5
-                
-        rest_client = RestClient(self._rest_endpoint)
-
-        start = time.time()
-        
-    
-        for batch_list in _split_batch_list(batch_size_limit , batches):
-            rest_client.send_batches(batch_list)
-    
-        stop = time.time()
             
-        print('batches: {},  batch/sec: {}'.format(
-            str(len(batches.batches)),
-            len(batches.batches) / (stop - start)))
-    
-def _split_batch_list(batch_size_limit , batch_list):
-    new_list = []
-    for batch in batch_list:
-        new_list.append(batch)
-        if len(new_list) == batch_size_limit:
-            yield batch_pb2.BatchList(batches=new_list)
-            new_list = []
-    if new_list:
-        yield batch_pb2.BatchList(batches=new_list)
+        def parse_batch_row(batch):
+            return (
+                batch['header_signature'],
+                len(batch.get('transactions', [])),
+                batch['header']['signer_public_key'])
+            
+            
+        rest_client = RestClient(args.url, args.user)
+        batches = rest_client.list_batches()         
+        data = [{k: d for k, d in zip(keys, parse_batch_row(b))}
+                for b in batches]
+        batch_id = data[0]['batch_id']
+  
+        output = _run_batch_command('sawtooth batch show {} --url {} --format {}'.format(batch_id,
+                    self._rest_endpoint , 'yaml'))
+        self.assertTrue(data, "Batch yaml show not found")
+        output = _run_batch_command('sawtooth batch show {} --url {} --format {}'.format(batch_id,
+                    self._rest_endpoint , 'json'))
+        self.assertTrue(data, "Batch json show not found")
+         
+    def test_batch_status(self):
+        """Test for batch status for specified formats
+        """
+        args = self._parse_batch_command('list' , '--url', self._rest_endpoint , '--format' , 'json')
+        keys = ('batch_id', 'txns', 'signer')
+             
+        def parse_batch_row(batch):
+            return (
+                batch['header_signature'],
+                len(batch.get('transactions', [])),
+                batch['header']['signer_public_key'])
+             
+             
+        rest_client = RestClient(args.url, args.user)
+        batches = rest_client.list_batches()
+        data = [{k: d for k, d in zip(keys, parse_batch_row(b))}
+                for b in batches]
+        batch_id = data[0]['batch_id']
+        output = _run_batch_command('sawtooth batch status {} --url {} --format {}'.format(batch_id,
+                    self._rest_endpoint , 'yaml'))
+        self.assertTrue(data, "Batch yaml status not found")
+        output = _run_batch_command('sawtooth batch status {} --url {} --format {}'.format(
+                    batch_id ,self._rest_endpoint , 'json'))
+        self.assertTrue(data, "Batch json status not found")
+
+def _run_batch_command(command):
+    return subprocess.check_output(
+        shlex.split(command)
+    ).decode().strip().replace("'", '"')
