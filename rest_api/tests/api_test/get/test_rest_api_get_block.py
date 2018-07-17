@@ -1,80 +1,79 @@
-# Copyright 2018 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ------------------------------------------------------------------------------
-  
-import pytest
-import logging
-import json
-import urllib.request
-import urllib.error
-
- 
-from fixtures import break_genesis, invalid_batch
-from utils import get_batches, post_batch
-
-from base import RestApiBaseTest
-
-
-pytestmark = [pytest.mark.get , pytest.mark.batch]
-
-  
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
-  
-
-# class TestBatchList(RestApiBaseTest):
+# # Copyright 2018 Intel Corporation
+# #
+# # Licensed under the Apache License, Version 2.0 (the "License");
+# # you may not use this file except in compliance with the License.
+# # You may obtain a copy of the License at
+# #
+# #     http://www.apache.org/licenses/LICENSE-2.0
+# #
+# # Unless required by applicable law or agreed to in writing, software
+# # distributed under the License is distributed on an "AS IS" BASIS,
+# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# # See the License for the specific language governing permissions and
+# # limitations under the License.
+# # ------------------------------------------------------------------------------
+#   
+# import pytest
+# import logging
+# import json
+# import urllib.request
+# import urllib.error
+#   
+# from fixtures import setup, break_genesis
+# from utils import get_blocks
+# 
+# from base import RestApiBaseTest
+# 
+# 
+# pytestmark = [pytest.mark.get , pytest.mark.block]
+# 
+#   
+# LOGGER = logging.getLogger(__name__)
+# LOGGER.setLevel(logging.INFO)
+#   
+#   
+# class TestBlockList(RestApiBaseTest):
 #     """This class tests the batch list with different parameters
 #     """
-#     def test_api_get_batch_list(self, setup):
-#         """Tests the batch list by submitting intkey batches
-#         """
-#         signer_key = setup['signer_key']
-#         expected_head = setup['expected_head']
-#         expected_batches = setup['expected_batches']
-#         expected_txns = setup['expected_txns']
-#                                 
-#         try:   
-#             response = get_batches()
-#         except urllib.error.HTTPError as error:
-#             LOGGER.info("Rest Api is Unreachable")
-#              
-#         batches = response['data'][:-1]  
-#                         
-#         self.assert_check_batch_seq(batches, expected_batches, expected_txns)
-#         self.assert_valid_head(response, expected_head)
-               
-#     def test_api_get_batch_list_invalid_batch(self, invalid_batch):
-#         """Tests that transactions are submitted and committed for
-#         each block that are created by submitting invalid intkey batches
-#         """    
-#         batch= invalid_batch[0]
-#         try:
-#             response = post_batch(batch)
-#         except urllib.error.HTTPError as error:
-#             data = json.loads(error.fp.read().decode('utf-8'))
-#             LOGGER.info(data['error']['title'])
-#             LOGGER.info(data['error']['message'])
-#             assert data['error']['code'] == 34
-#            
-#     def test_api_get_batch_list_head(self, setup):   
+# #     def test_api_get_block_list(self, setup):
+# #         """Tests the batch list by submitting intkey batches
+# #         """
+# #         signer_key = setup['signer_key']
+# #         expected_head = setup['expected_head']
+# #         expected_batches = setup['expected_batches']
+# #         expected_txns = setup['expected_txns']
+# #              
+# #         try:   
+# #             response = get_blocks()
+# #         except urllib.error.HTTPError as error:
+# #             LOGGER.info("Rest Api is Unreachable")
+# #           
+# #         batches = response['data'][:-1]  
+# #                     
+# #         self.assert_check_block_seq(batches , expected_batches , expected_txns)
+# #         self.assert_valid_head(response , expected_head)
+#                
+# #     def test_api_get_block_list_invalid_batch(self, invalid_batch):
+# #         """Tests that transactions are submitted and committed for
+# #         each block that are created by submitting invalid intkey batches
+# #         """    
+# #         batch= invalid_batch[0]
+# #         try:
+# #             response = post_batch(batch)
+# #         except urllib.error.HTTPError as error:
+# #             data = json.loads(error.fp.read().decode('utf-8'))
+# #             LOGGER.info(data['error']['title'])
+# #             LOGGER.info(data['error']['message'])
+# #             assert data['error']['code'] == 34
+# #            
+#     def test_api_get_block_list_head(self, setup):   
 #         """Tests that GET /batches is reachable with head parameter 
 #         """
 #         LOGGER.info("Starting test for batch with head parameter")
 #         expected_head = setup['expected_head']
 #                 
 #         try:
-#             response = get_batches(head_id=expected_head)
+#             response = get_blocks(head_id=expected_head)
 #         except  urllib.error.HTTPError as error:
 #             LOGGER.info("Rest Api not reachable")
 #             data = json.loads(error.fp.read().decode('utf-8'))
@@ -83,14 +82,14 @@ LOGGER.setLevel(logging.INFO)
 #                 
 #         assert response['head'] == expected_head , "request is not correct"
 #          
-#     def test_api_get_batch_list_bad_head(self, setup):   
+#     def test_api_get_block_list_bad_head(self, setup):   
 #         """Tests that GET /batches is unreachable with bad head parameter 
 #         """       
 #         LOGGER.info("Starting test for batch with bad head parameter")
 #         bad_head = 'f' 
 #                      
 #         try:
-#             batch_list = get_batches(head_id=bad_head)
+#             batch_list = get_blocks(head_id=bad_head)
 #         except urllib.error.HTTPError as error:
 #             LOGGER.info("Rest Api is not reachable")
 #             data = json.loads(error.fp.read().decode('utf-8'))
@@ -100,17 +99,17 @@ LOGGER.setLevel(logging.INFO)
 #                 assert data['error']['code'] == 60
 #                 assert data['error']['title'] == 'Invalid Resource Id'
 #               
-#     def test_api_get_batch_list_id(self, setup):   
+#     def test_api_get_block_list_id(self, setup):   
 #         """Tests that GET /batches is reachable with id as parameter 
 #         """
 #         LOGGER.info("Starting test for batch with id parameter")
 #                      
-#         batch_ids   =  setup['batch_ids']
+#         block_ids   =  setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #                     
 #         try:
-#             response = get_batches(id=expected_id)
+#             response = get_blocks(id=expected_id)
 #         except:
 #             LOGGER.info("Rest Api is not reachable")
 #                    
@@ -119,14 +118,14 @@ LOGGER.setLevel(logging.INFO)
 #         assert response['paging']['start'] == None , "request is not correct"
 #         assert response['paging']['limit'] == None , "request is not correct"
 #                
-#     def test_api_get_batch_list_bad_id(self, setup):   
+#     def test_api_get_block_list_bad_id(self, setup):   
 #         """Tests that GET /batches is unreachable with bad id parameter 
 #         """
 #         LOGGER.info("Starting test for batch with bad id parameter")
 #         bad_id = 'f' 
 #                      
 #         try:
-#             batch_list = get_batches(head_id=bad_id)
+#             batch_list = get_blocks(head_id=bad_id)
 #         except urllib.error.HTTPError as error:
 #             LOGGER.info("Rest Api is not reachable")
 #             data = json.loads(error.fp.read().decode('utf-8'))
@@ -136,16 +135,16 @@ LOGGER.setLevel(logging.INFO)
 #                 assert data['error']['code'] == 60
 #                 assert data['error']['title'] == 'Invalid Resource Id'
 #              
-#     def test_api_get_batch_list_head_and_id(self, setup):   
+#     def test_api_get_block_list_head_and_id(self, setup):   
 #         """Tests GET /batches is reachable with head and id as parameters 
 #         """
 #         LOGGER.info("Starting test for batch with head and id parameter")
-#         batch_ids =  setup['batch_ids']
+#         block_ids =  setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #                       
 #                
-#         response = get_batches(head_id=expected_head , id=expected_id)
+#         response = get_blocks(head_id=expected_head , id=expected_id)
 #                      
 #         assert response['head'] == expected_head , "head is not matching"
 #         assert response['paging']['start'] == None ,  "start parameter is not correct"
@@ -153,86 +152,86 @@ LOGGER.setLevel(logging.INFO)
 #         assert bool(response['data']) == True
 #                
 #               
-#     def test_api_get_paginated_batch_list(self, setup):   
+#     def test_api_get_paginated_block_list(self, setup):   
 #         """Tests GET /batches is reachbale using paging parameters 
 #         """
 #         LOGGER.info("Starting test for batch with paging parameters")
-#         batch_ids   =  setup['batch_ids']
+#         block_ids   =  setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #         start = 1
 #         limit = 1
 #                   
 #         try:
-#             response = get_batches(start=start , limit=limit)
+#             response = get_blocks(start=start , limit=limit)
 #         except urllib.error.HTTPError as error:
 #             data = json.loads(error.fp.read().decode('utf-8'))
 #             LOGGER.info(data['error']['title'])
 #             LOGGER.info(data['error']['message'])
 #             assert data['error']['code'] == 54
 #                
-#     def test_api_get_batch_list_invalid_start(self, setup):   
+#     def test_api_get_block_list_invalid_start(self, setup):   
 #         """Tests that GET /batches is unreachable with invalid start parameter 
 #         """
 #         LOGGER.info("Starting test for batch with invalid start parameter")
-#         batch_ids   =  setup['batch_ids']
+#         block_ids   =  setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #         start = -1
 #                        
 #         try:  
-#             response = get_batches(start=start)
+#             response = get_blocks(start=start)
 #         except urllib.error.HTTPError as error:
 #             data = json.loads(error.fp.read().decode('utf-8'))
 #             LOGGER.info(data['error']['title'])
 #             LOGGER.info(data['error']['message'])
 #             assert data['error']['code'] == 54
 #         
-#     def test_api_get_batch_list_invalid_limit(self, setup):   
+#     def test_api_get_block_list_invalid_limit(self, setup):   
 #         """Tests that GET /batches is unreachable with bad limit parameter 
 #         """
 #         LOGGER.info("Starting test for batch with bad limit parameter")
-#         batch_ids = setup['batch_ids']
+#         block_ids = setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #         limit = 0
 #                    
 #         try:  
-#             response = get_batches(limit=limit)
+#             response = get_blocks(limit=limit)
 #         except urllib.error.HTTPError as error:
 #             data = json.loads(error.fp.read().decode('utf-8'))
 #             LOGGER.info(data['error']['title'])
 #             LOGGER.info(data['error']['message'])
 #             assert data['error']['code'] == 53
 #   
-#     def test_api_get_batch_list_no_count(self, setup):   
+#     def test_api_get_block_list_no_count(self, setup):   
 #         """Tests that GET /batches is unreachable with bad limit parameter 
 #         """
 #         LOGGER.info("Starting test for batch with bad limit parameter")
-#         batch_ids =  setup['batch_ids']
+#         block_ids =  setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #         limit = 0
 #                    
 #         try:  
-#             response = get_batches(limit=limit)
+#             response = get_blocks(limit=limit)
 #         except urllib.error.HTTPError as error:
 #             data = json.loads(error.fp.read().decode('utf-8'))
 #             LOGGER.info(data['error']['title'])
 #             LOGGER.info(data['error']['message'])
 #             assert data['error']['code'] == 53
 #                    
-#     def test_api_get_batch_list_reversed(self, setup):   
+#     def test_api_get_block_list_reversed(self, setup):   
 #         """verifies that GET /batches is unreachable with bad head parameter 
 #         """
 #         LOGGER.info("Starting test for batch with bad head parameter")
-#         batch_ids = setup['batch_ids']
+#         block_ids = setup['block_ids']
 #         expected_head = setup['expected_head']
-#         expected_id = batch_ids[0]
+#         expected_id = block_ids[0]
 #         reverse = True
 #                        
 #         try:
-#             response = get_batches(reverse=reverse)
+#             response = get_blocks(reverse=reverse)
 #         except urllib.error.HTTPError as error:
 #             assert response.code == 400
 #                       
@@ -279,11 +278,3 @@ LOGGER.setLevel(logging.INFO)
 # #             LOGGER.info(data['error']['title'])
 # #             LOGGER.info(data['error']['message'])
 # #             assert data['error']['code'] == 15
-#   
-# # class TestBatchGet():
-# #     def test_api_get_batch_id():
-# #   
-# #         
-# #       
-# #     def test_api_get_bad_batch_id(self):
-# #         pass    

@@ -1,12 +1,62 @@
+# Copyright 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------------
+  
 import pytest
 import sys
 import platform
 import inspect
- 
-ALL = set("darwin linux win32".split())
+import logging
+import urllib
+import json
+import os
+
+from sawtooth_signing import create_context
+from sawtooth_signing import CryptoFactory
+from sawtooth_signing import ParseError
+from sawtooth_signing.secp256k1 import Secp256k1PrivateKey
+
+from sawtooth_rest_api.protobuf.validator_pb2 import Message
+from sawtooth_rest_api.protobuf import client_batch_submit_pb2
+from sawtooth_rest_api.protobuf import client_batch_pb2
+from sawtooth_rest_api.protobuf import client_list_control_pb2
+
+from sawtooth_rest_api.protobuf.batch_pb2 import Batch
+from sawtooth_rest_api.protobuf.batch_pb2 import BatchList
+from sawtooth_rest_api.protobuf.batch_pb2 import BatchHeader
+from sawtooth_rest_api.protobuf.transaction_pb2 import TransactionHeader
+from sawtooth_rest_api.protobuf.transaction_pb2 import Transaction
+
+from google.protobuf.json_format import MessageToDict
+
+from utils import get_batches,  get_transactions, get_state, post_batch, get_blocks,\
+                  get_state_list , _delete_genesis , _start_validator, \
+                  _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
+                  _stop_settings_tp, _start_settings_tp
+
+from payload import get_signer, create_intkey_transaction , create_batch
+                  
+
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+                  
  
   
 def pytest_addoption(parser):
+    """Contains parsers for pytest cli commands
+    """
     parser.addoption(
         "--get", action="store_true", default=False, help="run get tests"
     )
@@ -49,6 +99,9 @@ def pytest_addoption(parser):
 
    
 def pytest_collection_modifyitems(config, items):
+    """Filters tests based on markers when parameters passed
+       through the cli
+    """
     try:
         num = int(config.getoption("-N"))
     except:
@@ -90,32 +143,80 @@ def pytest_collection_modifyitems(config, items):
         selected_items = items[:num]
         items[:] = selected_items
         return items
- 
-# def pytest_pycollect_makeitem(collector, name, obj):
-#     if _is_coroutine(obj):
-#         wrappped = pytest.mark.asyncio(obj)
-#         return pytest.Function(name=name, parent=collector)
- 
- 
-# def pytest_configure(config):
-#     # register an additional marker
-#     config.addinivalue_line("markers",
-#         "env(name): mark test to run only on named environment")
-#   
-def pytest_runtest_setup(item):
-    envnames = [mark.args[0] for mark in item.iter_markers(name='env')]
-    option = item.config.getoption("-E")
-    option = item.config.getoption("-O")
-    if option:
-        if option not in envnames:
-            pytest.skip("test requires env in %r" % envnames)
- 
-       
-#     supported_platforms = ALL.intersection(mark.name for mark in item.iter_markers())
-#     plat = platform.platform()
-#     print(platform.system())
-#     print(platform.release())
-#     print(platform.linux_distribution())
-#     print(platform.version())
-#     if supported_platforms and plat not in supported_platforms:
-#         pytest.skip("cannot run on platform %s" % (plat))
+
+@pytest.fixture(scope="session", autouse=True)
+def setup(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    data = {}
+    signer = get_signer()
+    expected_trxns  = []
+    expected_batches = []
+    initial_state_length = len(get_state_list())
+
+    LOGGER.info("Creating intkey transactions with set operations")
+    
+    txns = [
+        create_intkey_transaction("set", [] , 50 , signer),
+    ]
+
+    for txn in txns:
+        data = MessageToDict(
+                txn,
+                including_default_value_fields=True,
+                preserving_proto_field_name=True)
+
+        trxn_id = data['header_signature']
+        expected_trxns.append(trxn_id)
+    
+    
+    LOGGER.info("Creating batches for transactions 1trn/batch")
+
+    batches = [create_batch([txn], signer) for txn in txns]
+
+    for batch in batches:
+        data = MessageToDict(
+                batch,
+                including_default_value_fields=True,
+                preserving_proto_field_name=True)
+
+        batch_id = data['header_signature']
+        expected_batches.append(batch_id)
+    
+    data['expected_txns'] = expected_trxns[::-1]
+    data['expected_batches'] = expected_batches[::-1]
+    data['signer_key'] = signer.get_public_key().as_hex()
+
+    post_batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches]
+    
+    LOGGER.info("Submitting batches to the handlers")
+    
+    for batch in post_batch_list:
+        try:
+            response = post_batch(batch)
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Rest Api is not reachable")
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+      
+    block_list = get_blocks()
+    data['block_list'] = block_list
+    batch_list = get_batches()
+    data['batch_list'] = batch_list
+    transaction_list = get_transactions()
+    data['transaction_list'] = transaction_list
+    transaction_ids = [trans['header_signature'] for trans in transaction_list['data']]
+    data['transaction_ids'] = transaction_ids
+    block_ids = [block['header_signature'] for block in block_list['data']]
+    data['block_ids'] = block_ids[:-1]
+    batch_ids = [block['header']['batch_ids'][0] for block in block_list['data']]
+    data['batch_ids'] = batch_ids
+    expected_head = block_ids[0]
+    data['expected_head'] = expected_head
+    state_addresses = [state['address'] for state in get_state_list()['data']]
+    data['address'] = state_addresses
+    state_head_list = [get_state(address)['head'] for address in state_addresses]
+    data['state_head'] = state_head_list
+    return data
