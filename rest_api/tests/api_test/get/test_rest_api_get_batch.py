@@ -53,19 +53,6 @@ class TestBatchList(RestApiBaseTest):
                          
         self.assert_check_batch_seq(batches, expected_batches, expected_txns)
         self.assert_valid_head(response, expected_head)
-                
-    def test_api_get_batch_list_invalid_batch(self, invalid_batch):
-        """Tests that transactions are submitted and committed for
-        each block that are created by submitting invalid intkey batches
-        """    
-        batch= invalid_batch[0]
-        try:
-            response = post_batch(batch)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 34
             
     def test_api_get_batch_list_head(self, setup):   
         """Tests that GET /batches is reachable with head parameter 
