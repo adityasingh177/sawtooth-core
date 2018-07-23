@@ -88,18 +88,19 @@ class RestApiBaseTest(object):
         """Asserts response has consensus as parameter
         """
         assert 'consensus' in response
+        assert response['consensus'] == CONSENSUS_ALGO
     
     def assert_state_root_hash(self, response):
         """Asserts the response has state root hash
         """
         assert 'state_root_hash' in response
     
-    def assert_check_previous_block_id(self, response):
+    def assert_previous_block_id(self, response):
         """Asserts that response has previous block id
         """
         assert 'previous_block_id' in response
     
-    def assert_check_block_num(self, response):
+    def assert_block_num(self, response):
         """Asserts that response has proper block number
         """
         assert 'block_num' in response
@@ -111,7 +112,8 @@ class RestApiBaseTest(object):
             assert isinstance(item, cls)
      
     def assert_valid_head(self, response, expected):
-        """Asserts a response has a head string with an expected value
+        """Asserts a response has a head string with an 
+           expected value
         """
         assert 'head' in response
         head = response['head']
@@ -119,14 +121,16 @@ class RestApiBaseTest(object):
         assert head == expected
     
     def assert_valid_link(self, response, expected):
-        """Asserts a response has a link url string with an expected ending
+        """Asserts a response has a link url string with an 
+           expected ending
         """
         assert link in response['link']
         self.assert_valid_url(link, expected)
             
     def assert_valid_paging(self, js_response, pb_paging,
                                     next_link=None, previous_link=None):
-        """Asserts a response has a paging dict with the expected values.
+        """Asserts a response has a paging dict with the 
+           expected values.
         """
         assert 'paging' in js_response
         js_paging = js_response['paging']
@@ -141,7 +145,8 @@ class RestApiBaseTest(object):
             assert 'next' not in js_paging
     
     def assert_valid_error(self, response, expected_code):
-        """Asserts a response has only an error dict with an expected code
+        """Asserts a response has only an error dict with an 
+           expected code
         """
         assert 'error' in response
         assert len(response) == 1
@@ -155,7 +160,8 @@ class RestApiBaseTest(object):
         assert isinstance(error['message'], str)
     
     def assert_valid_data_list(self, response, expected_length):
-        """Asserts a response has a data list of dicts of an expected length.
+        """Asserts a response has a data list of dicts of an 
+           expected length.
         """
         assert 'data' in response
         data = response['data']
