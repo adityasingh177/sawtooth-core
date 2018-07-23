@@ -31,6 +31,11 @@ pytestmark = [pytest.mark.get , pytest.mark.batch]
   
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
+
+INVALID_RESOURCE_ID  = 60
+INVALID_PAGING_QUERY = 54
+INVALID_COUNT_QUERY  = 53
+VALIDATOR_NOT_READY  = 15
   
 
 class TestBatchList(RestApiBaseTest):
@@ -84,7 +89,7 @@ class TestBatchList(RestApiBaseTest):
             if data:
                 LOGGER.info(data['error']['title'])
                 LOGGER.info(data['error']['message'])
-                assert data['error']['code'] == 60
+                assert data['error']['code'] == INVALID_RESOURCE_ID
                 assert data['error']['title'] == 'Invalid Resource Id'
                
     def test_api_get_batch_list_id(self, setup):   
@@ -120,7 +125,7 @@ class TestBatchList(RestApiBaseTest):
             if data:
                 LOGGER.info(data['error']['title'])
                 LOGGER.info(data['error']['message'])
-                assert data['error']['code'] == 60
+                assert data['error']['code'] == INVALID_RESOURCE_ID
                 assert data['error']['title'] == 'Invalid Resource Id'
               
     def test_api_get_batch_list_head_and_id(self, setup):   
@@ -141,7 +146,7 @@ class TestBatchList(RestApiBaseTest):
                 
                
     def test_api_get_paginated_batch_list(self, setup):   
-        """Tests GET /batches is reachbale using paging parameters 
+        """Tests GET /batches is reachable using paging parameters 
         """
         LOGGER.info("Starting test for batch with paging parameters")
         batch_ids   =  setup['batch_ids']
@@ -156,7 +161,7 @@ class TestBatchList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 54
+            assert data['error']['code'] == INVALID_PAGING_QUERY
                 
     def test_api_get_batch_list_invalid_start(self, setup):   
         """Tests that GET /batches is unreachable with invalid start parameter 
@@ -173,7 +178,7 @@ class TestBatchList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 54
+            assert data['error']['code'] == INVALID_PAGING_QUERY
          
     def test_api_get_batch_list_invalid_limit(self, setup):   
         """Tests that GET /batches is unreachable with bad limit parameter 
@@ -207,7 +212,7 @@ class TestBatchList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 53
+            assert data['error']['code'] == INVALID_COUNT_QUERY
                     
     def test_api_get_batch_list_reversed(self, setup):   
         """verifies that GET /batches is unreachable with bad head parameter 
