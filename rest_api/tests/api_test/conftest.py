@@ -151,9 +151,12 @@ def setup(request):
     """
     data = {}
     signer = get_signer()
-    expected_trxns  = []
+    expected_trxns  = {}
     expected_batches = []
+    transaction_list = []
     initial_state_length = len(get_state_list())
+    initial_batch_length = len(get_batches()['data'])
+    initial_transaction_length = len(get_transactions()['data'])
 
     LOGGER.info("Creating intkey transactions with set operations")
     
@@ -162,32 +165,37 @@ def setup(request):
     ]
 
     for txn in txns:
-        data = MessageToDict(
+        dict = MessageToDict(
                 txn,
                 including_default_value_fields=True,
                 preserving_proto_field_name=True)
-
-        trxn_id = data['header_signature']
-        expected_trxns.append(trxn_id)
-    
-    
+                
+        expected_trxns['trxn_id'] = [dict['header_signature']]
+        expected_trxns['payload'] = [dict['payload']]
+                    
     LOGGER.info("Creating batches for transactions 1trn/batch")
 
     batches = [create_batch([txn], signer) for txn in txns]
 
     for batch in batches:
-        data = MessageToDict(
+        dict = MessageToDict(
                 batch,
                 including_default_value_fields=True,
                 preserving_proto_field_name=True)
 
-        batch_id = data['header_signature']
+        batch_id = dict['header_signature']
         expected_batches.append(batch_id)
     
-    data['expected_txns'] = expected_trxns[::-1]
+        
+    length_batches = len(expected_batches)
+    length_transactions = len(expected_trxns)
+        
+    data['expected_length'] = initial_batch_length + length_batches
+    data['expected_txns'] = expected_trxns['trxn_id'][::-1]
+    data['payload'] = expected_trxns['payload'][::-1]
     data['expected_batches'] = expected_batches[::-1]
     data['signer_key'] = signer.get_public_key().as_hex()
-
+    
     post_batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches]
     
     LOGGER.info("Submitting batches to the handlers")
