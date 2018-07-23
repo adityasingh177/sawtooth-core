@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
-  
 from base64 import b64decode
+
+CONSENSUS_ALGO = b'devmode'
+
 
 class RestApiBaseTest(object):
     """Base class for Rest Api tests that simplifies making assertions
        for the test cases
     """ 
     def assert_check_batch_nonce(self, response):
-        pass
+        assert 'nonce' in response
     
     def assert_check_txn_nonce(self, txn , expected_id):
         expected_id == txn['header']['nonce']
@@ -39,9 +41,8 @@ class RestApiBaseTest(object):
     def assert_check_payload_algo(self ,response):
         assert 'payload_sha512' in response
         
-    
-    def assert_check_payload(self, response):
-        assert 'payload' in response
+    def assert_check_payload(self, txn):
+        assert 'payload' in txn
         assert payload == b64decode(txn['payload'])
         assert self.assert_check_payload_algo()
     
@@ -54,17 +55,17 @@ class RestApiBaseTest(object):
     def aasert_check_batch_trace(self, trace):
         assert bool(trace)
     
-    def assert_check_consensus(self):
-        pass
+    def assert_check_consensus(self, response):
+        assert 'consensus' in response
     
-    def assert_state_root_hash(self):
-        pass
+    def assert_state_root_hash(self, response):
+        assert 'state_root_hash' in response
     
-    def assert_check_previous_block_id(self):
-        pass
+    def assert_check_previous_block_id(self, response):
+        assert 'previous_block_id' in response
     
-    def assert_check_block_num(self):
-        pass
+    def assert_check_block_num(self, response):
+        assert 'block_num' in response
     
     def assert_items(self, items, cls):
             """Asserts that all items in a collection are instances of a class
@@ -137,7 +138,7 @@ class RestApiBaseTest(object):
         if not isinstance(blocks, list):
                 blocks = [blocks]
         
-        consensus = b'Devmode'
+        consensus_algo = CONSENSUS_ALGO
         
         print(expected_blocks)
         print(expected_batches)
@@ -154,7 +155,7 @@ class RestApiBaseTest(object):
             batches = block['batches']
             assert isinstance(batches, list)
             assert len(batches) == 1
-#             assert isinstance(batches, dict)
+            assert isinstance(batches, dict)
             self.assert_check_batch_seq(batches, expected_batch, expected_txn)
             
     def assert_check_batch_seq(self, batches , expected_batches , expected_txns):
@@ -166,15 +167,14 @@ class RestApiBaseTest(object):
         
         if not isinstance(expected_txns, list):
                 expected_txns = [expected_txns]
-        
-                
+           
         for batch, expected_batch , expected_txn in zip(batches, expected_batches , expected_txns):
             assert expected_batch == batch['header_signature']
-#             assert isinstance(batch['header'], dict)
+            assert isinstance(batch['header'], dict)
             txns = batch['transactions']
-#             assert isinstance(txns, list)
-#             assert len(txns) == 1
-#             self.assert_items(txns, dict)
+            assert isinstance(txns, list)
+            assert len(txns) == 1
+            self.assert_items(txns, dict)
             self.assert_check_transaction_seq(txns , expected_txn)
             
 
@@ -184,20 +184,17 @@ class RestApiBaseTest(object):
         
         if not isinstance(expected_ids, list):
                 expected_ids = [expected_ids]
-        
-        payload = None
-        
-                
+                                
         for txn, expected_id in zip(txns, expected_ids):
             assert expected_id == txn['header_signature']
             assert isinstance(txn['header'], dict)
-#             self.assert_check_payload()
-#             self.assert_check_txn_nonce()   
-#             self.assert_check_family()
-#             self.assert_check_dependency()
-#             self.assert_check_content()
-#             self.assert_signer_public_key(signer_key, batch)
-#             self.assert_batcher_public_key(public_key, batch)
+            self.assert_check_payload(txn)
+            self.assert_check_txn_nonce(txn)   
+            self.assert_check_family(txn)
+            self.assert_check_dependency(txn)
+            self.assert_check_content(txn)
+            self.assert_signer_public_key(signer_key, txn)
+            self.assert_batcher_public_key(public_key, txn)
         
     def assert_check_state_seq(self, state, expected):
         pass
