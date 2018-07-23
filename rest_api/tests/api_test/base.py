@@ -31,7 +31,7 @@ class RestApiBaseTest(object):
         """Asserts response has nonce parameter
         """
         assert 'nonce' in response['header']
-        assert response['header'] == NONCE
+        assert response['header']['nonce'] == NONCE
     
     def assert_check_family(self, response):
         """Asserts family name and versions in response
@@ -46,38 +46,39 @@ class RestApiBaseTest(object):
         """ 
         assert 'dependencies' in response['header']
     
-    def assert_check_content(self, response):
+    def assert_content(self, response):
         """Asserts response has inputs and outputs parameter
         """
         assert 'inputs' in response['header']
         assert 'outputs' in response['header']
     
-    def assert_check_payload_algo(self, response):
+    def assert_payload_algo(self, response):
         """Asserts payload has been created with 
            proper algorithm
         """
         assert 'payload_sha512' in response['header']
         
-    def assert_check_payload(self, txn, payload):
+    def assert_payload(self, txn, payload):
         """Asserts payload is constructed properly
         """
+        print(payload)
         assert 'payload' in txn
         assert payload == txn['payload']
-        self.assert_check_payload_algo(txn)
+        self.assert_payload_algo(txn)
     
-    def assert_batcher_public_key(self, public_key, response):
+    def assert_batcher_public_key(self, response, public_key):
         """Asserts batcher public key in response
         """
         assert 'signer_public_key' in response['header']
         assert public_key == response['header']['signer_public_key']
     
-    def assert_signer_public_key(self, public_key, response):
+    def assert_signer_public_key(self, response, public_key):
         """Asserts that signer public key is proper
         """
         assert 'signer_public_key' in response['header']
-        assert public_key == batch['header']['signer_public_key']
+        assert public_key == response['header']['signer_public_key']
     
-    def assert_check_batch_trace(self, trace):
+    def assert_trace(self, response):
         """Asserts whether the response has trace parameter
         """
         assert 'trace' in response['header']
@@ -225,7 +226,7 @@ class RestApiBaseTest(object):
                                               payload[0], signer_key)
             
 
-    def assert_check_transaction_seq(self, txns , expected_ids, 
+    def assert_check_transaction_seq(self, txns, expected_ids, 
                                      payload, signer_key):
         """Asserts transactions are constructed properly
         """        
@@ -238,11 +239,11 @@ class RestApiBaseTest(object):
         for txn, expected_id in zip(txns, expected_ids):
             assert expected_id == txn['header_signature']
             assert isinstance(txn['header'], dict)
-            self.assert_check_payload(txn, payload)
+            self.assert_payload(txn, payload)
             self.assert_check_family(txn)
             self.assert_check_nonce(txn)   
             self.assert_check_dependency(txn)
-            self.assert_check_content(txn)
+            self.assert_content(txn)
             self.assert_signer_public_key(txn, signer_key)
             self.assert_batcher_public_key(txn, signer_key)
         

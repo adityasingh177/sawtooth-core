@@ -60,7 +60,7 @@ class TestBatchList(RestApiBaseTest):
         
         self.assert_valid_data_list(response, expected_length)                 
         self.assert_check_batch_seq(batches, expected_batches, 
-                                    expected_txns, payload , 
+                                    expected_txns, payload, 
                                     signer_key)
         
         self.assert_valid_head(response, expected_head)

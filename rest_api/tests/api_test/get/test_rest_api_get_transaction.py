@@ -39,6 +39,8 @@ class TestTransactionList(RestApiBaseTest):
         signer_key = setup['signer_key']
         expected_head = setup['expected_head']
         expected_txns = setup['expected_txns']
+        expected_length = setup['expected_length']
+        payload = setup['payload'][0]
          
         try:   
             response = get_transactions()
@@ -49,12 +51,12 @@ class TestTransactionList(RestApiBaseTest):
             LOGGER.info(data['error']['message'])
                
         txns = response['data'][:-1]
-#                         
-# 
-#         self.assert_check_transaction_seq(txns, expected_txns)
-#         self.assert_valid_head(response , expected_head)
-#         self.assert_valid_link()
-#         self.assert_valid_data_list()
+        
+        self.assert_valid_data_list(response, expected_length)         
+        self.assert_check_transaction_seq(txns, expected_txns, 
+                                          payload, signer_key)
+        self.assert_valid_head(response , expected_head)
+        
         
     #     def test_api_get_transaction_list_invalid_batch(self, invalid_batch):
 #         """Tests that transactions are submitted and committed for
