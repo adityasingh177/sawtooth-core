@@ -30,6 +30,11 @@ pytestmark = [pytest.mark.get , pytest.mark.transactions]
   
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
+
+INVALID_RESOURCE_ID  = 60
+INVALID_PAGING_QUERY = 54
+INVALID_COUNT_QUERY  = 53
+VALIDATOR_NOT_READY  = 15
   
 
 class TestTransactionList(RestApiBaseTest):
