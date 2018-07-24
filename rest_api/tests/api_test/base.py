@@ -148,7 +148,6 @@ class RestApiBaseTest(object):
         """
         assert 'paging' in response
         paging = response['paging']
-        print(paging)
 
         if 'next' in paging:
              assert 'next_position' in paging
@@ -158,6 +157,8 @@ class RestApiBaseTest(object):
             self.assert_valid_url(paging['next'], next_link)
         else:
             assert 'next' not in paging
+            assert paging['start'] == None
+            assert paging['limit'] == None
     
     def assert_valid_error(self, response, expected_code):
         """Asserts a response has only an error dict with an 
