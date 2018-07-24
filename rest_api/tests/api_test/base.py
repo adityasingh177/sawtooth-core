@@ -81,8 +81,7 @@ class RestApiBaseTest(object):
         """Asserts whether the response has trace parameter
         """
         assert 'trace' in response
-        print(type(response['trace']))
-        assert bool(response['trace'])
+#         assert bool(response['trace'])
         assert response['trace'] == TRACE
     
     def assert_check_consensus(self, response):
@@ -121,12 +120,20 @@ class RestApiBaseTest(object):
         assert isinstance(head, str)
         assert head == expected
     
-    def assert_valid_link(self, response, expected):
+    def assert_valid_link(self, response, expected_link):
         """Asserts a response has a link url string with an 
            expected ending
         """
-        assert link in response['link']
-        self.assert_valid_url(link, expected)
+        assert 'link' in response
+        assert response['link'] == expected_link
+        self.assert_valid_url(response['link'], expected_link)
+    
+    def assert_valid_url(self, url, expected_link):
+        """Asserts a url is valid, and ends with the expected value
+        """
+        assert isinstance(url, str)
+        assert url.startswith('http')
+        assert url.endswith(expected_link)
     
     def assert_transaction_ids(self, response, expected):
         """Asserts a response has a link url string with an 
@@ -135,22 +142,22 @@ class RestApiBaseTest(object):
         assert 'transaction_ids' in response['header']
         assert response['header']['transaction_ids'][0] == expected
             
-    def assert_valid_paging(self, js_response, pb_paging,
-                                    next_link=None, previous_link=None):
+    def assert_valid_paging(self, response, next_link=None, previous_link=None):
         """Asserts a response has a paging dict with the 
            expected values.
         """
-        assert 'paging' in js_response
-        js_paging = js_response['paging']
+        assert 'paging' in response
+        paging = response['paging']
+        print(paging)
 
-        if pb_paging.next:
-             assert 'next_position' in js_paging
+        if 'next' in paging:
+             assert 'next_position' in paging
 
         if next_link is not None:
-            assert 'next' in js_paging
-            self.assert_valid_url(js_paging['next'], next_link)
+            assert 'next' in paging
+            self.assert_valid_url(paging['next'], next_link)
         else:
-            assert 'next' not in js_paging
+            assert 'next' not in paging
     
     def assert_valid_error(self, response, expected_code):
         """Asserts a response has only an error dict with an 
@@ -167,7 +174,7 @@ class RestApiBaseTest(object):
         assert 'message' in error
         assert isinstance(error['message'], str)
     
-    def assert_valid_data_list(self, response, expected_length):
+    def assert_valid_data(self, response, expected_length):
         """Asserts a response has a data list of dicts of an 
            expected length.
         """
@@ -177,15 +184,6 @@ class RestApiBaseTest(object):
         assert expected_length == len(data)
         self.assert_items(data, dict)
     
-    def assert_valid_url(self, url, expected_ending=''):
-        """Asserts a url is valid, and ends with the expected value
-        """
-        expected_ending = 'limit={}'%(DEFAULT_LIMIT)
-        print(expected_ending)
-        assert isinstance(url, str)
-        assert url.startswith('http')
-        assert url.endswith(expected_ending)
-     
                         
     def assert_check_block_seq(self, blocks, expected_blocks, expected_batches, expected_txns):
         """Asserts block is constructed properly after submitting batches

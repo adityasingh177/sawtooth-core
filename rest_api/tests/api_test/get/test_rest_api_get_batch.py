@@ -32,10 +32,20 @@ pytestmark = [pytest.mark.get , pytest.mark.batch]
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
+
+START = 1
+LIMIT = 1
+COUNT = 0
+BAD_HEAD = 'f'
+BAD_ID = 'f'
+INVALID_START = -1
+INVALID_LIMIT = 0
 INVALID_RESOURCE_ID  = 60
 INVALID_PAGING_QUERY = 54
 INVALID_COUNT_QUERY  = 53
 VALIDATOR_NOT_READY  = 15
+
+
   
 class TestBatchList(RestApiBaseTest):
     """This class tests the batch list with different parameters
@@ -49,20 +59,27 @@ class TestBatchList(RestApiBaseTest):
         expected_txns = setup['expected_txns']
         expected_length = setup['expected_length']
         payload = setup['payload']
-                                 
+        start = setup['start']
+        limit = setup['limit']
+        address = setup['address']
+            
+        expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
+                         expected_head, start, limit)
+                                         
         try:   
             response = get_batches()
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
               
-        batches = response['data'][:-1]  
+        batches = response['data'][:-1] 
         
-        self.assert_valid_data_list(response, expected_length)               
+        self.assert_valid_head(response, expected_head) 
+        self.assert_valid_data(response, expected_length)               
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)
-        
-        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response)
             
 #     def test_api_get_batch_list_head(self, setup):   
 #         """Tests that GET /batches is reachable with head parameter 

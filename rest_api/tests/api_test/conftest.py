@@ -43,7 +43,7 @@ from google.protobuf.json_format import MessageToDict
 from utils import get_batches,  get_transactions, get_state, post_batch, get_blocks,\
                   get_state_list , _delete_genesis , _start_validator, \
                   _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
-                  _stop_settings_tp, _start_settings_tp
+                  _stop_settings_tp, _start_settings_tp, _get_client_address
 
 from payload import get_signer, create_intkey_transaction , create_batch
                   
@@ -51,6 +51,9 @@ from payload import get_signer, create_intkey_transaction , create_batch
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
+
+
+LIMIT = 100
                   
  
   
@@ -157,6 +160,7 @@ def setup(request):
     initial_state_length = len(get_state_list())
     initial_batch_length = len(get_batches()['data'])
     initial_transaction_length = len(get_transactions()['data'])
+    address = _get_client_address()
 
     LOGGER.info("Creating intkey transactions with set operations")
     
@@ -228,4 +232,7 @@ def setup(request):
     data['address'] = state_addresses
     state_head_list = [get_state(address)['head'] for address in state_addresses]
     data['state_head'] = state_head_list
+    data['address'] = address
+    data['limit'] = LIMIT
+    data['start'] = expected_batches[::-1][0]
     return data
