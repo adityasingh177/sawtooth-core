@@ -162,6 +162,7 @@ def setup(request):
     
     txns = [
         create_intkey_transaction("set", [] , 50 , signer),
+        create_intkey_transaction("set", [] , 50 , signer),
     ]
 
     for txn in txns:

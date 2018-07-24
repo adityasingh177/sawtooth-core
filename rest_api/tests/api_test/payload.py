@@ -154,3 +154,7 @@ def random_word_list(count):
             return [x.strip() for x in fd.readlines()[0:count]]
     else:
         return [random_word() for _ in range(0, count)]
+
+def make_bad_protobuf():
+    pass
+    

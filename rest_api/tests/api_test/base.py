@@ -61,7 +61,6 @@ class RestApiBaseTest(object):
     def assert_payload(self, txn, payload):
         """Asserts payload is constructed properly
         """
-        print(payload)
         assert 'payload' in txn
         assert payload == txn['payload']
         self.assert_payload_algo(txn)
@@ -81,9 +80,10 @@ class RestApiBaseTest(object):
     def assert_trace(self, response):
         """Asserts whether the response has trace parameter
         """
-        assert 'trace' in response['header']
-        assert bool(trace)
-        assert response['header']['trace'] == TRACE
+        assert 'trace' in response
+        print(type(response['trace']))
+        assert bool(response['trace'])
+        assert response['trace'] == TRACE
     
     def assert_check_consensus(self, response):
         """Asserts response has consensus as parameter
@@ -127,6 +127,13 @@ class RestApiBaseTest(object):
         """
         assert link in response['link']
         self.assert_valid_url(link, expected)
+    
+    def assert_transaction_ids(self, response, expected):
+        """Asserts a response has a link url string with an 
+           expected ending
+        """
+        assert 'transaction_ids' in response['header']
+        assert response['header']['transaction_ids'][0] == expected
             
     def assert_valid_paging(self, js_response, pb_paging,
                                     next_link=None, previous_link=None):
@@ -222,6 +229,9 @@ class RestApiBaseTest(object):
             assert isinstance(txns, list)
             assert len(txns) == 1
             self.assert_items(txns, dict)
+            self.assert_transaction_ids(batch, expected_txn)
+            self.assert_signer_public_key(batch, signer_key)
+            self.assert_trace(batch)
             self.assert_check_transaction_seq(txns, expected_txn, 
                                               payload[0], signer_key)
             

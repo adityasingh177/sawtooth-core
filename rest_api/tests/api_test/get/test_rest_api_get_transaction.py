@@ -37,30 +37,30 @@ INVALID_COUNT_QUERY  = 53
 VALIDATOR_NOT_READY  = 15
   
 
-class TestTransactionList(RestApiBaseTest):
-    def test_api_get_transaction_list(self, setup):
-        """Tests the transaction list after submitting intkey batches
-        """
-        signer_key = setup['signer_key']
-        expected_head = setup['expected_head']
-        expected_txns = setup['expected_txns']
-        expected_length = setup['expected_length']
-        payload = setup['payload'][0]
-         
-        try:   
-            response = get_transactions()
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is Unreachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-               
-        txns = response['data'][:-1]
-        
-        self.assert_valid_data_list(response, expected_length)         
-        self.assert_check_transaction_seq(txns, expected_txns, 
-                                          payload, signer_key)
-        self.assert_valid_head(response , expected_head)
+# class TestTransactionList(RestApiBaseTest):
+#     def test_api_get_transaction_list(self, setup):
+#         """Tests the transaction list after submitting intkey batches
+#         """
+#         signer_key = setup['signer_key']
+#         expected_head = setup['expected_head']
+#         expected_txns = setup['expected_txns']
+#         expected_length = setup['expected_length']
+#         payload = setup['payload'][0]
+#          
+#         try:   
+#             response = get_transactions()
+#         except urllib.error.HTTPError as error:
+#             LOGGER.info("Rest Api is Unreachable")
+#             data = json.loads(error.fp.read().decode('utf-8'))
+#             LOGGER.info(data['error']['title'])
+#             LOGGER.info(data['error']['message'])
+#                
+#         txns = response['data'][:-1]
+#         
+#         self.assert_valid_data_list(response, expected_length)         
+#         self.assert_check_transaction_seq(txns, expected_txns, 
+#                                           payload, signer_key)
+#         self.assert_valid_head(response , expected_head)
         
         
     #     def test_api_get_transaction_list_invalid_batch(self, invalid_batch):
