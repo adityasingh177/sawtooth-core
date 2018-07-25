@@ -119,10 +119,9 @@ class TestBatchList(RestApiBaseTest):
         """Tests that GET /batches is unreachable with bad head parameter 
         """       
         LOGGER.info("Starting test for batch with bad head parameter")
-        bad_head = 'f' 
                          
         try:
-            batch_list = get_batches(head_id=bad_head)
+            batch_list = get_batches(head_id=BAD_HEAD)
         except urllib.error.HTTPError as error:
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
@@ -172,10 +171,9 @@ class TestBatchList(RestApiBaseTest):
         """Tests that GET /batches is unreachable with bad id parameter 
         """
         LOGGER.info("Starting test for batch with bad id parameter")
-        bad_id = 'f' 
                         
         try:
-            batch_list = get_batches(head_id=bad_id)
+            batch_list = get_batches(head_id=BAD_ID)
         except urllib.error.HTTPError as error:
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
@@ -207,9 +205,7 @@ class TestBatchList(RestApiBaseTest):
             response = get_batches(head_id=expected_head , id=expected_id)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api not reachable")
-            
-        print(response)
-            
+                        
         batches = response['data'][:-1]
                         
         self.assert_valid_data(response, expected_length)                 

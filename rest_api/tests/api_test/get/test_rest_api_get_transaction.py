@@ -31,7 +31,13 @@ pytestmark = [pytest.mark.get , pytest.mark.transactions]
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
-LIMIT = 100
+START = 1
+LIMIT = 1
+COUNT = 0
+BAD_HEAD = 'f'
+BAD_ID = 'f'
+INVALID_START = -1
+INVALID_LIMIT = 0
 INVALID_RESOURCE_ID  = 60
 INVALID_PAGING_QUERY = 54
 INVALID_COUNT_QUERY  = 53
@@ -108,10 +114,9 @@ class TestTransactionList(RestApiBaseTest):
         """Tests that GET /transactions is unreachable with bad head parameter 
         """       
         LOGGER.info("Starting test for transactions with bad head parameter")
-        bad_head = 'f' 
                       
         try:
-            response = get_transactions(head_id=bad_head)
+            response = get_transactions(head_id=BAD_HEAD)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
             data = json.loads(error.fp.read().decode('utf-8'))
