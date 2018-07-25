@@ -144,14 +144,13 @@ class TestBatchList(RestApiBaseTest):
         start = setup['start']
         limit = setup['limit']
         address = setup['address']
-            
-        expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
-                         expected_head, start, limit)
         
         expected_id = batch_ids[0]
         expected_length = len([expected_id])
-        
-                       
+            
+        expected_link = '{}/batches?head={}&start={}&limit={}&id={}'.format(address,\
+                         expected_head, start, limit, expected_id)
+          
         try:
             response = get_batches(id=expected_id)
         except:
@@ -197,17 +196,19 @@ class TestBatchList(RestApiBaseTest):
         start = setup['start']
         limit = setup['limit']
         address = setup['address']
-            
-        expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
-                         expected_head, start, limit)
         
         expected_id = batch_ids[0]
         expected_length = len([expected_id])
-                         
+            
+        expected_link = '{}/batches?head={}&start={}&limit={}&id={}'.format(address,\
+                         expected_head, start, limit, expected_id)
+                                 
         try:         
             response = get_batches(head_id=expected_head , id=expected_id)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api not reachable")
+            
+        print(response)
             
         batches = response['data'][:-1]
                         
@@ -300,15 +301,14 @@ class TestBatchList(RestApiBaseTest):
         LOGGER.info("Starting test for batch with bad head parameter")
         signer_key = setup['signer_key']
         expected_head = setup['expected_head']
-        expected_batches = setup['expected_batches']
+        setup_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
         expected_length = setup['expected_length']
         payload = setup['payload']                       
-        batch_ids   =  setup['batch_ids']
-        expected_id = batch_ids[0]
         start = setup['start']
         limit = setup['limit']
         address = setup['address']
+        expected_batches = setup_batches[::-1]
             
         expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)

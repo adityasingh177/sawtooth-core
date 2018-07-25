@@ -63,7 +63,7 @@ def get_blocks(head_id=None , id=None , start=None , limit=None , reverse=None):
         return response
 
 
-def get_batches(head_id=None , id=None , start=None , limit=None, count=None, reverse=None):  
+def get_batches(head_id=None , id=None , start=None , limit=None, reverse=None):  
     if all(v is not None for v in [head_id , id]):
         response = query_rest_api('/batches?head={}&id={}'.format(head_id , id))
         return response
@@ -85,9 +85,6 @@ def get_batches(head_id=None , id=None , start=None , limit=None, count=None, re
     if reverse:
         response = query_rest_api('/batches?reverse')
         return response
-    if count:
-        response = query_rest_api('/batches?count=%s'% id)
-        return response
     else:
         response = query_rest_api('/batches')
         return response
@@ -96,7 +93,7 @@ def get_batch(batch_id):
     response = query_rest_api('/batches/%s' % batch_id)
     return response
 
-def get_transactions(head_id=None , id=None , start=None , limit=None , reverse=None, count=None):
+def get_transactions(head_id=None , id=None , start=None , limit=None , reverse=None):
     if all(v is not None for v in [head_id , id]):
         response = query_rest_api('/transactions?head={}&id={}'.format(head_id , id))
         return response
@@ -115,9 +112,6 @@ def get_transactions(head_id=None , id=None , start=None , limit=None , reverse=
     if id is not None:
         response = query_rest_api('/transactions?id=%s'% id)
         return response
-    if count is not None:
-        response = query_rest_api('/transactions?count=%s'% count)
-        return response
     if reverse:
         response = query_rest_api('/transactions?reverse')
         return response
@@ -129,7 +123,7 @@ def get_transaction(transaction_id):
     response = query_rest_api('/transactions/%s' % transaction_id)
     return response['data']
 
-def get_state_list(head_id=None , address=None , start=None , limit=None , reverse=None, count=None):
+def get_state_list(head_id=None , address=None , start=None , limit=None , reverse=None):
     if all(v is not None for v in [head_id , address]):
         response = query_rest_api('/state?head={}&address={}'.format(head_id , address))
         return response
@@ -147,9 +141,6 @@ def get_state_list(head_id=None , address=None , start=None , limit=None , rever
         return response 
     if address is not None:
         response = query_rest_api('/state?address=%s'% address)
-        return response
-    if count is not None:
-        response = query_rest_api('/state?count=%s'% count)
         return response
     if reverse:
         response = query_rest_api('/state?reverse')
