@@ -30,11 +30,14 @@ import requests
 import hashlib
 import os
 import time
+import socket
+import netifaces
     
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
     
 WAIT = 300
+
 
 def get_blocks(head_id=None , id=None , start=None , limit=None , reverse=None):  
     if all(v is not None for v in [head_id , id]):
@@ -260,7 +263,7 @@ def _make_http_address(node_number):
     return node_number
 
 def _get_client_address():  
-    command = "ifconfig eno1 | grep 'inet addr' | cut -d ':' -f 2 | cut -d ' ' -f 1"
+    command = "ifconfig lo | grep 'inet addr' | cut -d ':' -f 2 | cut -d ' ' -f 1"
     node_ip = subprocess.check_output(command , shell=True).decode().strip().replace("'", '"')
     return 'http://' + node_ip + ':8008'
 

@@ -210,9 +210,9 @@ def setup(request):
             response = post_batch(batch)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
       
     block_list = get_blocks()
     data['block_list'] = block_list
