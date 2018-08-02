@@ -50,6 +50,12 @@ from payload import get_signer, create_intkey_transaction, create_batch
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
+NO_BATCHES_SUBMITTED = 30
+BAD_PROTOBUF_SUBMITTED = 35
+BATCH_QUEUE_FULL = 31
+INVALID_BATCH = 30
+WRONG_CONTENT_TYPE = 43
+
 BLOCK_TO_CHECK_CONSENSUS = 1
 
 pytestmark = pytest.mark.post

@@ -48,7 +48,6 @@ from utils import get_batches,  get_transactions, get_state, post_batch, get_blo
 from payload import get_signer, create_intkey_transaction , create_batch
                   
 
-
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
@@ -56,7 +55,6 @@ LOGGER.setLevel(logging.INFO)
 LIMIT = 100
                   
  
-  
 def pytest_addoption(parser):
     """Contains parsers for pytest cli commands
     """
@@ -191,11 +189,11 @@ def setup(request):
         batch_id = dict['header_signature']
         expected_batches.append(batch_id)
     
-        
     length_batches = len(expected_batches)
     length_transactions = len(expected_trxns)
         
     data['expected_length'] = initial_batch_length + length_batches
+    data['expected_trn_length'] = initial_transaction_length + length_transactions
     data['expected_txns'] = expected_trxns['trxn_id'][::-1]
     data['payload'] = expected_trxns['payload'][::-1]
     data['expected_batches'] = expected_batches[::-1]

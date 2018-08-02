@@ -98,5 +98,51 @@ def invalid_batch():
     return post_batch_list
 
 
+@pytest.fixture(scope="function")
+def setup_batch_multiple_transcation():
+    data = {}
+    signer = get_signer()
+    transactions= []
+    expected_trxns  = []
+    expected_batches = []
+    initial_state_length = len(get_state_list())
+
+    LOGGER.info("Creating intkey transactions with set operations")
+    for val in range(15):
+        txns = create_intkey_transaction("set", [] , 50 , signer)
+        transactions.append(txns)
+        
+            
+    for txn in transactions:
+        #print(txn)
+        data = MessageToDict(
+                txn,
+                including_default_value_fields=True,
+                preserving_proto_field_name=True)
+
+        trxn_id = data['header_signature']
+        expected_trxns.append(trxn_id)
+    
+    
+    
+    batch_s= create_batch(transactions, signer)        
+    #print(batch_s)
+    post_batch_list = BatchList(batches=[batch_s]).SerializeToString()
+    
+    LOGGER.info("Submitting batches to the handlers")
+    
+    #for batch in post_batch_list:
+    try:
+        response = post_batch(post_batch_list)
+    except urllib.error.HTTPError as error:
+        LOGGER.info("Rest Api is not reachable")
+        data = json.loads(error.fp.read().decode('utf-8'))
+        LOGGER.info(data['error']['title'])
+        LOGGER.info(data['error']['message'])    
+    
+    return expected_trxns
+
+
+
 
     

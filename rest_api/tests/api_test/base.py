@@ -27,6 +27,8 @@ class RestApiBaseTest(object):
     """Base class for Rest Api tests that simplifies making assertions
        for the test cases
     """ 
+    def assert_equal(self, response, data):
+        assert response == data
     
     def assert_check_nonce(self, response):
         """Asserts response has nonce parameter

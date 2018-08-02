@@ -88,8 +88,34 @@ def create_intkey_transaction(verb, deps, count, signer):
     payload = IntKeyPayload(
         verb=verb,name=name,value=1)
 
-    # The prefix should eventually be looked up from the
-    # validator's namespace registry.
+    addr = make_intkey_address(name)
+
+    header = TransactionHeader(
+        signer_public_key=signer.get_public_key().as_hex(),
+        family_name='intkey',
+        family_version='1.0',
+        inputs=[addr],
+        outputs=[addr],
+        dependencies=deps,
+        payload_sha512=payload.sha512(),
+        batcher_public_key=signer.get_public_key().as_hex())
+
+    header_bytes = header.SerializeToString()
+
+    signature = signer.sign(header_bytes)
+
+    transaction = Transaction(
+        header=header_bytes,
+        payload=payload.to_cbor(),
+        header_signature=signature)
+
+    return transaction
+
+def create_intkey_same_transaction(verb, deps, count, signer):
+    name='a'   
+    payload = IntKeyPayload(
+        verb=verb,name=name,value=1)
+
     addr = make_intkey_address(name)
 
     header = TransactionHeader(

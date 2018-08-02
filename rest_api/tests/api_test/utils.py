@@ -92,8 +92,12 @@ def get_batches(head_id=None , id=None , start=None , limit=None, reverse=None):
         response = query_rest_api('/batches')
         return response
 
-def get_batch(batch_id):
+def get_batch_id(batch_id):
     response = query_rest_api('/batches/%s' % batch_id)
+    return response
+
+def get_peers():
+    response = query_rest_api('/peers')
     return response
 
 def get_transactions(head_id=None , id=None , start=None , limit=None , reverse=None):
@@ -152,7 +156,7 @@ def get_state_list(head_id=None , address=None , start=None , limit=None , rever
         response = query_rest_api('/state')
         return response
 
-def get_state(address):
+def get_state_address(address):
     response = query_rest_api('/state/%s' % address)
     return response
 
@@ -356,4 +360,41 @@ def wait_for_rest_apis(endpoints, tries=5):
             '{}/blocks'.format(url),
             status_code=200,
             tries=tries)
+
+
+def post_batch_statuses(batch):
+    headers = {'content-type': 'application/json'}
+    response = query_rest_api(
+        '/batch_statuses', data=batch, headers=headers)
+    #response = submit_request('{}&wait={}'.format(response['link'], WAIT))
+    return response
+
+def get_batch_statuses(batch_id):
+    response = query_rest_api('/batch_statuses?id={}' % batch_id )
+    #return base64.b64decode(response['data'])
+    return response['data']  
+
+def get_state_limit(limit):
+    response = query_rest_api('/state?limit=%s' % limit)
+    #return base64.b64decode(response['data'])
+    return response['data']
+
+
+def get_reciepts(reciept_id):
+    response = query_rest_api('/receipts?id=%s' % reciept_id)
+    return response
+
+
+def post_receipts(receipts):
+    headers = {'Content-Type': 'application/json'}
+     
+    response = query_rest_api('/receipts', data=receipts, headers=headers)
+
+    return response
+
+def filter_by_signer_key(data):
+    """Filters the transaction list based on signer key
+    """
+    pass
+
     

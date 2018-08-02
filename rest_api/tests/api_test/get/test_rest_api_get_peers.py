@@ -12,29 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ------------------------------------------------------------------------------
- 
-# import pytest
-# import logging
-# import json
-# import urllib.request
-# import urllib.error
-#  
-# from fixtures import setup
-# from utils import get_state_list
-#  
-#  
-# LOGGER = logging.getLogger(__name__)
-# LOGGER.setLevel(logging.INFO)
-#  
-# pytestmark = [pytest.mark.get , pytest.mark.peers]
- 
- 
-# class TestPeerList(RestApiBaseTest):
-#     """This class tests the peer list with different parameters
-#     """
-#     @pytest.mark.usefixtures('setup')
-#     def test_api_get_peer_list(self, setup):
-#         """Tests the receipt list by submitting intkey batches
-#         """
-#         pass
+     
+import pytest
+import logging
+import json
+import urllib.request
+import urllib.error
+  
+from utils import get_peers
+
+from base import RestApiBaseTest  
+  
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+  
+pytestmark = [pytest.mark.get , pytest.mark.peers]
+
+PEER_LIST = []
+          
+class TestPeerList(RestApiBaseTest):
+    """This class tests the peer list with different parameters
+    """
+    def test_api_get_peer_list(self, setup):
+        """Tests the peer list 
+        """
+        address = setup['address']
+        expected_link = '{}/peers'.format(address)
         
+        try:   
+            response = get_peers()
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Rest Api is Unreachable")
+        
+        self.assert_valid_data(response, len(PEER_LIST))          
+        self.assert_valid_link(response, expected_link)
+           
