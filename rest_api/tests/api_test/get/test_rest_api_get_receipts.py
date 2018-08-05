@@ -34,17 +34,12 @@ RECEIPT_NOT_FOUND = 80
 RECEIPT_WRONG_CONTENT_TYPE = 81
 RECEIPT_BODY_INVALID = 82
 RECEIPT_Id_QUERYINVALID = 83
+INVALID_RESOURCE_ID = 60
   
   
 class TestReceiptsList(RestApiBaseTest):
     """This class tests the receipt list with different parameters
     """
-    @pytest.mark.usefixtures('setup')
-    def test_api_get_receipts_list(self, setup):
-        """Tests the receipt list by submitting intkey batches
-        """
-        pass
-   
     def test_api_get_reciept_invalid_id(self):
         """Tests the reciepts after submitting invalid transaction
         """
@@ -53,13 +48,13 @@ class TestReceiptsList(RestApiBaseTest):
             response = get_reciepts(transaction_id)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 60
-            assert data['error']['title'] == 'Invalid Resource Id'
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
+            assert response['error']['code'] == INVALID_RESOURCE_ID
+            assert response['error']['title'] == 'Invalid Resource Id'
                  
-    def test_api_get_reciepts_multiple_tranasactions(self,setup_batch_multiple_transcation):
+    def test_api_get_reciepts_multiple_transactions(self,setup_batch_multiple_transcation):
         """Test the get reciepts for multiple transaction.
         """
         transaction_list=""
@@ -70,15 +65,14 @@ class TestReceiptsList(RestApiBaseTest):
         trans_list = str(transaction_list)[:-1]
         try:
             response = get_reciepts(trans_list)
-            #print(response)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
+            response = json.loads(error.fp.read().decode('utf-8'))
          
         for res,txn in zip(response['data'],reversed(li)):
            assert str(res['id']) == txn
             
-    def test_api_get_reciepts_single_tranasactions(self,setup):
+    def test_api_get_reciepts_single_transactions(self,setup):
         """Tests get reciepts response for single transaction"""
          
         expected_transaction=setup['expected_txns']
@@ -86,16 +80,15 @@ class TestReceiptsList(RestApiBaseTest):
         transaction_id=str(expected_transaction)[2:-2]
         try:   
              response = get_reciepts(transaction_id)
-        
         except urllib.error.HTTPError as error:
              LOGGER.info("Rest Api is Unreachable")
-             data = json.loads(error.fp.read().decode('utf-8'))
-             LOGGER.info(data['error']['title'])
-             LOGGER.info(data['error']['message'])
-             assert data['error']['code'] == 60
-             assert data['error']['title'] == 'Invalid Resource Id'
+             response = json.loads(error.fp.read().decode('utf-8'))
+             LOGGER.info(response['error']['title'])
+             LOGGER.info(response['error']['message'])
+             assert response['error']['code'] == RECEIPT_NOT_FOUND
+             assert response['error']['title'] == 'Invalid Resource Id'
          
-    def test_api_post_reciepts_single_tranasactions(self,setup):
+    def test_api_post_reciepts_single_transactions(self,setup):
       """Test post reciepts response for single transaction"""
           
       expected_transaction=setup['expected_txns']
@@ -105,13 +98,13 @@ class TestReceiptsList(RestApiBaseTest):
            response = post_receipts(transaction_json)
       except urllib.error.HTTPError as error:
            LOGGER.info("Rest Api is Unreachable")
-           data = json.loads(error.fp.read().decode('utf-8'))
-           LOGGER.info(data['error']['title'])
-           LOGGER.info(data['error']['message'])
-           assert data['error']['code'] == 60
-           assert data['error']['title'] == 'Invalid Resource Id'
+           response = json.loads(error.fp.read().decode('utf-8'))
+           LOGGER.info(response['error']['title'])
+           LOGGER.info(response['error']['message'])
+           assert response['error']['code'] == INVALID_RESOURCE_ID
+           assert response['error']['title'] == 'Invalid Resource Id'
           
-    def test_api_post_reciepts_invalid_tranasactions(self):
+    def test_api_post_reciepts_invalid_transactions(self):
       """test reciepts post for invalid transaction"""
           
       expected_transaction="few"
@@ -120,13 +113,13 @@ class TestReceiptsList(RestApiBaseTest):
            response = post_receipts(transaction_json)
       except urllib.error.HTTPError as error:
            LOGGER.info("Rest Api is Unreachable")
-           data = json.loads(error.fp.read().decode('utf-8'))
-           LOGGER.info(data['error']['title'])
-           LOGGER.info(data['error']['message'])
-           assert data['error']['code'] == 82
-           assert data['error']['title'] == 'Bad Receipts Request'
+           response = json.loads(error.fp.read().decode('utf-8'))
+           LOGGER.info(response['error']['title'])
+           LOGGER.info(response['error']['message'])
+           assert response['error']['code'] == RECEIPT_BODY_INVALID
+           assert response['error']['title'] == 'Bad Receipts Request'
           
-    def test_api_post_reciepts_multiple_tranasactions(self,setup_batch_multiple_transcation):
+    def test_api_post_reciepts_multiple_transactions(self,setup_batch_multiple_transcation):
        """Test the post reciepts response for multiple transaction.
        """
      
@@ -138,7 +131,7 @@ class TestReceiptsList(RestApiBaseTest):
            response= post_receipts(json_list)
        except urllib.error.HTTPError as error:
            LOGGER.info("Rest Api is Unreachable")
-           data = json.loads(error.fp.read().decode('utf-8'))
+           response = json.loads(error.fp.read().decode('utf-8'))
            
        for res,txn in zip(response['data'], transaction_list):
            assert str(res['id']) == txn

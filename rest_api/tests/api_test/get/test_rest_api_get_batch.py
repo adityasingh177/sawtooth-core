@@ -49,7 +49,6 @@ STATUS_BODY_INVALID = 43
 STATUS_WRONG_CONTENT_TYPE = 46
 
 
-  
 class TestBatchList(RestApiBaseTest):
     """This class tests the batch list with different parameters
     """
@@ -342,7 +341,7 @@ class TestBatchList(RestApiBaseTest):
         assert 'head' in response
        
 class TestBatchGet(RestApiBaseTest):
-    def test_api_get_batch_id(self):
+    def test_api_get_batch_id(self, setup):
         signer_key = setup['signer_key']
         expected_head = setup['expected_head']
         expected_batches = setup['expected_batches']
@@ -372,7 +371,7 @@ class TestBatchGet(RestApiBaseTest):
         self.assert_valid_paging(response)
     
            
-    def test_api_get_bad_batch_id(self):
+    def test_api_get_bad_batch_id(self, setup):
         """verifies that GET /batches/{bad_batch_id} 
            is unreachable with bad head parameter 
         """
@@ -384,7 +383,6 @@ class TestBatchGet(RestApiBaseTest):
             LOGGER.info(data['error']['message'])
           
         self.assert_valid_error(data, INVALID_RESOURCE_ID)
-  
   
 class TestBatchStatusesList(RestApiBaseTest):
     """This class tests the batch list with different parameters
@@ -425,4 +423,3 @@ class TestBatchStatusesList(RestApiBaseTest):
             assert response['data'][0]['status'] == "COMMITTED"
         except urllib.error.HTTPError as error:
             assert response.code == 400
-      

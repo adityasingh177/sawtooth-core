@@ -19,7 +19,7 @@ import json
 import urllib.request
 import urllib.error
    
-from utils import get_blocks
+from utils import get_blocks, get_block_id
  
 from base import RestApiBaseTest
  
@@ -246,7 +246,7 @@ class TestBlockList(RestApiBaseTest):
         assert 'paging' in response
         assert 'head' in response
         
-class TestBlockGet():
+class TestBlockGet(RestApiBaseTest):
     def test_api_get_block_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 
         """
@@ -255,7 +255,7 @@ class TestBlockGet():
         transaction_id = setup['transaction_ids'][0]
                          
         try:
-            response = get_transaction(transaction_id=transaction_id)
+            response = get_block_id(transaction_id=transaction_id)
             print(response)
         except  urllib.error.HTTPError as error:
             LOGGER.info("Rest Api not reachable")

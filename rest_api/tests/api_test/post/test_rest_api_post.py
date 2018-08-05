@@ -145,26 +145,7 @@ class TestPost(RestApiBaseTest):
         chains = _get_node_chains(node_list)
         assert final_state_length ==  initial_state_length + len(expected_batch_ids)
         assert check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS) == True
-    
-    def test_rest_api_batch_no_trans(self):
-        LOGGER.info("Starting test for batch with bad protobuf")
         
-        LOGGER.info("Creating batches for transactions 1trn/batch")
-        signer = get_signer()
-        batches = [create_batch([], signer)]
-    
-        post_batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches]
-    
-        LOGGER.info("Submitting batches to the handlers")
-    
-        for batch in post_batch_list:
-            try:
-                response = post_batch(batch)
-            except urllib.error.HTTPError as error:
-                data = error.fp.read().decode('utf-8')
-                LOGGER.info(data)
-                  
-    
     def test_rest_api_no_batches(self):
         LOGGER.info("Starting test for batch with bad protobuf")
                          
@@ -241,11 +222,7 @@ class TestPost(RestApiBaseTest):
                 LOGGER.info(error['error']['message'])
                 assert (json.loads(errdata)['error']['code']) == 42
                 assert e.code == 400
-            '''
-            block_batch_ids = [block['header']['batch_ids'][0] for block in get_blocks()]
-            state_addresses = [state['address'] for state in get_state_list()['data']]
-            state_head_list = [get_state(address)['head'] for address in state_addresses]
-            '''
+
     def test_rest_api_post_same_txns(self, setup):
         """Tests the rest-api by submitting multiple transactions with same key
         """
@@ -316,7 +293,7 @@ class TestPost(RestApiBaseTest):
                     assert (json.loads(errdata)['error']['code']) == 35
                     assert e.code == 400
                     
-    def test_rest_api_state_multiple_txns_batches(self, setup):
+    def test_rest_api_multiple_txns_batches(self, setup):
         """Tests rest-api state by submitting multiple
             transactions in multiple batches
         """

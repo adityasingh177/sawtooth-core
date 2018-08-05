@@ -21,7 +21,7 @@ import urllib.error
 
 from fixtures import break_genesis
 
-from utils import get_transactions, get_transaction, filter_by_signer_key
+from utils import get_transactions, get_transaction_id
 
 from base import RestApiBaseTest
 
@@ -366,41 +366,44 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_equal(response, new_txn_list)
  
  
-class TesttransactionGet():
+class TesttransactionGet(RestApiBaseTest):
     def test_api_get_transaction_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 
         """
         LOGGER.info("Starting test for transaction/{transaction_id}")
         expected_head = setup['expected_head']
-        transaction_id = setup['transaction_ids'][0]
+        expected_id = setup['transaction_ids'][0]
+        address = setup['address']
+        expected_length = 1
+        
+        expected_link = '{}/transactions/{}'.format(address,expected_id)
                          
         try:
-            response = get_transaction(transaction_id=transaction_id)
-            print(response)
+            response = get_transaction_id(transaction_id=expected_id)
         except  urllib.error.HTTPError as error:
             LOGGER.info("Rest Api not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-                 
-        assert response['head'] == expected_head , "request is not correct"
-    
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message']) 
+        
+        self.assert_valid_link(response, expected_link)  
+        assert bool(response['data']) == True   
           
     def test_api_get_bad_transaction_bad_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is not reachable
            with bad id
         """
         LOGGER.info("Starting test for transactions/{transaction_id}")
-        expected_head = setup['expected_head']
-        transaction_id = 'f'
-                 
         try:
-            response = get_transaction(transaction_id=transaction_id)
+            response = get_transaction_id(transaction_id=BAD_ID)
         except  urllib.error.HTTPError as error:
             LOGGER.info("Rest Api not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
+        
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
+
                  
          
      
