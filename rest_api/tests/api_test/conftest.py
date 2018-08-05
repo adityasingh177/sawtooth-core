@@ -40,7 +40,7 @@ from sawtooth_rest_api.protobuf.transaction_pb2 import Transaction
 
 from google.protobuf.json_format import MessageToDict
 
-from utils import get_batches,  get_transactions, get_state, post_batch, get_blocks,\
+from utils import get_batches,  get_transactions, get_state_address, post_batch, get_blocks,\
                   get_state_list , _delete_genesis , _start_validator, \
                   _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
                   _stop_settings_tp, _start_settings_tp, _get_client_address
@@ -228,7 +228,7 @@ def setup(request):
     data['expected_head'] = expected_head
     state_addresses = [state['address'] for state in get_state_list()['data']]
     data['address'] = state_addresses
-    state_head_list = [get_state(address)['head'] for address in state_addresses]
+    state_head_list = [get_state_address(address)['head'] for address in state_addresses]
     data['state_head'] = state_head_list
     data['address'] = address
     data['limit'] = LIMIT

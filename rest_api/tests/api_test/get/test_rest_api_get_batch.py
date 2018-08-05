@@ -357,7 +357,7 @@ class TestBatchGet(RestApiBaseTest):
                          expected_head, start, limit)
                                          
         try:   
-            response = get_batch_id()
+            response = get_batch_id(expected_batches[0])
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
               
@@ -370,7 +370,7 @@ class TestBatchGet(RestApiBaseTest):
                                     signer_key)
         self.assert_valid_link(response, expected_link)
         self.assert_valid_paging(response)
-     
+    
            
     def test_api_get_bad_batch_id(self):
         """verifies that GET /batches/{bad_batch_id} 

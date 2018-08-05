@@ -160,8 +160,11 @@ def get_state_address(address):
     response = query_rest_api('/state/%s' % address)
     return response
 
-def post_batch(batch):
-    headers = {'Content-Type': 'application/octet-stream'}
+def post_batch(batch, headers="None"):
+    if headers=="True":
+        headers = {'Content-Type': 'application/json'}  
+    else:
+        headers = {'Content-Type': 'application/octet-stream'}
     
     response = query_rest_api(
         '/batches', data=batch, headers=headers)
