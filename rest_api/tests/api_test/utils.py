@@ -97,7 +97,7 @@ def get_batch_id(batch_id):
     return response
 
 def get_block_id(block_id):
-    response = query_rest_api('/block/%s' % block_id)
+    response = query_rest_api('/blocks/%s' % block_id)
     return response
 
 def get_transaction_id(transaction_id):

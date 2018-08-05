@@ -15,7 +15,7 @@
 import aiohttp
 from base64 import b64decode
 
-CONSENSUS_ALGO = b'devmode'
+CONSENSUS_ALGO = b'Devmode'
 FAMILY_NAME = 'intkey'
 FAMILY_VERSION = '1.0'
 DEFAULT_LIMIT = 100
@@ -189,7 +189,7 @@ class RestApiBaseTest(object):
         self.assert_items(data, dict)
     
                         
-    def assert_check_block_seq(self, blocks, expected_blocks, expected_batches, expected_txns):
+    def assert_check_block_seq(self, blocks, expected_batches, expected_txns):
         """Asserts block is constructed properly after submitting batches
         """
         if not isinstance(blocks, list):
@@ -197,11 +197,10 @@ class RestApiBaseTest(object):
         
         consensus_algo = CONSENSUS_ALGO
         
-        ep = list(zip(blocks, expected_blocks, expected_batches, expected_txns))
+        ep = list(zip(blocks, expected_batches, expected_txns))
         
-        for block, expected_block , expected_batch, expected_txn in ep:
+        for block, expected_batch, expected_txn in ep:
             assert isinstance(block, dict)
-            assert expected_block == block['header_signature']
             assert isinstance(block['header'], dict)
             assert consensus_algo ==  b64decode(block['header']['consensus'])
             batches = block['batches']

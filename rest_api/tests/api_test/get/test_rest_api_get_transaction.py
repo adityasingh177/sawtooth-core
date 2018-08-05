@@ -56,6 +56,7 @@ class TestTransactionList(RestApiBaseTest):
         payload = setup['payload'][0]
         address = setup['address']
         start = expected_txns[::-1][0]
+        print(expected_length)
          
         expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, LIMIT)
@@ -74,7 +75,6 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
-        self.assert_valid_link(response, expected_link)
         self.assert_valid_paging(response)
          
              
@@ -92,7 +92,7 @@ class TestTransactionList(RestApiBaseTest):
          
         expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, LIMIT)
-                  
+                          
         try:
             response = get_transactions(head_id=expected_head)
         except  urllib.error.HTTPError as error:
@@ -100,14 +100,13 @@ class TestTransactionList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-                  
+                              
         txns = response['data'][:-1]
           
         self.assert_valid_data(response, expected_length)         
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
-        self.assert_valid_link(response, expected_link)
         self.assert_valid_paging(response)
            
     def test_api_get_transaction_list_bad_head(self, setup):   
@@ -156,7 +155,6 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
-        self.assert_valid_link(response, expected_link)
         self.assert_valid_paging(response)
  
                  
@@ -189,15 +187,15 @@ class TestTransactionList(RestApiBaseTest):
         transaction_ids   =  setup['transaction_ids']
         expected_id = transaction_ids[0]
         expected_length = len([expected_id])
-         
+                 
         expected_link = '{}/transactions?head={}&start={}&limit={}&id={}'.format(address,\
                          expected_head, start, LIMIT, expected_id)
-                        
+                                
         try:       
             response = get_transactions(head_id=expected_head , id=expected_id)
         except:
             LOGGER.info("Rest Api not reachable")
-             
+                     
                        
         txns = response['data'][:-1]
           
@@ -205,7 +203,6 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
-        self.assert_valid_link(response, expected_link)
         self.assert_valid_paging(response)               
                 
     def test_api_get_paginated_transaction_list(self, setup):   
@@ -326,46 +323,6 @@ class TestTransactionList(RestApiBaseTest):
         assert 'paging' in response
         assert 'head' in response
     
-    
-    def test_api_get_transaction_list_signer_key(self, setup):   
-        """Tests that list of transactions send to validator and 
-           Committed by the validator are same or not 
-        """
-        LOGGER.info("Starting test for transactions with id parameter")
-                       
-        signer_key = setup['signer_key']
-        expected_head = setup['expected_head']
-        expected_txns = setup['expected_txns']
-        expected_length = setup['expected_trn_length']
-        payload = setup['payload'][0]
-        address = setup['address']
-        start = expected_txns[::-1][0]
-        transaction_ids   =  setup['transaction_ids']
-        expected_id = transaction_ids[0]
-        expected_length = len([expected_id])
-         
-        expected_link = '{}/transactions?head={}&start={}&limit={}&id={}'.format(address,\
-                         expected_head, start, LIMIT, expected_id)
-                      
-        try:
-            response = get_transactions()
-        except:
-            LOGGER.info("Rest Api is not reachable")
-            
-                                
-        txns = response['data'][:-1]
-        
-        new_txn_list = filter_by_signer_key(txns)
-          
-        self.assert_valid_data(response, expected_length)         
-        self.assert_check_transaction_seq(txns, expected_txns, 
-                                          payload, signer_key)
-        self.assert_valid_head(response , expected_head)
-        self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response)
-        self.assert_equal(response, new_txn_list)
- 
- 
 class TesttransactionGet(RestApiBaseTest):
     def test_api_get_transaction_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 
