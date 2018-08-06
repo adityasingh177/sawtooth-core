@@ -317,28 +317,6 @@ class TestStateList(RestApiBaseTest):
                 assert data['error']['code'] == 60
                 assert data['error']['title'] == 'Invalid Resource Id'    
                 
-    def test_api_get_state_data_address_wildcard_character(self, setup):
-        """Tests the state address with wildcard_character ***STL-1346***
-        """   
-        try:   
-            for _ in get_state_list()['data']:
-                namespace = state['address']
-                res=get_state_list(address=namespace)
-                expected_head = setup['expected_head'][:6]
-                addressList = list(expected_head)
-                addressList[2]='?'
-                expected_head = ''.join(addressList)
-                print("\nVALUE is: ", expected_head)
-                res=get_state_list(head_id=expected_head)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Not able to access  ")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            if data:
-                LOGGER.info(data['error']['title'])
-                LOGGER.info(data['error']['message'])
-                assert data['error']['code'] == 62
-                assert data['error']['title'] == 'Invalid State Address' 
-                
     def test_api_get_state_data_address_partial_character(self, setup):
         """Tests the state address with partial head address ***STL-1346***
         """   
