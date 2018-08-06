@@ -78,9 +78,9 @@ class TestBlockList(RestApiBaseTest):
             response = get_blocks(head_id=expected_head)
         except  urllib.error.HTTPError as error:
             LOGGER.info("Rest Api not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
                   
         assert response['head'] == expected_head , "request is not correct"
            
@@ -93,9 +93,9 @@ class TestBlockList(RestApiBaseTest):
             batch_list = get_blocks(head_id=BAD_HEAD)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
+            response = json.loads(error.fp.read().decode('utf-8'))
          
-        self.assert_valid_error(data, INVALID_RESOURCE_ID)
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
                 
     def test_api_get_block_list_id(self, setup):   
         """Tests that GET /blocks is reachable with id as parameter 
@@ -126,9 +126,9 @@ class TestBlockList(RestApiBaseTest):
             batch_list = get_blocks(head_id=bad_id)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
+            response = json.loads(error.fp.read().decode('utf-8'))
          
-        self.assert_valid_error(data, INVALID_RESOURCE_ID)
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
                
     def test_api_get_block_list_head_and_id(self, setup):   
         """Tests GET /blocks is reachable with head and id as parameters 
@@ -160,11 +160,11 @@ class TestBlockList(RestApiBaseTest):
         try:
             response = get_blocks(start=start , limit=limit)
         except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
          
-        self.assert_valid_error(data, INVALID_PAGING_QUERY)
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
                  
     def test_api_get_block_list_invalid_start(self, setup):   
         """Tests that GET /blocks is unreachable with invalid start parameter 
@@ -178,11 +178,11 @@ class TestBlockList(RestApiBaseTest):
         try:  
             response = get_blocks(start=start)
         except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
          
-        self.assert_valid_error(data, INVALID_PAGING_QUERY)
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
           
     def test_api_get_block_list_invalid_limit(self, setup):   
         """Tests that GET /blocks is unreachable with bad limit parameter 
@@ -200,7 +200,7 @@ class TestBlockList(RestApiBaseTest):
             LOGGER.info(response['error']['title'])
             LOGGER.info(response['error']['message'])
          
-        self.assert_valid_error(data, INVALID_COUNT_QUERY)
+        self.assert_valid_error(response, INVALID_COUNT_QUERY)
     
                      
     def test_api_get_block_list_reversed(self, setup):   
