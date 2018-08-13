@@ -171,7 +171,7 @@ def make_intkey_address(name):
 
 
 def random_word():
-    return ''.join([random.choice(string.ascii_letters) for _ in range(0, 6)])
+    return ''.join([random.choice(string.ascii_letters) for _ in range(0, 100)])
 
 
 def random_word_list(count):
