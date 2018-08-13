@@ -395,7 +395,11 @@ def post_receipts(receipts):
 def batch_count():
     batch_list = get_batches()
     count = len(batch_list['data'])
-    next_position = batch_list['paging']['next_position']
+    try:
+        next_position = batch_list['paging']['next_position']
+    except:
+        next_position = None
+    
     while(next_position):
         batch_list = get_batches(start=next_position)
         try:
@@ -409,7 +413,11 @@ def batch_count():
 def transaction_count():
     transaction_list = get_transactions()
     count = len(transaction_list['data'])
-    next_position = transaction_list['paging']['next_position']
+    try:
+        next_position = transaction_list['paging']['next_position']
+    except:
+        next_position = None
+    
     while(next_position):
         transaction_list = get_transactions(start=next_position)
         try:
