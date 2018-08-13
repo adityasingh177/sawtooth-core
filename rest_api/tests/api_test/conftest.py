@@ -43,7 +43,7 @@ from google.protobuf.json_format import MessageToDict
 from utils import get_batches,  get_transactions, get_state_address, post_batch, get_blocks,\
                   get_state_list , _delete_genesis , _start_validator, \
                   _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
-                  _stop_settings_tp, _start_settings_tp, _get_client_address
+                  _stop_settings_tp, _start_settings_tp, _get_client_address, batch_count, transaction_count
 
 from payload import get_signer, create_intkey_transaction , create_batch
                   
@@ -150,6 +150,10 @@ def setup(request):
     """Setup method for posting batches and returning the 
        response
     """
+    count1 = batch_count()
+    count2 = transaction_count()
+    print(count1)
+    print(count2)
     data = {}
     signer = get_signer()
     expected_trxns  = {}

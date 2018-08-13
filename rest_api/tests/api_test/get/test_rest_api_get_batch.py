@@ -417,3 +417,6 @@ class TestBatchStatusesList(RestApiBaseTest):
             assert response['data'][0]['status'] == "COMMITTED"
         except urllib.error.HTTPError as error:
             assert response.code == 400
+    
+    def test_api_get_batch_status_wait(self):
+        pass

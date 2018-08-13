@@ -252,7 +252,6 @@ class TestPost(RestApiBaseTest):
         LOGGER.info("Creating batches for transactions 1trn/batch")
     
         batches = [create_batch([txn], signer) for txn in txns]
-        #print (batches)
     
         for batch in batches:
             data = MessageToDict(

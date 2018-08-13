@@ -274,7 +274,7 @@ def _make_http_address(node_number):
     return node_number
 
 def _get_client_address():  
-    command = "ifconfig eno1 | grep 'inet addr' | cut -d ':' -f 2 | cut -d ' ' -f 1"
+    command = "hostname -I | awk '{print $1}'"
     node_ip = subprocess.check_output(command , shell=True).decode().strip().replace("'", '"')
     return 'http://' + node_ip + ':8008'
 
@@ -314,7 +314,6 @@ def _create_genesis_batch():
     subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
     
     
-
 def wait_until_status(url, status_code=200, tries=5):
     """Pause the program until the given url returns the required status.
 
@@ -388,10 +387,35 @@ def get_reciepts(reciept_id):
     response = query_rest_api('/receipts?id=%s' % reciept_id)
     return response
 
-
 def post_receipts(receipts):
     headers = {'Content-Type': 'application/json'}
-     
     response = query_rest_api('/receipts', data=receipts, headers=headers)
-
     return response
+
+def batch_count():
+    batch_list = get_batches()
+    count = len(batch_list['data'])
+    next_position = batch_list['paging']['next_position']
+    while(next_position):
+        batch_list = get_batches(start=next_position)
+        try:
+            next_position = batch_list['paging']['next_position']
+        except:
+            next_position = None
+        
+        count += len(batch_list['data'])
+    return count   
+
+def transaction_count():
+    transaction_list = get_transactions()
+    count = len(transaction_list['data'])
+    next_position = transaction_list['paging']['next_position']
+    while(next_position):
+        transaction_list = get_transactions(start=next_position)
+        try:
+            next_position = transaction_list['paging']['next_position']
+        except:
+            next_position = None
+        
+        count += len(transaction_list['data'])
+    return count 

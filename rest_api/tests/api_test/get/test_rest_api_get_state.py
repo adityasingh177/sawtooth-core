@@ -448,7 +448,7 @@ class TestStateList(RestApiBaseTest):
         
             
 class TestStateGet(RestApiBaseTest):
-    def test_api_get_state_address():
+    def test_api_get_state_address(self):
         """Tests/ validate the state key parameters with data, head, link and paging               
         """
         pass
@@ -463,4 +463,4 @@ class TestStateGet(RestApiBaseTest):
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
           
-        self.assert_valid_error(data, INVALID_RESOURCE_ID)
+        self.assert_valid_error(data, INVALID_STATE_ADDRESS)

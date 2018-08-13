@@ -114,7 +114,6 @@ def setup_batch_multiple_transcation():
         
             
     for txn in transactions:
-        #print(txn)
         data = MessageToDict(
                 txn,
                 including_default_value_fields=True,
@@ -124,14 +123,11 @@ def setup_batch_multiple_transcation():
         expected_trxns.append(trxn_id)
     
     
-    
     batch_s= create_batch(transactions, signer)        
-    #print(batch_s)
     post_batch_list = BatchList(batches=[batch_s]).SerializeToString()
     
     LOGGER.info("Submitting batches to the handlers")
     
-    #for batch in post_batch_list:
     try:
         response = post_batch(post_batch_list)
     except urllib.error.HTTPError as error:
