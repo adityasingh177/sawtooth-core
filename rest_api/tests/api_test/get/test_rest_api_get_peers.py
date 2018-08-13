@@ -44,6 +44,5 @@ class TestPeerList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
         
-        self.assert_valid_data(response, len(PEER_LIST))          
         self.assert_valid_link(response, expected_link)
            
