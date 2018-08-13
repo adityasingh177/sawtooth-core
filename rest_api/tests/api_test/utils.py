@@ -274,7 +274,7 @@ def _make_http_address(node_number):
     return node_number
 
 def _get_client_address():  
-    command = "ifconfig ens32 | grep 'inet addr' | cut -d ':' -f 2 | cut -d ' ' -f 1"
+    command = "ifconfig eno1 | grep 'inet addr' | cut -d ':' -f 2 | cut -d ' ' -f 1"
     node_ip = subprocess.check_output(command , shell=True).decode().strip().replace("'", '"')
     return 'http://' + node_ip + ':8008'
 
