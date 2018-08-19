@@ -315,6 +315,18 @@ class TestTransactionList(RestApiBaseTest):
         assert 'paging' in response
         assert 'head' in response
     
+    def test_api_get_transaction_id_length(self, setup):
+        """Tests the transaction id length should be 128 hex character long 
+        """   
+        try:
+            transaction_list = get_transactions()
+            for trans in transaction_list['data']:
+                transaction_ids = trans['header_signature']
+                head_len = len(transaction_ids)
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Transaction id length is not 128 hex character long")
+        assert head_len == head
+    
 class TesttransactionGet(RestApiBaseTest):
     def test_api_get_transaction_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 

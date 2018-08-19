@@ -21,7 +21,9 @@ import urllib.error
 
  
 from fixtures import break_genesis, invalid_batch
-from utils import get_batches, get_batch_id, post_batch, post_batch_statuses
+from utils import get_batches, get_batch_id, post_batch,\
+                  get_batch_statuses, post_batch_statuses,\
+                  _create_expected_link, _get_batch_list
 
 from base import RestApiBaseTest
 
@@ -47,6 +49,7 @@ BATCH_NOT_FOUND = 71
 STATUS_ID_QUERY_INVALID = 66
 STATUS_BODY_INVALID = 43
 STATUS_WRONG_CONTENT_TYPE = 46
+WAIT = 10
 
 
 class TestBatchList(RestApiBaseTest):
@@ -59,29 +62,33 @@ class TestBatchList(RestApiBaseTest):
         expected_head = setup['expected_head']
         expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
-        expected_length = setup['expected_length']
+        expected_length = setup['expected_batch_length']
         payload = setup['payload']
         start = setup['start']
         limit = setup['limit']
-        address = setup['address']
-        
+        address = setup['address']        
             
         expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)
+        
+        paging_link = '{}/batches?head={}&start={}'.format(address,\
+                         expected_head, start)
                                          
         try:   
             response = get_batches()
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
               
-        batches = response['data'][:-1] 
-        
+        batches = _get_batch_list(response) 
+         
+        self.assert_valid_data(response)
         self.assert_valid_head(response, expected_head) 
+        self.assert_valid_data_list(batches, expected_length)
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)
         self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response)
+        self.assert_valid_paging(response, expected_link)
             
     def test_api_get_batch_list_head(self, setup):   
         """Tests that GET /batches is reachable with head parameter 
@@ -91,7 +98,6 @@ class TestBatchList(RestApiBaseTest):
         expected_head = setup['expected_head']
         expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
-        expected_length = setup['expected_length']
         payload = setup['payload']
         expected_head = setup['expected_head']
         start = setup['start']
@@ -114,7 +120,7 @@ class TestBatchList(RestApiBaseTest):
           
         self.assert_valid_head(response, expected_head)
         self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response)
+        self.assert_valid_paging(response, expected_link)
              
     def test_api_get_batch_list_bad_head(self, setup):   
         """Tests that GET /batches is unreachable with bad head parameter 
@@ -165,7 +171,6 @@ class TestBatchList(RestApiBaseTest):
           
         self.assert_valid_head(response, expected_head)
         self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response)
  
     def test_api_get_batch_list_bad_id(self, setup):   
         """Tests that GET /batches is unreachable with bad id parameter 
@@ -215,7 +220,6 @@ class TestBatchList(RestApiBaseTest):
           
         self.assert_valid_head(response, expected_head)
         self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response)
                            
     def test_api_get_paginated_batch_list(self, setup):   
         """Tests GET /batches is reachable using paging parameters 
@@ -235,7 +239,44 @@ class TestBatchList(RestApiBaseTest):
             LOGGER.info(data['error']['message'])
           
         self.assert_valid_error(data, INVALID_PAGING_QUERY)
-                
+    
+    def test_api_get_batch_list_limit(self, setup):   
+        """Tests GET /batches is reachable using paging parameters 
+        """
+        LOGGER.info("Starting test for batch with paging parameters")
+        signer_key = setup['signer_key']
+        batch_ids   =  setup['batch_ids']
+        expected_head = setup['expected_head']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        expected_txns = setup['expected_txns']
+        payload = setup['payload']
+        expected_id = batch_ids[0]
+        start = setup['start']
+        address = setup['address']
+        limit = 1
+        
+        expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
+                         expected_head, start, limit)
+                      
+        try:
+            response = get_batches(limit=limit)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+        
+        batches = response['data'][:-1]
+                                 
+        self.assert_check_batch_seq(batches, expected_batches, 
+                                    expected_txns, payload, 
+                                    signer_key)
+          
+        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
+        
+        
     def test_api_get_batch_list_invalid_start(self, setup):   
         """Tests that GET /batches is unreachable with invalid start parameter 
         """
@@ -272,24 +313,6 @@ class TestBatchList(RestApiBaseTest):
             LOGGER.info(data['error']['message'])
           
         self.assert_valid_error(data, INVALID_COUNT_QUERY)
-      
-    def test_api_get_batch_list_no_count(self, setup):   
-        """Tests that GET /batches is unreachable with bad limit parameter 
-        """
-        LOGGER.info("Starting test for batch with bad limit parameter")
-        batch_ids =  setup['batch_ids']
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        limit = 0
-                       
-        try:  
-            response = get_batches(limit=limit)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-          
-        self.assert_valid_error(data, INVALID_COUNT_QUERY)
                      
     def test_api_get_batch_list_reversed(self, setup):   
         """verifies that GET /batches is unreachable with bad head parameter 
@@ -299,7 +322,7 @@ class TestBatchList(RestApiBaseTest):
         expected_head = setup['expected_head']
         setup_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
-        expected_length = setup['expected_length']
+        expected_length = setup['expected_batch_length']
         payload = setup['payload']                       
         start = setup['start']
         limit = setup['limit']
@@ -317,6 +340,7 @@ class TestBatchList(RestApiBaseTest):
             assert response.code == 400
           
         batches = response['data'][:-1]
+        
                           
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
@@ -334,6 +358,21 @@ class TestBatchList(RestApiBaseTest):
         assert 'data' in response
         assert 'paging' in response
         assert 'head' in response
+    
+    def test_api_get_batch_param_link_val(self, setup):
+        """Tests/ validate the batch parameters with batches, head, start and limit
+        """
+        try:
+            batch_list = get_batches()
+            for link in batch_list:
+                if(link == 'link'):
+                    assert 'head' in batch_list['link']
+                    assert 'start' in batch_list['link']  
+                    assert 'limit' in batch_list['link'] 
+                    assert 'batches' in batch_list['link']  
+        except urllib.error.HTTPError as error:
+            assert response.code == 400
+            LOGGER.info("Link is not proper for batch and parameters are missing")
        
 class TestBatchGet(RestApiBaseTest):
     def test_api_get_batch_id(self, setup):
@@ -341,30 +380,26 @@ class TestBatchGet(RestApiBaseTest):
         expected_head = setup['expected_head']
         expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
-        expected_length = setup['expected_length']
+        expected_length = setup['expected_batch_length']
+        batch_ids = setup['batch_ids']
+        expected_id = batch_ids[0]
         payload = setup['payload']
-        start = setup['start']
-        limit = setup['limit']
         address = setup['address']
         
-        expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
-                         expected_head, start, limit)
+        expected_link = '{}/batches/{}'.format(address, expected_batches[0])
                                          
         try:   
             response = get_batch_id(expected_batches[0])
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
-              
-        batches = response['data'][:-1] 
+                              
+        batches = response['data']
         
-#         self.assert_valid_head(response, expected_head) 
-#         self.assert_check_batch_seq(batches, expected_batches, 
-#                                     expected_txns, payload, 
-#                                     signer_key)
-#         self.assert_valid_link(response, expected_link)
-#         self.assert_valid_paging(response)
-#     
-           
+        self.assert_check_batch_seq(batches, expected_batches, 
+                                    expected_txns, payload, 
+                                    signer_key)
+        self.assert_valid_link(response, expected_link)
+                
     def test_api_get_bad_batch_id(self, setup):
         """verifies that GET /batches/{bad_batch_id} 
            is unreachable with bad head parameter 
@@ -379,10 +414,10 @@ class TestBatchGet(RestApiBaseTest):
         self.assert_valid_error(data, INVALID_RESOURCE_ID)
   
 class TestBatchStatusesList(RestApiBaseTest):
-    """This class tests the batch list with different parameters
+    """This class tests the batch status list with different parameters
     """
     def test_api_post_batch_status_15ids(self, setup):   
-        """verifies that GET /batches is unreachable with bad head parameter 
+        """verifies that POST /batches_statuses with more than 15 ids
         """
         LOGGER.info("Starting test for batch with bad head parameter")
         data = {}
@@ -399,7 +434,7 @@ class TestBatchStatusesList(RestApiBaseTest):
             assert response.code == 400
    
     def test_api_post_batch_status_10ids(self, setup):   
-        """verifies that GET /batches is unreachable with bad head parameter 
+        """verifies that POST /batches_status with less than 15 ids
         """
         LOGGER.info("Starting test for batch with bad head parameter")
         data = {}
@@ -418,5 +453,168 @@ class TestBatchStatusesList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             assert response.code == 400
     
-    def test_api_get_batch_status_wait(self):
-        pass
+    def test_api_get_batch_statuses(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+        status = "COMMITTED"
+
+        
+        expected_link = '{}/batch_statuses?id={}'.format(address, expected_batches[0])
+                                         
+        try:   
+            response = get_batch_statuses([expected_batches[0]])
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                      
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)
+    
+    def test_api_get_batch_statuses_many_ids(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+        status = "COMMITTED"
+        
+        batches = ",".join(expected_batches)
+
+        expected_link = '{}/batch_statuses?id={}'.format(address, batches)
+                                         
+        try:   
+            response = get_batch_statuses(expected_batches)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                              
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)
+    
+    def test_api_get_batch_statuses_bad_id(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+                                         
+        try:   
+            response = get_batch_statuses(BAD_ID)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                      
+        self.assert_valid_error(data, INVALID_RESOURCE_ID)
+    
+    def test_api_get_batch_statuses_invalid_query(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+                                         
+        try:   
+            response = get_batch_statuses()
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                      
+        self.assert_valid_error(data, STATUS_ID_QUERY_INVALID)
+        
+    def test_api_get_batch_statuses_wait(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+        status = "COMMITTED"
+
+        expected_link = '{}/batch_statuses?id={}&wait={}'.format(address, expected_batches[0], WAIT)
+                                         
+        try:   
+            response = get_batch_statuses([expected_batches[0]],WAIT)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                              
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)
+    
+    
+    def test_api_get_batch_statuses_invalid(self, invalid_batch):
+        expected_batches = invalid_batch['expected_batches']
+        address = invalid_batch['address']
+        status = "INVALID"
+ 
+        expected_link = '{}/batch_statuses?id={}'.format(address, expected_batches[0])
+                                          
+        try:   
+            response = get_batch_statuses([expected_batches[0]])
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                               
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)
+        
+    
+    def test_api_get_batch_statuses_unknown(self, setup):
+        address = setup['address']
+        expected_batches = setup['expected_batches']
+        unknown_batch = expected_batches[0]
+        status = "UNKNOWN"
+        print(unknown_batch)
+
+        expected_link = '{}/batch_statuses?id={}'.format(address, unknown_batch)
+                                         
+        try:   
+            response = get_batch_statuses([unknown_batch])
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                              
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)
+    
+    def test_api_get_batch_statuses_default_wait(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+        status = "COMMITTED"
+
+        expected_link = '{}/batch_statuses?id={}&wait=300'.format(address, expected_batches[0], WAIT)
+                                         
+        try:   
+            response = get_batch_statuses([expected_batches[0]],300)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                              
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)
+    
+    def test_api_get_batch_statuses_default_wait_id(self,setup):
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        address = setup['address']
+        status = "COMMITTED"
+
+        expected_link = '{}/batch_statuses?id={}&wait=300'.format(address, expected_batches[0], WAIT)
+                                         
+        try:   
+            response = get_batch_statuses([expected_batches[0]],300)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+                                              
+        self.assert_status(response,status)
+        self.assert_valid_link(response, expected_link)

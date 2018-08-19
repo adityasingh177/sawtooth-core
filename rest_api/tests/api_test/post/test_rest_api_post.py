@@ -277,21 +277,6 @@ class TestPost(RestApiBaseTest):
                 assert (json.loads(errdata)['error']['code']) == 42
                 assert e.code == 400
                     
-    def test_post_batch_not_decodable(self, setup):
-        """Test rest-api when batch is not decodable
-        """
-           
-        post_batch_list = setup['batch_list']
-        batch=bytearray([0x13, 0x00, 0x00, 0x00, 0x08, 0x00])
-        try:        
-            response=post_batch(batch)           
-        except urllib.error.HTTPError as e:
-                    errdata = e.file.read().decode("utf-8")
-                    error = json.loads(errdata)
-                    LOGGER.info(error['error']['message'])
-                    assert (json.loads(errdata)['error']['code']) == 35
-                    assert e.code == 400
-                    
     def test_rest_api_multiple_txns_batches(self, setup):
         """Tests rest-api state by submitting multiple
             transactions in multiple batches
@@ -321,7 +306,7 @@ class TestPost(RestApiBaseTest):
     
         LOGGER.info("Creating batches for transactions 1trn/batch")
     
-        batches = [create_batch([txn], signer) for txn in txns]
+        batches = [create_batch([txns], signer)]
     
         for batch in batches:
             data = MessageToDict(

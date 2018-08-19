@@ -43,7 +43,8 @@ from google.protobuf.json_format import MessageToDict
 from utils import get_batches,  get_transactions, get_state_address, post_batch, get_blocks,\
                   get_state_list , _delete_genesis , _start_validator, \
                   _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
-                  _stop_settings_tp, _start_settings_tp, _get_client_address, batch_count, transaction_count
+                  _stop_settings_tp, _start_settings_tp, _get_client_address, batch_count, transaction_count,\
+                  get_batch_statuses
 
 from payload import get_signer, create_intkey_transaction , create_batch
                   
@@ -150,18 +151,14 @@ def setup(request):
     """Setup method for posting batches and returning the 
        response
     """
-    count1 = batch_count()
-    count2 = transaction_count()
-    print(count1)
-    print(count2)
     data = {}
     signer = get_signer()
     expected_trxns  = {}
     expected_batches = []
     transaction_list = []
     initial_state_length = len(get_state_list())
-    initial_batch_length = len(get_batches()['data'])
-    initial_transaction_length = len(get_transactions()['data'])
+    initial_batch_length = batch_count()
+    initial_transaction_length = transaction_count()
     address = _get_client_address()
 
     LOGGER.info("Creating intkey transactions with set operations")
@@ -196,7 +193,7 @@ def setup(request):
     length_batches = len(expected_batches)
     length_transactions = len(expected_trxns)
         
-    data['expected_length'] = initial_batch_length + length_batches
+    data['expected_batch_length'] = initial_batch_length + length_batches
     data['expected_trn_length'] = initial_transaction_length + length_transactions
     data['expected_txns'] = expected_trxns['trxn_id'][::-1]
     data['payload'] = expected_trxns['payload'][::-1]
@@ -215,7 +212,8 @@ def setup(request):
             response = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(response['error']['title'])
             LOGGER.info(response['error']['message'])
-      
+    
+                
     block_list = get_blocks()
     data['block_list'] = block_list
     batch_list = get_batches()

@@ -153,7 +153,26 @@ class TestBlockList(RestApiBaseTest):
         limit = 1
                     
         try:
-            response = get_blocks(start=start , limit=limit)
+            response = get_blocks(start=start , limit=limit, id=expected_id)
+        except urllib.error.HTTPError as error:
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
+         
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
+    
+    def test_api_get_block_list_start_id(self, setup):   
+        """Tests GET /blocks is reachable using paging parameters 
+        """
+        LOGGER.info("Starting test for blocks with paging parameters")
+        block_ids   =  setup['block_ids']
+        expected_head = setup['expected_head']
+        expected_id = block_ids[0]
+        start = 1
+        limit = 1
+                    
+        try:
+            response = get_blocks(start=start , limit=limit, id=expected_id)
         except urllib.error.HTTPError as error:
             response = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(response['error']['title'])
@@ -162,6 +181,24 @@ class TestBlockList(RestApiBaseTest):
         self.assert_valid_error(response, INVALID_PAGING_QUERY)
                  
     def test_api_get_block_list_invalid_start(self, setup):   
+        """Tests that GET /blocks is unreachable with invalid start parameter 
+        """
+        LOGGER.info("Starting test for batch with invalid start parameter")
+        block_ids   =  setup['block_ids']
+        expected_head = setup['expected_head']
+        expected_id = block_ids[0]
+        start = -1
+                         
+        try:  
+            response = get_blocks(start=start)
+        except urllib.error.HTTPError as error:
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
+         
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
+    
+    def test_api_get_block_list_limit(self, setup):   
         """Tests that GET /blocks is unreachable with invalid start parameter 
         """
         LOGGER.info("Starting test for batch with invalid start parameter")
@@ -240,6 +277,85 @@ class TestBlockList(RestApiBaseTest):
         assert 'data' in response
         assert 'paging' in response
         assert 'head' in response
+    
+    def test_api_get_each_batch_id_length(self, setup):
+        """Tests the each batch id length should be 128 hex character long 
+        """   
+        try:
+            block_list = get_blocks()
+            for batch in block_list['data']:
+                expected_head = batch['header']['batch_ids'][0]
+                head_len = len(expected_head)
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Batch id length is not 128 hex character long")
+        assert head_len == head     
+        
+    def test_api_get_first_block_id_length(self, setup):
+        """Tests the first block id length should be 128 hex character long 
+        """   
+        try: 
+            for block_list in get_blocks():
+                batch_list = get_batches()
+                for block in batch_list:
+                    expected_head = batch_list['head']
+                    head_len = len(expected_head)
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Block id length is not 128 hex character long")
+        assert head_len == head
+    
+    def test_rest_api_check_post_max_batches(module):
+        """Tests that allow max post batches in block
+        Handled max 100 batches post in block and handle for extra batch
+        """
+        block_list = module
+        for batchcount, _ in enumerate(block_list, start=1):
+            if batchcount == MAX_BATCH_IN_BLOCK:
+                print("Max 100 Batches are present in Block") 
+           
+    def test_rest_api_check_head_signature(module):
+        """Tests that head signature of each batch of the block 
+        should be not none 
+        """
+        block_list = module
+        head_signature = [block['batches'][0]['header_signature'] for block in block_list]
+        for i, _ in enumerate(block_list):
+            head_sig = json.dumps(head_signature[i]).encode('utf8')
+            assert head_signature[i] is not None, "Head signature is available for all batches in block"   
+    
+    def test_rest_api_check_family_version(module):
+        """Test batch transaction family version should be present 
+        for each transaction header
+        """
+        block_list = module
+        family_version = [block['batches'][0]['transactions'][0]['header']['family_version'] for block in block_list]
+        for i, _ in enumerate(block_list):
+            assert family_version[i] is not None, "family version present for all batches in block"
+    
+    def test_rest_api_check_family_name(module):
+        """Test batch transaction family name should be present
+        for each tansaction header 
+        """
+        block_list = module
+        family_name = [block['batches'][0]['transactions'][0]['header']['family_name'] for block in block_list]
+        for i, _ in enumerate(block_list):
+            assert family_name[i] == "intkey"
+        
+    def test_rest_api_check_input_output_content(module):
+        """Test batch input and output content should be same for
+        each batch and unique from other
+        """
+        block_list = module    
+        txn_input = [block['batches'][0]['transactions'][0]['header']['inputs'][0] for block in block_list]
+        txn_output = [block['batches'][0]['transactions'][0]['header']['outputs'][0] for block in block_list]
+        if(txn_input == txn_output):
+            return True
+    def test_rest_api_check_signer_public_key(module):
+        """Tests that signer public key is calculated for a block
+        properly
+        """
+        block_list = module    
+        signer_public_key = [block['batches'][0]['header']['signer_public_key'] for block in block_list]
+        assert signer_public_key is not None, "signer public key is available"
         
 class TestBlockGet(RestApiBaseTest):
     def test_api_get_block_id(self, setup):
@@ -248,7 +364,6 @@ class TestBlockGet(RestApiBaseTest):
         LOGGER.info("Starting test for blocks/{block_id}")
         expected_head = setup['expected_head']
         expected_block_id  = setup['block_ids'][0]
-        print(expected_block_id)
                          
         try:
             response = get_block_id(block_id=expected_block_id)

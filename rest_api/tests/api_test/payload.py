@@ -111,6 +111,39 @@ def create_intkey_transaction(verb, deps, count, signer):
 
     return transaction
 
+def create_invalid_intkey_transaction(verb, deps, count, signer):
+    words = random_word_list(count)
+    name=random.choice(words)    
+    payload = IntKeyPayload(
+        verb=verb,name=name,value=1)
+    
+    INVALID_INTKEY_ADDRESS_PREFIX = hashlib.sha512(
+    'invalid'.encode('utf-8')).hexdigest()[0:6]
+
+    addr = INVALID_INTKEY_ADDRESS_PREFIX + hashlib.sha512(
+        name.encode('utf-8')).hexdigest()[-64:]
+
+    header = TransactionHeader(
+        signer_public_key=signer.get_public_key().as_hex(),
+        family_name='intkey',
+        family_version='1.0',
+        inputs=[addr],
+        outputs=[addr],
+        dependencies=deps,
+        payload_sha512=payload.sha512(),
+        batcher_public_key=signer.get_public_key().as_hex())
+
+    header_bytes = header.SerializeToString()
+
+    signature = signer.sign(header_bytes)
+
+    transaction = Transaction(
+        header=header_bytes,
+        payload=payload.to_cbor(),
+        header_signature=signature)
+
+    return transaction
+
 def create_intkey_same_transaction(verb, deps, count, signer):
     name='a'   
     payload = IntKeyPayload(
@@ -171,7 +204,7 @@ def make_intkey_address(name):
 
 
 def random_word():
-    return ''.join([random.choice(string.ascii_letters) for _ in range(0, 100)])
+    return ''.join([random.choice(string.ascii_letters) for _ in range(0, 6)])
 
 
 def random_word_list(count):

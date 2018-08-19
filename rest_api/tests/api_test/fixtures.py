@@ -43,7 +43,8 @@ from utils import get_batches,  get_transactions, get_state_address, post_batch,
                   _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
                   _stop_settings_tp, _start_settings_tp
 
-from payload import get_signer, create_intkey_transaction , create_batch
+from payload import get_signer, create_intkey_transaction , create_batch,\
+                    create_invalid_intkey_transaction
 
                
 LOGGER = logging.getLogger(__name__)
@@ -81,21 +82,55 @@ def invalid_batch():
     """Setup method for creating invalid batches
     """
     signer = get_signer()
+    data = {}
+    expected_trxns  = {}
+    expected_batches = []
+    address = _get_client_address()
     
     LOGGER.info("Creating intkey transactions with set operations")
     
     txns = [
-        create_invalid_intkey_transaction("set", 'a', 0, [], signer),
+        create_invalid_intkey_transaction("set", [] , 50 , signer),
     ]
+    
+    for txn in txns:
+        dict = MessageToDict(
+                txn,
+                including_default_value_fields=True,
+                preserving_proto_field_name=True)
+                
+        expected_trxns['trxn_id'] = [dict['header_signature']]
 
     
     LOGGER.info("Creating batches for transactions 1trn/batch")
 
     batches = [create_batch([txn], signer) for txn in txns]
+    
+    for batch in batches:
+        dict = MessageToDict(
+                batch,
+                including_default_value_fields=True,
+                preserving_proto_field_name=True)
+
+        batch_id = dict['header_signature']
+        expected_batches.append(batch_id)
+    
+    data['expected_txns'] = expected_trxns['trxn_id'][::-1]
+    data['expected_batches'] = expected_batches[::-1]
+    data['address'] = address
 
     post_batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches]
     
-    return post_batch_list
+    for batch in post_batch_list:
+        try:
+            response = post_batch(batch)
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Rest Api is not reachable")
+            response = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(response['error']['title'])
+            LOGGER.info(response['error']['message'])
+    
+    return data
 
 
 @pytest.fixture(scope="function")

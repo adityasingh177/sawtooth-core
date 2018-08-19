@@ -374,13 +374,26 @@ def post_batch_statuses(batch):
         '/batch_statuses', data=batch, headers=headers)
     return response
 
-def get_batch_statuses(batch_id):
-    response = query_rest_api('/batch_statuses?id={}' % batch_id )
-    return response['data']  
-
+def get_batch_statuses(batch_ids=None, wait=None):
+    try:
+        batches = ",".join(batch_ids)
+    except:
+        batches = None
+    
+    if batches:
+        if wait:
+            response = query_rest_api('/batch_statuses?id={}&wait={}'.format(batches,wait))
+            return response
+        else:
+            response = query_rest_api('/batch_statuses?id=%s' % batches)
+            return response       
+    else:
+        response = query_rest_api('/batch_statuses')
+        return response
+    
 def get_state_limit(limit):
     response = query_rest_api('/state?limit=%s' % limit)
-    return response['data']
+    return response
 
 
 def get_reciepts(reciept_id):
@@ -427,3 +440,49 @@ def transaction_count():
         
         count += len(transaction_list['data'])
     return count 
+
+def _create_expected_link(expected_ids):
+    for id in expected_ids:
+        link = '{}/batch_statuses?id={},{}'.format(address, id)
+    return link
+
+def _get_batch_list(response):
+    batch_list = response['data']
+    
+    try:
+        next_position = response['paging']['next_position']
+    except:
+        next_position = None
+        
+    while(next_position):
+        response = get_batches(start=next_position)
+        data_list = response['data']
+        try:
+            next_position = response['paging']['next_position']
+        except:
+            next_position = None
+                      
+        batch_list += data_list
+            
+    return batch_list
+
+
+def _get_transaction_list(response):
+    transaction_list = response['data']
+    
+    try:
+        next_position = response['paging']['next_position']
+    except:
+        next_position = None
+        
+    while(next_position):
+        response = get_transactions(start=next_position)
+        data_list = response['data']
+        try:
+            next_position = response['paging']['next_position']
+        except:
+            next_position = None
+                      
+        transaction_list += data_list
+            
+    return transaction_list    

@@ -163,6 +163,40 @@ class TestStateList(RestApiBaseTest):
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
             assert data['error']['code'] == 54
+    
+    def test_api_get_paginated_state_list_limit(self, setup):   
+        """Tests GET /state is reachbale using paging parameters 
+        """
+        LOGGER.info("Starting test for state with paging parameters")
+        batch_ids   =  setup['batch_ids']
+        expected_head = setup['expected_head']
+        expected_id = batch_ids[0]
+        limit = 1
+                    
+        try:
+            response = get_state_list(limit=limit)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+            assert data['error']['code'] == 54
+    
+    def test_api_get_paginated_state_list_start(self, setup):   
+        """Tests GET /state is reachbale using paging parameters 
+        """
+        LOGGER.info("Starting test for state with paging parameters")
+        batch_ids   =  setup['batch_ids']
+        expected_head = setup['expected_head']
+        expected_id = batch_ids[0]
+        limit = 1
+                    
+        try:
+            response = get_state_list(limit=limit)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+            assert data['error']['code'] == 54
       
     def test_api_get_state_list_bad_paging(self, setup):   
         """Tests GET /state is reachbale using bad paging parameters 
@@ -210,38 +244,6 @@ class TestStateList(RestApiBaseTest):
                      
         try:  
             response = get_state_list(limit=limit)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 53
-      
-    def test_api_get_state_list_count(self, setup):   
-        """Tests that GET /state is unreachable with bad limit parameter 
-        """
-        LOGGER.info("Starting test for state with bad limit parameter")
-        expected_head = setup['expected_head']
-        count = 1
-                     
-        try:  
-            response = get_state_list()
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-          
-    
-    def test_api_get_state_list_no_count(self, setup):   
-        """Tests that GET /state is unreachable with bad limit parameter 
-        """
-        LOGGER.info("Starting test for state with bad limit parameter")
-        batch_ids =  setup['batch_ids']
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        count = 0
-                     
-        try:  
-            response = get_state_list()
         except urllib.error.HTTPError as error:
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
@@ -406,21 +408,6 @@ class TestStateList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             LOGGER.info("state data address with altered bytes not processed ")
             
-    def test_api_get_batch_param_link_val(self, setup):
-        """Tests/ validate the batch parameters with batches, head, start and limit
-        """
-        try:
-            batch_list = get_batches()
-            for link in batch_list:
-                if(link == 'link'):
-                    assert 'head' in batch_list['link']
-                    assert 'start' in batch_list['link']  
-                    assert 'limit' in batch_list['link'] 
-                    assert 'batches' in batch_list['link']  
-        except urllib.error.HTTPError as error:
-            assert response.code == 400
-            LOGGER.info("Link is not proper for batch and parameters are missing")
-            
             
     def test_api_get_state_link_val(self, setup):
         """Tests/ validate the state parameters with state, head, start and limit
@@ -444,7 +431,18 @@ class TestStateList(RestApiBaseTest):
         assert 'link' in response
         assert 'data' in response
         assert 'paging' in response
-        assert 'head' in response   
+        assert 'head' in response  
+    
+    def test_api_get_each_state_head_length(self, setup):
+        """Tests the each state head length should be 128 hex character long 
+        """   
+        try:   
+            for _ in get_state_list()['data']:
+                expected_head = setup['expected_head']
+                head_len = len(expected_head)
+        except urllib.error.HTTPError as error:
+            LOGGER.info("State Head length is not 128 hex character long")
+        assert head_len == head  
         
             
 class TestStateGet(RestApiBaseTest):

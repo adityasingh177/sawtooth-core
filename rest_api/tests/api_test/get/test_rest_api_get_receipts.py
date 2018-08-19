@@ -54,7 +54,7 @@ class TestReceiptsList(RestApiBaseTest):
             assert response['error']['code'] == INVALID_RESOURCE_ID
             assert response['error']['title'] == 'Invalid Resource Id'
                  
-    def test_api_get_reciepts_multiple_transactions(self,setup_batch_multiple_transcation):
+    def test_api_get_reciepts_multiple_transactions(self, setup_batch_multiple_transacation):
         """Test the get reciepts for multiple transaction.
         """
         transaction_list=""
@@ -119,7 +119,7 @@ class TestReceiptsList(RestApiBaseTest):
            assert response['error']['code'] == RECEIPT_BODY_INVALID
            assert response['error']['title'] == 'Bad Receipts Request'
           
-    def test_api_post_reciepts_multiple_transactions(self,setup_batch_multiple_transcation):
+    def test_api_post_reciepts_multiple_transactions(self, setup_batch_multiple_transcation):
        """Test the post reciepts response for multiple transaction.
        """
      
@@ -135,4 +135,3 @@ class TestReceiptsList(RestApiBaseTest):
            
        for res,txn in zip(response['data'], transaction_list):
            assert str(res['id']) == txn
-  

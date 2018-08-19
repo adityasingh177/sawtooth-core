@@ -27,6 +27,10 @@ class RestApiBaseTest(object):
     """Base class for Rest Api tests that simplifies making assertions
        for the test cases
     """ 
+    def assert_status(self, response, status):
+        for data in response['data']:
+            assert data['status'] == status
+
     def assert_equal(self, response, data):
         assert response == data
     
@@ -145,19 +149,17 @@ class RestApiBaseTest(object):
         assert 'transaction_ids' in response['header']
         assert response['header']['transaction_ids'][0] == expected
             
-    def assert_valid_paging(self, response, next_link=None, previous_link=None):
+    def assert_valid_paging(self, response, expected_link):
         """Asserts a response has a paging dict with the 
            expected values.
         """
         assert 'paging' in response
         paging = response['paging']
 
-        if 'next' in paging:
-             assert 'next_position' in paging
-
-        if next_link is not None:
+        if 'next' in paging and expected_link is not None:
             assert 'next' in paging
-            self.assert_valid_url(paging['next'], next_link)
+            assert 'next_position' in paging
+            self.assert_valid_url(response['link'], expected_link)
         else:
             assert 'next' not in paging
             assert paging['start'] == None
@@ -178,16 +180,19 @@ class RestApiBaseTest(object):
         assert 'message' in error
         assert isinstance(error['message'], str)
     
-    def assert_valid_data(self, response, expected_length):
-        """Asserts a response has a data list of dicts of an 
-           expected length.
+    def assert_valid_data(self, response):
+        """Asserts a response has a data list of dicts 
         """
         assert 'data' in response
         data = response['data']
         assert isinstance(data, list)
-        assert expected_length == len(data)
         self.assert_items(data, dict)
     
+    def assert_valid_data_list(self, response, expected_length):
+        """Asserts a response has a data list of dicts of an 
+           expected length.
+        """
+        assert len(response) == expected_length
                         
     def assert_check_block_seq(self, blocks, expected_batches, expected_txns):
         """Asserts block is constructed properly after submitting batches
@@ -222,7 +227,7 @@ class RestApiBaseTest(object):
         
         if not isinstance(expected_txns, list):
                 expected_txns = [expected_txns]
-           
+                   
         for batch, expected_batch , expected_txn in zip(batches, expected_batches , expected_txns):
             assert expected_batch == batch['header_signature']
             assert isinstance(batch['header'], dict)
