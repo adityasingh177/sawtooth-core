@@ -359,7 +359,7 @@ class TesttransactionGet(RestApiBaseTest):
         self.assert_valid_link(response, expected_link)  
         assert bool(response['data']) == True   
           
-    def test_api_get_bad_transaction_bad_id(self, setup):
+    def test_api_get_transaction_bad_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is not reachable
            with bad id
         """

@@ -267,3 +267,55 @@ class RestApiBaseTest(object):
         """Asserts state is updated properly
         """
         pass
+    
+    def wait_until_status(url, status_code=200, tries=5):
+        """Pause the program until the given url returns the required status.
+    
+        Args:
+            url (str): The url to query.
+            status_code (int, optional): The required status code. Defaults to 200.
+            tries (int, optional): The number of attempts to request the url for
+                the given status. Defaults to 5.
+        Raises:
+            AssertionError: If the status is not recieved in the given number of
+                tries.
+        """
+        attempts = tries
+        while attempts > 0:
+            try:
+                response = urlopen(url)
+                if response.getcode() == status_code:
+                    return
+    
+            except HTTPError as err:
+                if err.code == status_code:
+                    return
+    
+                LOGGER.debug('failed to read url: %s', str(err))
+            except URLError as err:
+                LOGGER.debug('failed to read url: %s', str(err))
+    
+            sleep_time = (tries - attempts + 1) * 2
+            LOGGER.debug('Retrying in %s secs', sleep_time)
+            time.sleep(sleep_time)
+    
+            attempts -= 1
+
+        raise AssertionError(
+            "{} is not available within {} attempts".format(url, tries))
+
+    def wait_for_rest_apis(endpoints, tries=5):
+        """Pause the program until all the given REST API endpoints are available.
+    
+        Args:
+            endpoints (list of str): A list of host:port strings.
+            tries (int, optional): The number of attempts to request the url for
+                availability.
+        """
+        for endpoint in endpoints:
+            http = 'http://'
+            url = endpoint if endpoint.startswith(http) else http + endpoint
+            wait_until_status(
+                '{}/blocks'.format(url),
+                status_code=200,
+                tries=tries)
