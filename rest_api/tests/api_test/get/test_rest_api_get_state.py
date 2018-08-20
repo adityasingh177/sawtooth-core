@@ -44,6 +44,7 @@ VALIDATOR_NOT_READY  = 15
 STATE_ADDRESS_LENGTH = 70
 STATE_NOT_FOUND = 75
 INVALID_STATE_ADDRESS = 62
+HEAD_LENGTH = 128
      
      
 class TestStateList(RestApiBaseTest):
@@ -62,7 +63,7 @@ class TestStateList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
             
-        batches = response['data'][:-1]  
+        state_list = response['data'][:-1]  
                       
         self.assert_valid_head(response , expected_head)
                               
@@ -70,14 +71,13 @@ class TestStateList(RestApiBaseTest):
         """Tests that transactions are submitted and committed for
         each block that are created by submitting invalid intkey batches
         """    
-        batch= invalid_batch[0]
+        batches = invalid_batch['expected_batches']
         try:
-            response = post_batch(batch)
+            response = get_state_list()
         except urllib.error.HTTPError as error:
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 34
             
     def test_api_get_state_list_head(self, setup):   
         """Tests that GET /state is reachable with head parameter 
@@ -106,18 +106,18 @@ class TestStateList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
             data = json.loads(error.fp.read().decode('utf-8'))
-            if data:
-                LOGGER.info(data['error']['title'])
-                LOGGER.info(data['error']['message'])
-                assert data['error']['code'] == 60
-                assert data['error']['title'] == 'Invalid Resource Id'
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+        
+        self.assert_valid_error(data , INVALID_RESOURCE_ID)
+
       
     def test_api_get_state_list_address(self, setup):   
         """Tests that GET /state is reachable with address parameter 
         """
         LOGGER.info("Starting test for state with address parameter")
         expected_head = setup['expected_head']
-        address = setup['address'][0]
+        address = setup['state_address'][0]
                   
         try:
             response = get_state_list(address=address)
@@ -140,11 +140,10 @@ class TestStateList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
             data = json.loads(error.fp.read().decode('utf-8'))
-            if data:
-                LOGGER.info(data['error']['title'])
-                LOGGER.info(data['error']['message'])
-                assert data['error']['code'] == 60
-                assert data['error']['title'] == 'Invalid Resource Id'
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
+        
+        self.assert_valid_error(data , INVALID_RESOURCE_ID)
                                            
     def test_api_get_paginated_state_list(self, setup):   
         """Tests GET /state is reachbale using paging parameters 
@@ -162,7 +161,8 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 54
+        
+        self.assert_valid_error(data , INVALID_PAGING_QUERY)
     
     def test_api_get_paginated_state_list_limit(self, setup):   
         """Tests GET /state is reachbale using paging parameters 
@@ -179,7 +179,7 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 54
+        
     
     def test_api_get_paginated_state_list_start(self, setup):   
         """Tests GET /state is reachbale using paging parameters 
@@ -196,7 +196,7 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 54
+        
       
     def test_api_get_state_list_bad_paging(self, setup):   
         """Tests GET /state is reachbale using bad paging parameters 
@@ -214,7 +214,9 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 53
+        
+        self.assert_valid_error(data , INVALID_COUNT_QUERY)
+
                  
     def test_api_get_state_list_invalid_start(self, setup):   
         """Tests that GET /state is unreachable with invalid start parameter 
@@ -231,7 +233,9 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 54
+        
+        self.assert_valid_error(data , INVALID_PAGING_QUERY)
+
           
     def test_api_get_state_list_invalid_limit(self, setup):   
         """Tests that GET /state is unreachable with bad limit parameter 
@@ -248,7 +252,8 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
-            assert data['error']['code'] == 53
+        
+        self.assert_valid_error(data , INVALID_COUNT_QUERY)
                      
     def test_api_get_state_list_reversed(self, setup):   
         """verifies that GET /state is unreachable with bad head parameter 
@@ -442,16 +447,22 @@ class TestStateList(RestApiBaseTest):
                 head_len = len(expected_head)
         except urllib.error.HTTPError as error:
             LOGGER.info("State Head length is not 128 hex character long")
-        assert head_len == head  
+        assert head_len == HEAD_LENGTH  
         
             
 class TestStateGet(RestApiBaseTest):
-    def test_api_get_state_address(self):
+    def test_api_get_state_address(self, setup):
         """Tests/ validate the state key parameters with data, head, link and paging               
         """
-        pass
+        address = setup['state_address'][0]
+        try:
+            response = get_state_address(address=address)
+        except urllib.error.HTTPError as error:
+            data = json.loads(error.fp.read().decode('utf-8'))
+            LOGGER.info(data['error']['title'])
+            LOGGER.info(data['error']['message'])
    
-    def test_api_get_bad_address(self):
+    def test_api_get_bad_address(self, setup):
         """Tests /state/{bad_state_address}                
         """
         try:

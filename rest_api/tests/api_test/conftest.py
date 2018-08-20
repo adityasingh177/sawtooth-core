@@ -229,7 +229,7 @@ def setup(request):
     expected_head = block_ids[0]
     data['expected_head'] = expected_head
     state_addresses = [state['address'] for state in get_state_list()['data']]
-    data['address'] = state_addresses
+    data['state_address'] = state_addresses
     state_head_list = [get_state_address(address)['head'] for address in state_addresses]
     data['state_head'] = state_head_list
     data['address'] = address
