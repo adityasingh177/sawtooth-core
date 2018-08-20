@@ -588,26 +588,7 @@ class TestBatchStatusesList(RestApiBaseTest):
         address = setup['address']
         status = "COMMITTED"
 
-        expected_link = '{}/batch_statuses?id={}&wait=300'.format(address, expected_batches[0], WAIT)
-                                         
-        try:   
-            response = get_batch_statuses([expected_batches[0]],300)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-                                              
-        self.assert_status(response,status)
-        self.assert_valid_link(response, expected_link)
-    
-    def test_api_get_batch_statuses_default_wait_id(self,setup):
-        signer_key = setup['signer_key']
-        expected_head = setup['expected_head']
-        expected_batches = setup['expected_batches']
-        address = setup['address']
-        status = "COMMITTED"
-
-        expected_link = '{}/batch_statuses?id={}&wait=300'.format(address, expected_batches[0], WAIT)
+        expected_link = '{}/batch_statuses?id={}&wait=300'.format(address, expected_batches[0])
                                          
         try:   
             response = get_batch_statuses([expected_batches[0]],300)

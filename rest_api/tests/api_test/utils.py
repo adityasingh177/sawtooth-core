@@ -381,7 +381,10 @@ def get_batch_statuses(batch_ids=None, wait=None):
         batches = None
     
     if batches:
-        if wait:
+        if wait == 'default':
+            response = query_rest_api('/batch_statuses?wait&id={}'.format(batches))
+            return response
+        elif wait:
             response = query_rest_api('/batch_statuses?id={}&wait={}'.format(batches,wait))
             return response
         else:

@@ -19,7 +19,7 @@ import json
 import urllib.request
 import urllib.error
    
-from utils import get_blocks, get_block_id
+from utils import get_blocks, get_block_id, get_batches
  
 from base import RestApiBaseTest
  
@@ -39,6 +39,8 @@ INVALID_PAGING_QUERY = 54
 INVALID_COUNT_QUERY  = 53
 VALIDATOR_NOT_READY  = 15
 BLOCK_NOT_FOUND = 70
+HEAD_LENGTH = 128
+MAX_BATCH_IN_BLOCK = 100
  
    
 LOGGER = logging.getLogger(__name__)
@@ -288,7 +290,7 @@ class TestBlockList(RestApiBaseTest):
                 head_len = len(expected_head)
         except urllib.error.HTTPError as error:
             LOGGER.info("Batch id length is not 128 hex character long")
-        assert head_len == head     
+        assert head_len == HEAD_LENGTH     
         
     def test_api_get_first_block_id_length(self, setup):
         """Tests the first block id length should be 128 hex character long 
@@ -301,59 +303,59 @@ class TestBlockList(RestApiBaseTest):
                     head_len = len(expected_head)
         except urllib.error.HTTPError as error:
             LOGGER.info("Block id length is not 128 hex character long")
-        assert head_len == head
+        assert head_len == HEAD_LENGTH
     
-    def test_rest_api_check_post_max_batches(module):
+    def test_rest_api_check_post_max_batches(self, setup):
         """Tests that allow max post batches in block
         Handled max 100 batches post in block and handle for extra batch
         """
-        block_list = module
+        block_list = get_blocks()['data']
         for batchcount, _ in enumerate(block_list, start=1):
             if batchcount == MAX_BATCH_IN_BLOCK:
                 print("Max 100 Batches are present in Block") 
            
-    def test_rest_api_check_head_signature(module):
+    def test_rest_api_check_head_signature(self, setup):
         """Tests that head signature of each batch of the block 
         should be not none 
         """
-        block_list = module
+        block_list = get_blocks()['data']
         head_signature = [block['batches'][0]['header_signature'] for block in block_list]
         for i, _ in enumerate(block_list):
             head_sig = json.dumps(head_signature[i]).encode('utf8')
             assert head_signature[i] is not None, "Head signature is available for all batches in block"   
     
-    def test_rest_api_check_family_version(module):
+    def test_rest_api_check_family_version(self, setup):
         """Test batch transaction family version should be present 
         for each transaction header
         """
-        block_list = module
+        block_list = get_blocks()['data']
         family_version = [block['batches'][0]['transactions'][0]['header']['family_version'] for block in block_list]
         for i, _ in enumerate(block_list):
             assert family_version[i] is not None, "family version present for all batches in block"
     
-    def test_rest_api_check_family_name(module):
+    def test_rest_api_check_family_name(self, setup):
         """Test batch transaction family name should be present
         for each tansaction header 
         """
-        block_list = module
+        block_list = get_blocks()['data']
         family_name = [block['batches'][0]['transactions'][0]['header']['family_name'] for block in block_list]
         for i, _ in enumerate(block_list):
             assert family_name[i] == "intkey"
         
-    def test_rest_api_check_input_output_content(module):
+    def test_rest_api_check_input_output_content(self,setup):
         """Test batch input and output content should be same for
         each batch and unique from other
         """
-        block_list = module    
+        block_list = get_blocks()['data']  
         txn_input = [block['batches'][0]['transactions'][0]['header']['inputs'][0] for block in block_list]
         txn_output = [block['batches'][0]['transactions'][0]['header']['outputs'][0] for block in block_list]
         if(txn_input == txn_output):
             return True
-    def test_rest_api_check_signer_public_key(module):
+    def test_rest_api_check_signer_public_key(self, setup):
         """Tests that signer public key is calculated for a block
         properly
         """
-        block_list = module    
+        block_list = get_blocks()['data']   
         signer_public_key = [block['batches'][0]['header']['signer_public_key'] for block in block_list]
         assert signer_public_key is not None, "signer public key is available"
         
