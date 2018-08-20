@@ -134,7 +134,7 @@ def invalid_batch():
 
 
 @pytest.fixture(scope="function")
-def setup_batch_multiple_transcation():
+def setup_batch_multiple_transaction():
     data = {}
     signer = get_signer()
     transactions= []

@@ -22,7 +22,7 @@ import urllib.error
 from conftest import setup
 from utils import get_state_list, get_reciepts, post_receipts
 from base import RestApiBaseTest
-from fixtures import setup_batch_multiple_transcation
+from fixtures import setup_batch_multiple_transaction
   
   
 LOGGER = logging.getLogger(__name__)
@@ -54,11 +54,11 @@ class TestReceiptsList(RestApiBaseTest):
             assert response['error']['code'] == INVALID_RESOURCE_ID
             assert response['error']['title'] == 'Invalid Resource Id'
                  
-    def test_api_get_reciepts_multiple_transactions(self, setup_batch_multiple_transacation):
+    def test_api_get_reciepts_multiple_transactions(self, setup_batch_multiple_transaction):
         """Test the get reciepts for multiple transaction.
         """
         transaction_list=""
-        li=setup_batch_multiple_transcation
+        li=setup_batch_multiple_transaction
         for txn in li:
             transaction_list=txn+","+transaction_list
          
@@ -119,11 +119,11 @@ class TestReceiptsList(RestApiBaseTest):
            assert response['error']['code'] == RECEIPT_BODY_INVALID
            assert response['error']['title'] == 'Bad Receipts Request'
           
-    def test_api_post_reciepts_multiple_transactions(self, setup_batch_multiple_transcation):
+    def test_api_post_reciepts_multiple_transactions(self, setup_batch_multiple_transaction):
        """Test the post reciepts response for multiple transaction.
        """
      
-       transaction_list=setup_batch_multiple_transcation
+       transaction_list=setup_batch_multiple_transaction
        
        json_list=json.dumps(transaction_list).encode() 
 
