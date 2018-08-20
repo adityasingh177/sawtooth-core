@@ -19,7 +19,7 @@ import json
 import urllib.request
 import urllib.error
    
-from utils import get_blocks, get_block_id, get_batches
+from utils import get_blocks, get_block_id, get_batches, get_transactions
  
 from base import RestApiBaseTest
  
@@ -333,15 +333,6 @@ class TestBlockList(RestApiBaseTest):
         family_version = [block['batches'][0]['transactions'][0]['header']['family_version'] for block in block_list]
         for i, _ in enumerate(block_list):
             assert family_version[i] is not None, "family version present for all batches in block"
-    
-    def test_rest_api_check_family_name(self, setup):
-        """Test batch transaction family name should be present
-        for each tansaction header 
-        """
-        family_name = setup['family_name']
-        block_list = get_blocks()['data']
-        for i, _ in enumerate(block_list):
-            assert family_name[i] == family_name
         
     def test_rest_api_check_input_output_content(self,setup):
         """Test batch input and output content should be same for
@@ -370,6 +361,22 @@ class TestBlockList(RestApiBaseTest):
                 count = count+1
         except urllib.error.HTTPError as error:
             LOGGER.info("BLock count not able to collect")
+    
+    def test_rest_api_blk_content_head_signature(self, setup):
+        """Tests that head signature of each batch of the block
+        should be not none
+        """
+        try:
+            block_list = get_blocks()
+            for batch in block_list['data']:
+                batch_list = get_batches()
+                for block in batch_list:
+                    transaction_list = get_transactions()
+                    for trans in transaction_list['data']:
+                        head_signature = trans['header_signature']
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Header signature is missing in some of the batches")    
+        assert head_signature is not None, "Head signature is available for all batches in block"
         
 class TestBlockGet(RestApiBaseTest):
     def test_api_get_block_id(self, setup):
