@@ -43,6 +43,7 @@ INVALID_PAGING_QUERY = 54
 INVALID_COUNT_QUERY  = 53
 VALIDATOR_NOT_READY  = 15
 TRANSACTION_NOT_FOUND = 72
+HEAD_LENGTH = 128
   
 
 class TestTransactionList(RestApiBaseTest):
@@ -148,9 +149,7 @@ class TestTransactionList(RestApiBaseTest):
         txns = response['data'][:-1]
           
         self.assert_check_transaction_seq(txns, expected_txns, 
-                                          payload, signer_key)
-        self.assert_valid_paging(response)
- 
+                                          payload, signer_key) 
                  
     def test_api_get_transaction_list_bad_id(self, setup):   
         """Tests that GET /transactions is unreachable with bad id parameter 
@@ -196,7 +195,6 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
-        self.assert_valid_paging(response)               
                 
     def test_api_get_paginated_transaction_list(self, setup):   
         """Tests GET /transactions is reachbale using paging parameters 
@@ -325,7 +323,7 @@ class TestTransactionList(RestApiBaseTest):
                 head_len = len(transaction_ids)
         except urllib.error.HTTPError as error:
             LOGGER.info("Transaction id length is not 128 hex character long")
-        assert head_len == head
+        assert head_len == HEAD_LENGTH
     
 class TesttransactionGet(RestApiBaseTest):
     def test_api_get_transaction_id(self, setup):

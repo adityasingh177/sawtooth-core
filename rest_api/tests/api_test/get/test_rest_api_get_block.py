@@ -41,6 +41,7 @@ VALIDATOR_NOT_READY  = 15
 BLOCK_NOT_FOUND = 70
 HEAD_LENGTH = 128
 MAX_BATCH_IN_BLOCK = 100
+FAMILY_NAME = 'xo'
  
    
 LOGGER = logging.getLogger(__name__)
@@ -337,10 +338,10 @@ class TestBlockList(RestApiBaseTest):
         """Test batch transaction family name should be present
         for each tansaction header 
         """
+        family_name = setup['family_name']
         block_list = get_blocks()['data']
-        family_name = [block['batches'][0]['transactions'][0]['header']['family_name'] for block in block_list]
         for i, _ in enumerate(block_list):
-            assert family_name[i] == "intkey"
+            assert family_name[i] == family_name
         
     def test_rest_api_check_input_output_content(self,setup):
         """Test batch input and output content should be same for
