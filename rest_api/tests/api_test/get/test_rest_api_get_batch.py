@@ -373,6 +373,17 @@ class TestBatchList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             assert response.code == 400
             LOGGER.info("Link is not proper for batch and parameters are missing")
+    
+    def test_rest_api_check_batches_count(self, setup):
+        """Tests batches count from batch list 
+        """
+        count =0
+        try:
+            batch_list = get_batches()
+            for batch in enumerate(batch_list['data']):
+                count = count+1
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Batch count not able to collect")
        
 class TestBatchGet(RestApiBaseTest):
     def test_api_get_batch_id(self, setup):

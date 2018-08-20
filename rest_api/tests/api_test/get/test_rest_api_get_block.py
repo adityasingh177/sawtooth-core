@@ -359,6 +359,17 @@ class TestBlockList(RestApiBaseTest):
         block_list = get_blocks()['data']   
         signer_public_key = [block['batches'][0]['header']['signer_public_key'] for block in block_list]
         assert signer_public_key is not None, "signer public key is available"
+    
+    def test_rest_api_check_blocks_count(self, setup):
+        """Tests blocks count from block list 
+        """
+        count =0
+        try:
+            block_list = get_blocks()
+            for block in enumerate(block_list['data']):
+                count = count+1
+        except urllib.error.HTTPError as error:
+            LOGGER.info("BLock count not able to collect")
         
 class TestBlockGet(RestApiBaseTest):
     def test_api_get_block_id(self, setup):

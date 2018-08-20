@@ -20,6 +20,8 @@ import urllib.request
 import urllib.error
    
 from utils import get_state_list, get_state_address
+from fixtures import invalid_batch
+
   
 from base import RestApiBaseTest
    
@@ -62,7 +64,7 @@ class TestStateList(RestApiBaseTest):
             response = get_state_list()
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
-            
+        
         state_list = response['data'][:-1]  
                       
         self.assert_valid_head(response , expected_head)
@@ -447,7 +449,18 @@ class TestStateList(RestApiBaseTest):
                 head_len = len(expected_head)
         except urllib.error.HTTPError as error:
             LOGGER.info("State Head length is not 128 hex character long")
-        assert head_len == HEAD_LENGTH  
+        assert head_len == HEAD_LENGTH 
+    
+    def test_rest_api_check_state_count(self, setup):
+        """Tests state count from state list 
+        """
+        count = 0
+        try:
+            state_list = get_state_list()['data']
+            for batch in enumerate(state_list):
+                count = count+1
+        except urllib.error.HTTPError as error:
+            LOGGER.info("State count not able to collect") 
         
             
 class TestStateGet(RestApiBaseTest):

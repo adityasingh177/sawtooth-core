@@ -325,6 +325,17 @@ class TestTransactionList(RestApiBaseTest):
             LOGGER.info("Transaction id length is not 128 hex character long")
         assert head_len == HEAD_LENGTH
     
+    def test_rest_api_check_transactions_count(self, setup):
+        """Tests transaction count from transaction list 
+        """
+        count =0
+        try:
+            batch_list = get_transactions()
+            for batch in enumerate(batch_list['data']):
+                count = count+1
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Transaction count not able to collect")
+    
 class TesttransactionGet(RestApiBaseTest):
     def test_api_get_transaction_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 
