@@ -4,8 +4,8 @@ import sys
 nbytes = 4096
 hostname = '10.223.155.130'
 port = 22
-username = 'shourya' 
-password = 'shourya123'
+username = '' 
+password = ''
 command = 'ps aux | grep sawtooth'
 
 try:

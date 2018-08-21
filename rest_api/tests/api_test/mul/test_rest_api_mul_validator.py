@@ -85,7 +85,7 @@ class TestMultiple(RestApiBaseTest):
 
     def test_rest_api_mul_val_Node(self):
         """Tests that node are brought up/down in a network
-           checks are performed on the respective nodes 
+           and checks are performed on the respective nodes 
         """
         node_list = _get_node_list()
         chains = _get_node_chain(node_list)
@@ -93,8 +93,8 @@ class TestMultiple(RestApiBaseTest):
         nbytes = 4096
         hostname = '10.223.155.130'
         port = 22
-        username = 'shourya' 
-        password = 'shourya123'
+        username = '' 
+        password = ''
         command = 'ps aux | grep sawtooth'
         
         try:
