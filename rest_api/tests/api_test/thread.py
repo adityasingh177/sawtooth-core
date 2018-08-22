@@ -25,11 +25,26 @@ logging.basicConfig(level=logging.INFO,
 
 
 class Workload_thread(threading.Thread):
+    def __init__(self):
+        self._stopevent = threading.Event()
+        
     def run(self):
         logging.debug('running')
         return
+    def do_workload(self):
+        pass
 
 class SSH_thread(threading.Thread):
     def run(self):
         logging.debug('running')
         return
+    def do_ssh(self):
+        pass
+
+class Consensus_Thread(threading.Thread):
+    def run(self):
+        logging.debug('running')
+        return
+    
+    def check_for_consensus(self):
+        pass

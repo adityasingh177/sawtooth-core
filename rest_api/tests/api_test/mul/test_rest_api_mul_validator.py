@@ -97,7 +97,11 @@ class TestMultiple(RestApiBaseTest):
         """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
         """
-        node_list = ['10.223.155.134' , '10.223.155.25']
+        node_list = _get_node_list()
+        leaf_nodes = ['10.223.155.134']
+        
+        chains = _get_node_chain()
+        check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS)
         
         threads = []
         
@@ -106,7 +110,7 @@ class TestMultiple(RestApiBaseTest):
          
         workload_thread = threading.Thread(target=workload.do_workload())
          
-        for node in node_list:
+        for node in leaf_nodes:
             t= threading.Thread(target=ssh.do_ssh(node, PORT, USERNAME, PASSWORD))
             threads.append(t)    
          
@@ -115,11 +119,5 @@ class TestMultiple(RestApiBaseTest):
             
         workload_thread.start()
         
-           
-        
-        
-
-        
-        
-        
-        
+        chains = _get_node_chain()
+        check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS)
