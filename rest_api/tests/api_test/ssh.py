@@ -23,10 +23,10 @@ class SSH():
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(hostname,port,username,password)
         except paramiko.AuthenticationException:
-            print("Failed to connect to {} due to wrong username/password").format(hostname)
+            print("Failed to connect to {} due to wrong username/password".format(hostname))
             exit(1)
         except:
-            print("Failed to connect to {}").format(hostname)
+            print("Failed to connect to {}".format(hostname))
             exit(2)
                 
         command = 'ps aux | grep sawtooth'

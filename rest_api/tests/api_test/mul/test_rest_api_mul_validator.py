@@ -28,6 +28,7 @@ import paramiko
 import sys
 import threading
 import os
+import signal
 
 
 from google.protobuf.json_format import MessageToDict
@@ -39,6 +40,8 @@ from utils import  _get_client_address, _send_cmd, _get_node_list, \
             
 from workload import Workload
 from ssh import SSH
+from thread import Workload_thread, SSH_thread, Consensus_Thread,\
+                   wait_for_event, wait_for_event_timeout
 
 
 
@@ -96,28 +99,31 @@ class TestMultiple(RestApiBaseTest):
     def test_rest_api_mul_val_Node(self):
         """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
-        """
-        node_list = _get_node_list()
-        leaf_nodes = ['10.223.155.134']
-        
-        chains = _get_node_chain()
-        check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS)
-        
+        """        
+        leaf_nodes = ['10.223.155.134', '10.223.155.25']
         threads = []
+        event = threading.Event()
         
-        workload = Workload()
-        ssh = SSH()
-         
-        workload_thread = threading.Thread(target=workload.do_workload())
-         
-        for node in leaf_nodes:
-            t= threading.Thread(target=ssh.do_ssh(node, PORT, USERNAME, PASSWORD))
-            threads.append(t)    
-         
-        for t in threads:
-            t.start()
-            
+        workload_thread = Workload_thread()
+        workload_thread.setName('workload_thread')
         workload_thread.start()
         
-        chains = _get_node_chain()
-        check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS)
+        consensus_thread = Consensus_Thread(leaf_nodes)
+        consensus_thread.setName('consensus_thread')
+        consensus_thread.setDaemon(True)
+        consensus_thread.start()
+         
+        for node in leaf_nodes:
+            ssh_thread = SSH_thread(node,PORT,USERNAME,PASSWORD)
+            ssh_thread.setName('ssh_thread')
+            threads.append(ssh_thread)    
+         
+        for thread in threads:
+            thread.start()
+            thread.join()
+        
+        consensus_thread.join() 
+        workload_thread.join()
+        
+       
+        
