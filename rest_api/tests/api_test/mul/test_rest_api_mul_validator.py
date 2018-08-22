@@ -26,20 +26,30 @@ import requests
 import time
 import paramiko
 import sys
+import threading
+import os
 
 
 from google.protobuf.json_format import MessageToDict
 
+from base import RestApiBaseTest
 from payload import get_signer, create_intkey_transaction , create_batch
 from utils import  _get_client_address, _send_cmd, _get_node_list, \
-                   _get_node_chain, check_for_consensus, _stop_validator
+                   _get_node_chain, check_for_consensus, _stop_validator\
+            
+from workload import Workload
+from ssh import SSH
 
-from base import RestApiBaseTest
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+
+logging.basicConfig(level=logging.INFO,
+                    format='[%(levelname)s] (%(threadName)-10s) %(message)s',
+                    )
   
 WAIT_TIME = 10
+PORT =22
+USERNAME = 'test'
+PASSWORD = 'aditya9971'
   
 BLOCK_TO_CHECK_CONSENSUS = 1
 
@@ -63,7 +73,7 @@ class TestMultiple(RestApiBaseTest):
         txns = [
             create_intkey_transaction("set", [] , 50 , signer),
             create_intkey_transaction("set", [] , 50 , signer),
-        ]
+       ]
     
         for txn in txns:
             dict = MessageToDict(
@@ -84,35 +94,28 @@ class TestMultiple(RestApiBaseTest):
         check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS)
 
     def test_rest_api_mul_val_Node(self):
-        """Tests that node are brought up/down in a network
+        """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
         """
-        node_list = _get_node_list()
-        chains = _get_node_chain(node_list)
+        node_list = ['10.223.155.134' , '10.223.155.25']
         
-        nbytes = 4096
-        hostname = '10.223.155.130'
-        port = 22
-        username = '' 
-        password = ''
-        command = 'ps aux | grep sawtooth'
+        threads = []
         
-        try:
-            ssh=paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname,port,username,password)
-        except paramiko.AuthenticationException:
-            print("Failed to connect to {} due to wrong username/password").format(hostname)
-            exit(1)
-        except:
-            print("Failed to connect to {}").format(hostname)
-            exit(2)
-                
-        command2 = 'sudo systemctl status sawtooth-rest-api.service'
-        stdin,stdout,stderr=ssh.exec_command(command2)
-        outlines=stdout.readlines()
-        resp=''.join(outlines)
-        print(resp)
+        workload = Workload()
+        ssh = SSH()
+         
+        workload_thread = threading.Thread(target=workload.do_workload())
+         
+        for node in node_list:
+            t= threading.Thread(target=ssh.do_ssh(node, PORT, USERNAME, PASSWORD))
+            threads.append(t)    
+         
+        for t in threads:
+            t.start()
+            
+        workload_thread.start()
+        
+           
         
         
 

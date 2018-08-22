@@ -13,5 +13,17 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-class RestApiError(Exception):
-    pass
+import subprocess
+import logging
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
+
+class Workload():
+    def do_workload(self):
+        LOGGER.info('Starting Intkey Workload')
+        cmd = "intkey workload --url 10.223.155.43:8008 --rate 1 -d 1"
+        subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
+    
+    def stop(self):
+        pass

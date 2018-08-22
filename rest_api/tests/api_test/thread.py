@@ -13,5 +13,23 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-class RestApiError(Exception):
-    pass
+import threading
+import os
+
+from workload import Workload
+from ssh import SSH
+
+logging.basicConfig(level=logging.INFO,
+                    format='(%(threadName)-10s) %(message)s',
+                    )
+
+
+class Workload_thread(threading.Thread):
+    def run(self):
+        logging.debug('running')
+        return
+
+class SSH_thread(threading.Thread):
+    def run(self):
+        logging.debug('running')
+        return

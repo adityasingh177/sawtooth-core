@@ -32,6 +32,7 @@ import os
 import time
 import socket
 import netifaces
+
     
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -434,4 +435,4 @@ def _get_transaction_list(response):
                       
         transaction_list += data_list
             
-    return transaction_list    
+    return transaction_list
