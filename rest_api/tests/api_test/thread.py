@@ -31,14 +31,25 @@ class Workload_thread(threading.Thread):
     def run(self):
         logging.debug('running')
         return
+    
     def do_workload(self):
+        pass
+    
+    def stop(self):
         pass
 
 class SSH_thread(threading.Thread):
     def run(self):
         logging.debug('running')
         return
+    
     def do_ssh(self):
+        pass
+    
+    def stop_validator(self):
+        pass
+    
+    def start_validator(self):
         pass
 
 class Consensus_Thread(threading.Thread):
@@ -47,4 +58,10 @@ class Consensus_Thread(threading.Thread):
         return
     
     def check_for_consensus(self):
+        pass
+    
+    def calculate_block_list(self):
+        pass
+    
+    def calculate_sync_time(self):
         pass
