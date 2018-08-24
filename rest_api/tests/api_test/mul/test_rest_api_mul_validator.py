@@ -34,7 +34,6 @@ import signal
 from google.protobuf.json_format import MessageToDict
 
 from base import RestApiBaseTest
-from payload import get_signer, create_intkey_transaction , create_batch
 from utils import  _get_client_address, _send_cmd, _get_node_list, \
                    _get_node_chain, check_for_consensus, _stop_validator\
             
@@ -51,7 +50,7 @@ logging.basicConfig(level=logging.INFO,
   
 WAIT_TIME = 10
 PORT =22
-USERNAME = 'test'
+USERNAME = 'aditya'
 PASSWORD = 'aditya9971'
   
 BLOCK_TO_CHECK_CONSENSUS = 1
@@ -59,62 +58,26 @@ BLOCK_TO_CHECK_CONSENSUS = 1
 pytestmark = pytest.mark.mul
 
 
-class TestMultiple(RestApiBaseTest):
-    def test_rest_api_mul_val_intk(self):
-        """Tests that transactions are submitted and committed for
-        each block that are created by submitting intkey and XO batches
-        """
-        signer = get_signer()
-        expected_trxns  = {}
-        expected_batches = []
-        node_list = [{_get_client_address()}]
-            
-        LOGGER.info('Starting Test for Intkey payload')
-            
-        LOGGER.info("Creating intkey batches")
-        
-        txns = [
-            create_intkey_transaction("set", [] , 50 , signer),
-            create_intkey_transaction("set", [] , 50 , signer),
-       ]
-    
-        for txn in txns:
-            dict = MessageToDict(
-                    txn,
-                    including_default_value_fields=True,
-                    preserving_proto_field_name=True)
-                    
-            expected_trxns['trxn_id'] = [dict['header_signature']]
-            expected_trxns['payload'] = [dict['payload']]
-                        
-        LOGGER.info("Creating batches for transactions 1trn/batch")
-    
-        batches = [create_batch([txn], signer) for txn in txns]
-         
-        node_list = _get_node_list()
-            
-        chains = _get_node_chain(node_list)
-        check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS)
-
+class TestMultiValidator(RestApiBaseTest):
     def test_rest_api_mul_val_Node(self):
         """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
         """        
-        leaf_nodes = ['10.223.155.134', '10.223.155.25']
+        leaf_nodes = ['10.223.155.43']
         threads = []
-        event = threading.Event()
+        stop_validator = threading.Condition()
+        start_validator = threading.Condition()
         
-        workload_thread = Workload_thread()
+        workload_thread = Workload_thread(stop_validator)
         workload_thread.setName('workload_thread')
         workload_thread.start()
         
-        consensus_thread = Consensus_Thread(leaf_nodes)
+        consensus_thread = Consensus_Thread(leaf_nodes,stop_validator)
         consensus_thread.setName('consensus_thread')
-        consensus_thread.setDaemon(True)
         consensus_thread.start()
-         
+        
         for node in leaf_nodes:
-            ssh_thread = SSH_thread(node,PORT,USERNAME,PASSWORD)
+            ssh_thread = SSH_thread(node,PORT,USERNAME,PASSWORD,stop_validator)
             ssh_thread.setName('ssh_thread')
             threads.append(ssh_thread)    
          
@@ -122,8 +85,5 @@ class TestMultiple(RestApiBaseTest):
             thread.start()
             thread.join()
         
-        consensus_thread.join() 
         workload_thread.join()
-        
-       
-        
+        consensus_thread.join()

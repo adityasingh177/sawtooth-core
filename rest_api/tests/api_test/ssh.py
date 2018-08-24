@@ -14,6 +14,10 @@
 # ------------------------------------------------------------------------------
 
 import paramiko
+import logging
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class SSH():
@@ -23,10 +27,10 @@ class SSH():
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(hostname,port,username,password)
         except paramiko.AuthenticationException:
-            print("Failed to connect to {} due to wrong username/password".format(hostname))
+            LOGGER.info("Failed to connect to {} due to wrong username/password".format(hostname))
             exit(1)
         except:
-            print("Failed to connect to {}".format(hostname))
+            LOGGER.info("Failed to connect to {}".format(hostname))
             exit(2)
                 
         command = 'ps aux | grep sawtooth'
@@ -34,3 +38,10 @@ class SSH():
         outlines=stdout.readlines()
         resp=''.join(outlines)
         ssh.close()
+    
+    def stop_validator(self, node):
+        LOGGER.info("stopping validator service for %s",node)
+        
+    def start_validator(self, node):
+        LOGGER.info("starting validator service for %s",node)
+        

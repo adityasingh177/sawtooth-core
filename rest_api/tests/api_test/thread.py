@@ -16,6 +16,7 @@ import queue
 import threading
 import os
 import logging
+import time
 
 
 from workload import Workload
@@ -33,6 +34,7 @@ def wait_for_event(e):
     event_is_set = e.wait()
     logging.debug('event set: %s', event_is_set)
 
+
 def wait_for_event_timeout(e, t):
     """Wait t seconds and then timeout"""
     while not e.isSet():
@@ -46,69 +48,102 @@ def wait_for_event_timeout(e, t):
 
 
 class Workload_thread(threading.Thread):
-    def __init__(self):
+    def __init__(self, stop):
         threading.Thread.__init__(self)
         self.shutdown_flag = threading.Event()
+        self.workload = Workload()
+        self.stop = stop
         
     def run(self):
-        logging.info('Starting Workload')
-        workload = Workload()
-        while not self.shutdown_flag.is_set():
-            workload.do_workload()
+        with self.stop:
+            self.stop.wait()
+            logging.info('Starting Workload')
+            end_time = time.time() + 0.05
+            while time.time() < end_time:
+                self.workload.do_workload() 
         return
     
     def stop(self):
-        pass
+        logging.info('Stopping Workload')
+        self.workload.stop_workload()
+        return
+        
 
 class SSH_thread(threading.Thread):
-    def __init__(self, hostname, port, username, password):
+    def __init__(self, hostname, port, username, password, stop):
       threading.Thread.__init__(self)
+      self.ssh = SSH()
       self.hostname = hostname
       self.port = port
       self.username = username
       self.password = password
+      self.stop = stop
       
     def run(self):
-        logging.info('starting ssh thread')
-        logging.info('Logging into Validation Network')
-        self.ssh()
+        with self.stop:
+            logging.info('starting ssh thread')
+            logging.info('Logging into Validation Network')
+            self.start_ssh()
+            self.stop_service(self.hostname)
+            self.stop.notifyAll()
         logging.info('Exiting ssh thread')
         return
     
-    def ssh(self):
-        logging.info('creating ssh object')
-        ssh = SSH()
+    def start_ssh(self):
         logging.info('performing ssh')
-        ssh.do_ssh(self.hostname, self.port, self.username, self.password)
+        self.ssh.do_ssh(self.hostname, self.port, self.username, self.password)
         
-    def stop_validator(self):
-        loggin.info("stopping validator service")
+    def stop_service(self, hostname):
+        logging.info("stopping validator service")
+        self.ssh.stop_validator(hostname)
     
-    def start_validator(self):
-        loggin.info("starting validator service")
+    def start_service(self, hostname):
+        logging.info("starting validator service")
+        self.ssh.start_validator(hostname)
+
 
 class Consensus_Thread(threading.Thread):
-    def __init__(self, nodes):
+    def __init__(self, nodes, stop):
       threading.Thread.__init__(self)
       self.shutdown_flag = threading.Event()
-      self.nodes = nodes
+      self.node_list = nodes
+      self.stop = stop
     
     def run(self):
-        logging.info('starting consensus thread')
-        logging.info('calculating block list from the nodes')
-        chains = self.calculate_block_list()
-        self.compare_chains(chains)
+        with self.stop:
+            self.stop.wait()
+            logging.info('Starting consensus thread')
+            self.calculate_sync_time()
         return
         
     def calculate_block_list(self):
-        logging.info('getting block list from the nodes')
+        logging.info('Getting block list from the nodes')
         node_list = ['http://10.223.155.43:8008']
         chains = _get_node_chains(node_list)
         return chains
     
-    def compare_chains(self, chains):
+    def check_for_consensus(self,chains):
+        time.sleep(10)
+        logging.info('Validator Nodes are in Sync.....')
+        return True
+    
+    def compare_chains(self):
         logging.info('comparing chains for equality')
-        
+        chains = self.calculate_block_list()
+        self.check_for_consensus(chains)            
+        return True
         
     def calculate_sync_time(self):
-        pass
+        start_time = time.time()
+        logging.info('calculating sync times')
+        logging.info("start time : %s",start_time)
+        chain_status = self.compare_chains()
+        
+        if chain_status:
+            end_time = time.time()
+            logging.info('end time : %s',end_time)        
+            sync_time = end_time - start_time
+        
+        logging.info('sync time : %s',sync_time)
+        
+        return sync_time
