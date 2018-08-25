@@ -39,10 +39,7 @@ from utils import  _get_client_address, _send_cmd, _get_node_list, \
             
 from workload import Workload
 from ssh import SSH
-from thread import Workload_thread, SSH_thread, Consensus_Thread,\
-                   wait_for_event, wait_for_event_timeout
-
-
+from thread import Workload_thread, SSH_thread, Consensus_Thread
 
 logging.basicConfig(level=logging.INFO,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s',
@@ -62,11 +59,18 @@ class TestMultiValidator(RestApiBaseTest):
     def test_rest_api_mul_val_Node(self):
         """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
-        """        
+        """      
         leaf_nodes = ['10.223.155.43']
         threads = []
         stop_validator = threading.Condition()
-        start_validator = threading.Condition()
+        start_validator = threading.Event()
+        
+        for node in leaf_nodes:
+            ssh_thread = SSH_thread(node,PORT,USERNAME,PASSWORD,stop_validator)
+            ssh_thread.setName('ssh_thread')
+            threads.append(ssh_thread)  
+        
+
         
         workload_thread = Workload_thread(stop_validator)
         workload_thread.setName('workload_thread')
@@ -76,14 +80,23 @@ class TestMultiValidator(RestApiBaseTest):
         consensus_thread.setName('consensus_thread')
         consensus_thread.start()
         
-        for node in leaf_nodes:
-            ssh_thread = SSH_thread(node,PORT,USERNAME,PASSWORD,stop_validator)
-            ssh_thread.setName('ssh_thread')
-            threads.append(ssh_thread)    
-         
         for thread in threads:
             thread.start()
-            thread.join()
-        
-        workload_thread.join()
-        consensus_thread.join()
+
+def wait_for_event(e):
+    """Wait for the event to be set before doing anything"""
+    logging.debug('wait_for_event starting')
+    event_is_set = e.wait()
+    logging.debug('event set: %s', event_is_set)
+
+
+def wait_for_event_timeout(e, t):
+    """Wait t seconds and then timeout"""
+    while not e.isSet():
+        logging.debug('wait_for_event_timeout starting')
+        event_is_set = e.wait(t)
+        logging.debug('event set: %s', event_is_set)
+        if event_is_set:
+            logging.debug('processing event')
+        else:
+            logging.debug('doing other work')

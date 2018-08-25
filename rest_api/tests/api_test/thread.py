@@ -27,30 +27,9 @@ logging.basicConfig(level=logging.INFO,
                     format='(%(threadName)-10s) %(message)s',
                     )
 
-
-def wait_for_event(e):
-    """Wait for the event to be set before doing anything"""
-    logging.debug('wait_for_event starting')
-    event_is_set = e.wait()
-    logging.debug('event set: %s', event_is_set)
-
-
-def wait_for_event_timeout(e, t):
-    """Wait t seconds and then timeout"""
-    while not e.isSet():
-        logging.debug('wait_for_event_timeout starting')
-        event_is_set = e.wait(t)
-        logging.debug('event set: %s', event_is_set)
-        if event_is_set:
-            logging.debug('processing event')
-        else:
-            logging.debug('doing other work')
-
-
 class Workload_thread(threading.Thread):
-    def __init__(self, stop):
-        threading.Thread.__init__(self)
-        self.shutdown_flag = threading.Event()
+    def __init__(self, stop, target=None):
+        threading.Thread.__init__(self, target=target)
         self.workload = Workload()
         self.stop = stop
         
@@ -58,9 +37,9 @@ class Workload_thread(threading.Thread):
         with self.stop:
             self.stop.wait()
             logging.info('Starting Workload')
-            end_time = time.time() + 0.05
+            end_time = time.time() + 0.01
             while time.time() < end_time:
-                self.workload.do_workload() 
+                self.workload.do_workload()
         return
     
     def stop(self):
@@ -86,6 +65,10 @@ class SSH_thread(threading.Thread):
             self.start_ssh()
             self.stop_service(self.hostname)
             self.stop.notifyAll()
+        
+        logging.info('Sleeping.................')
+        time.sleep(1)
+        self.start_service(self.hostname)
         logging.info('Exiting ssh thread')
         return
     
