@@ -34,8 +34,8 @@ class SSH():
             LOGGER.info("Failed to connect to {}".format(hostname))
             exit(2)
                 
-        command = 'ps aux | grep sawtooth'
-        stdin,stdout,stderr=ssh.exec_command(command)
+        command = "sudo kill -9  $(ps aux | grep 'sawtooth' | awk '{print $2}')"
+        stdin,stdout,stderr = ssh.exec_command(command)
         outlines=stdout.readlines()
         resp=''.join(outlines)
         ssh.close()
