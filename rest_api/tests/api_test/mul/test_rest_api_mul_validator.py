@@ -47,7 +47,7 @@ logging.basicConfig(level=logging.INFO,
   
 WAIT_TIME = 10
 PORT = 22
-USERNAME = 'test'
+USERNAME = 'aditya'
 PASSWORD = 'aditya9971'
   
 BLOCK_TO_CHECK_CONSENSUS = 1
@@ -60,16 +60,8 @@ class TestMultiValidator(RestApiBaseTest):
         """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
         """      
-        leaf_nodes = ['10.223.155.134']
+        leaf_nodes = ['10.223.155.43']
         ssh = SSH()
         
-        
         ssh_session = ssh.do_ssh(leaf_nodes[0],PORT,USERNAME,PASSWORD)
-    
-        workload = Workload()
-        workload.do_workload()
-        
-        
-        
-
     

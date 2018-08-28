@@ -15,8 +15,10 @@
 
 import paramiko
 import logging
+import datetime
 
 import os, re, threading
+from workload import Workload
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -40,27 +42,18 @@ class SSH():
         chan = sshClient.invoke_shell()
         chan = sshClient.get_transport().open_session()
         chan.get_pty()
-        chan.exec_command('sudo systemctl stop sawtooth-rest-api.service')
+        workload = Workload()
+        workload.do_workload()
+        
+        endTime = datetime.datetime.now() + datetime.timedelta(seconds=20)
+            
+        while True:
+          if datetime.datetime.now() >= endTime:
+            break
+          
+        chan.exec_command("sudo kill -9  $(ps aux | grep 'intkey' | awk '{print $2}')")
         print(chan.recv(4096))
-        chan.send('aditya9971\n')
-
-
-#         stdin,stdout,stderr = sshClient.exec_command(command)
-#         outlines=stdout.readlines()
-#         print(outlines)
-#         resp=''.join(outlines)
-#         print(resp)
-          
-#          
-#         command2 = "systemctl status sawtooth-rest-api.service"
-#         channel = sshClient.invoke_shell() 
-#         output = channel.send(command2) 
-#         print(output)
-#         stdin,stdout,stderr = sshClient.exec_command(command2)
-#         outlines=stdout.readlines()
-#         resp=''.join(outlines)
-#         print(resp)
-          
+        chan.send('aditya9971\n')          
         sshClient.close()
     
     def stop_validator(self, node):
