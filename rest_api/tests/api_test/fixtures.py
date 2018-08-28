@@ -40,7 +40,7 @@ from google.protobuf.json_format import MessageToDict
 
 from utils import get_batches,  get_transactions, get_state_address, post_batch, get_blocks, \
                   get_state_list , _delete_genesis , _start_validator, \
-                  _stop_validator , _create_genesis , wait_for_rest_apis , _get_client_address, \
+                  _stop_validator , _create_genesis , _get_client_address, \
                   _stop_settings_tp, _start_settings_tp
 
 from payload import get_signer, create_intkey_transaction , create_batch,\

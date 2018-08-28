@@ -46,8 +46,8 @@ logging.basicConfig(level=logging.INFO,
                     )
   
 WAIT_TIME = 10
-PORT =22
-USERNAME = 'aditya'
+PORT = 22
+USERNAME = 'test'
 PASSWORD = 'aditya9971'
   
 BLOCK_TO_CHECK_CONSENSUS = 1
@@ -60,27 +60,16 @@ class TestMultiValidator(RestApiBaseTest):
         """Tests that leaf nodes are brought up/down in a network
            and checks are performed on the respective nodes 
         """      
-        leaf_nodes = ['10.223.155.43']
-        threads = []
-        stop_validator = threading.Condition()
-        
-        for node in leaf_nodes:
-            ssh_thread = SSH_thread(node,PORT,USERNAME,PASSWORD,stop_validator)
-            ssh_thread.setName('ssh_thread')
-            threads.append(ssh_thread)  
+        leaf_nodes = ['10.223.155.134']
+        ssh = SSH()
         
         
-        workload_thread = Workload_thread(stop_validator)
-        workload_thread.setName('workload_thread')
-        workload_thread.start()
+        ssh_session = ssh.do_ssh(leaf_nodes[0],PORT,USERNAME,PASSWORD)
+    
+        workload = Workload()
+        workload.do_workload()
         
-        consensus_thread = Consensus_Thread(leaf_nodes,stop_validator)
-        consensus_thread.setName('consensus_thread')
-        consensus_thread.start()
         
-        for thread in threads:
-            thread.start()
-            thread.join()
         
-        workload_thread.join()
-        consensus_thread.join()
+
+    
