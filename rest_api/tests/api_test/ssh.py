@@ -45,7 +45,7 @@ class SSH():
         workload = Workload()
         workload.do_workload()
         
-        endTime = datetime.datetime.now() + datetime.timedelta(seconds=20)
+        endTime = datetime.datetime.now() + datetime.timedelta(seconds=1)
             
         while True:
           if datetime.datetime.now() >= endTime:
