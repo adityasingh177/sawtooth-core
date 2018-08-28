@@ -146,7 +146,7 @@ def pytest_collection_modifyitems(config, items):
         items[:] = selected_items
         return items
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def setup(request):
     """Setup method for posting batches and returning the 
        response
