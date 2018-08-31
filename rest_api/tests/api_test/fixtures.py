@@ -152,7 +152,6 @@ def setup_empty_batch():
     
     return batch
 
-
 @pytest.fixture(scope="function")
 def setup_batch_multiple_transaction():
     data = {}

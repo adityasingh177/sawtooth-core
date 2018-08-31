@@ -1,0 +1,34 @@
+2018-08-31 03:31:19 INFO Starting Test for multiple validators
+2018-08-31 03:31:19 DEBUG starting thread (client mode): 0xab1d45f8
+2018-08-31 03:31:19 DEBUG Local version/idstring: SSH-2.0-paramiko_2.4.1
+2018-08-31 03:31:19 DEBUG Remote version/idstring: SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.4
+2018-08-31 03:31:19 INFO Connected (version 2.0, client OpenSSH_7.2p2)
+2018-08-31 03:31:19 DEBUG kex algos:['curve25519-sha256@libssh.org', 'ecdh-sha2-nistp256', 'ecdh-sha2-nistp384', 'ecdh-sha2-nistp521', 'diffie-hellman-group-exchange-sha256', 'diffie-hellman-group14-sha1'] server key:['ssh-rsa', 'rsa-sha2-512', 'rsa-sha2-256', 'ecdsa-sha2-nistp256', 'ssh-ed25519'] client encrypt:['chacha20-poly1305@openssh.com', 'aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'aes128-gcm@openssh.com', 'aes256-gcm@openssh.com'] server encrypt:['chacha20-poly1305@openssh.com', 'aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'aes128-gcm@openssh.com', 'aes256-gcm@openssh.com'] client mac:['umac-64-etm@openssh.com', 'umac-128-etm@openssh.com', 'hmac-sha2-256-etm@openssh.com', 'hmac-sha2-512-etm@openssh.com', 'hmac-sha1-etm@openssh.com', 'umac-64@openssh.com', 'umac-128@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'] server mac:['umac-64-etm@openssh.com', 'umac-128-etm@openssh.com', 'hmac-sha2-256-etm@openssh.com', 'hmac-sha2-512-etm@openssh.com', 'hmac-sha1-etm@openssh.com', 'umac-64@openssh.com', 'umac-128@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+2018-08-31 03:31:19 DEBUG Kex agreed: ecdh-sha2-nistp256
+2018-08-31 03:31:19 DEBUG HostKey agreed: ecdsa-sha2-nistp256
+2018-08-31 03:31:19 DEBUG Cipher agreed: aes128-ctr
+2018-08-31 03:31:19 DEBUG MAC agreed: hmac-sha2-256
+2018-08-31 03:31:19 DEBUG Compression agreed: none
+2018-08-31 03:31:19 DEBUG kex engine KexNistp256 specified hash_algo <built-in function openssl_sha256>
+2018-08-31 03:31:19 DEBUG Switch to new keys ...
+2018-08-31 03:31:19 DEBUG userauth is OK
+2018-08-31 03:31:19 INFO Authentication (password) successful!
+2018-08-31 03:31:19 DEBUG [chan 0] Max packet in: 32768 bytes
+2018-08-31 03:31:20 DEBUG Received global request "hostkeys-00@openssh.com"
+2018-08-31 03:31:20 DEBUG Rejecting "hostkeys-00@openssh.com" global request from server.
+2018-08-31 03:31:20 DEBUG [chan 0] Max packet out: 32768 bytes
+2018-08-31 03:31:20 DEBUG Secsh channel 0 opened.
+2018-08-31 03:31:20 DEBUG [chan 0] Sesch channel 0 request ok
+2018-08-31 03:31:20 DEBUG [chan 0] Sesch channel 0 request ok
+2018-08-31 03:31:20 DEBUG [chan 1] Max packet in: 32768 bytes
+2018-08-31 03:31:20 DEBUG [chan 1] Max packet out: 32768 bytes
+2018-08-31 03:31:20 DEBUG Secsh channel 1 opened.
+2018-08-31 03:31:20 DEBUG [chan 0] EOF sent (0)
+2018-08-31 03:31:20 DEBUG [chan 1] Sesch channel 1 request ok
+2018-08-31 03:31:20 INFO Starting Intkey Transaction processor
+2018-08-31 03:31:20 INFO Starting Intkey Workload
+2018-08-31 03:31:20 DEBUG Ignoring message for dead channel 0
+2018-08-31 03:31:20 DEBUG Ignoring message for dead channel 0
+2018-08-31 03:31:30 INFO Stopping Intkey Workload
+2018-08-31 03:31:30 DEBUG [chan 1] Sesch channel 1 request ok
+2018-08-31 03:31:30 DEBUG EOF in transport thread

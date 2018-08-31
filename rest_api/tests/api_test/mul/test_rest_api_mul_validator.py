@@ -36,7 +36,7 @@ LOGGER.setLevel(logging.INFO)
   
 WAIT_TIME = 10
 PORT = 22
-USERNAME = 'aditya'
+USERNAME = 'test'
 PASSWORD = 'aditya9971'
   
 BLOCK_TO_CHECK_CONSENSUS = 1
@@ -86,7 +86,7 @@ class TestMultiValidator(RestApiBaseTest):
            and checks are performed on the respective nodes 
         """      
         LOGGER.info('Starting Test for multiple validators')
-        leaf_nodes = ['10.223.155.43']
+        leaf_nodes = ['10.223.155.134']
         workload = Workload()
         ssh_client = SSH_CLIENT()
         consensus = Consensus(leaf_nodes)

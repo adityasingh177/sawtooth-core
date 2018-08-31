@@ -338,36 +338,12 @@ class TestPost(RestApiBaseTest):
 
     def test_api_post_empty_transaction_batch(self, setup_empty_batch):
         batch = setup_empty_batch
-        print(batch)
         post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
         
         for batch in post_batch_list:
-            try:
-                response = post_batch(batch)
-            except urllib.error.HTTPError as error:
-                LOGGER.info("Rest Api is not reachable")
-                response = json.loads(error.fp.read().decode('utf-8'))
-                LOGGER.info(response['error']['title'])
-                LOGGER.info(response['error']['message']) 
-        
-    def test_api_post_batch_different_signer(self, setup):
-        signer_trans = get_signer() 
-        intkey=create_intkey_transaction("set",[],50,signer_trans)
-        translist=[intkey]
-        signer_batch = get_signer()
-        batch= create_batch(translist,signer_batch)
-        batch_list=[BatchList(batches=[batch]).SerializeToString()]
-        for batc in batch_list:
-            try:
-                response = post_batch(batc)
-                print(response)
-            except urllib.error.HTTPError as error:
-                LOGGER.info("Rest Api is not reachable")
-                data = json.loads(error.fp.read().decode('utf-8'))
-                LOGGER.info(data['error']['title'])
-                LOGGER.info(data['error']['message'])
-                assert data['error']['code'] == 30
-                assert data['error']['title'] =='Submitted Batches Invalid' 
+            response = post_batch(batch)
+            print(response)
+           
                     
     def test_api_post_batch_different_signer(self, setup):
         signer_trans = get_signer() 

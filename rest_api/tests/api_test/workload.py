@@ -28,7 +28,7 @@ class Workload:
         
     def do_workload(self):
         LOGGER.info('Starting Intkey Workload')
-        cmd = "intkey workload --url http://10.223.155.43:8008 --rate 1 -d 1"
+        cmd = "intkey workload --url http://10.223.155.134:8008 --rate 1 -d 1"
         subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE)
     
     def stop_workload(self, channel, wait):

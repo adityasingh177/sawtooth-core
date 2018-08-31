@@ -1,0 +1,11 @@
+[
+  "api_test/get/test_rest_api_get_batch.py::TestBatchList::()::test_api_get_batch_list",
+  "api_test/post/test_rest_api_post.py::test_rest_api_post_batch",
+  "api_test/post/test_rest_api_val_error.py::test_rest_invalid_batch",
+  "api_test/post/test_rest_api_val_error.py::test_rest_validator_503_err_17",
+  "api_test/post/test_rest_api_val_error.py::test_rest_validator_503_err_18",
+  "api_test/post/test_rest_api_val_error.py::test_rest_api_post_no_genesis",
+  "api_test/post/test_rest_api_val_error.py::test_rest_validator_invalid_batch",
+  "api_test/post/test_rest_api_val_error.py::test_rest_validator_no_genesis",
+  "api_test/post/test_rest_api_val_protobuf.py::test_rest_validator_no_genesis"
+]

@@ -1,0 +1,44 @@
+2018-08-28 15:15:20 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:20 INFO Creating batches for transactions 1trn/batch
+2018-08-28 15:15:20 INFO Submitting batches to the handlers
+2018-08-28 15:15:20 INFO Rest Api is not reachable
+2018-08-28 15:15:21 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:21 INFO Creating batches for transactions 1trn/batch
+2018-08-28 15:15:21 INFO Rest Api is not reachable
+2018-08-28 15:15:22 INFO Rest Api is Unreachable
+2018-08-28 15:15:22 INFO Invalid Resource Id
+2018-08-28 15:15:22 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: s
+2018-08-28 15:15:22 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:22 INFO Submitting batches to the handlers
+2018-08-28 15:15:22 INFO Rest Api is not reachable
+2018-08-28 15:15:23 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:23 INFO Creating batches for transactions 1trn/batch
+2018-08-28 15:15:23 INFO Submitting batches to the handlers
+2018-08-28 15:15:23 INFO Rest Api is not reachable
+2018-08-28 15:15:23 INFO Rest Api is Unreachable
+2018-08-28 15:15:23 INFO Bad Receipts Request
+2018-08-28 15:15:23 INFO Requests for transaction receipts sent as a POST must have a JSON formatted body with an array of at least one id string.
+2018-08-28 15:15:23 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:23 INFO Submitting batches to the handlers
+2018-08-28 15:15:23 INFO Rest Api is not reachable
+2018-08-28 15:15:23 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:23 INFO Creating batches for transactions 1trn/batch
+2018-08-28 15:15:23 INFO Rest Api is not reachable
+2018-08-28 15:15:24 INFO Connected (version 2.0, client OpenSSH_7.2p2)
+2018-08-28 15:15:24 INFO Authentication (password) successful!
+2018-08-28 15:15:24 INFO Starting Intkey Workload
+2018-08-28 15:15:34 INFO Starting test for batch post
+2018-08-28 15:15:34 INFO Creating intkey transactions with set operations
+2018-08-28 15:15:34 INFO Creating batches for transactions 1trn/batch
+2018-08-28 15:15:34 INFO Submitting batches to the handlers
+2018-08-28 15:15:34 INFO <html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1>Server got itself in trouble</body></html>
+2018-08-28 15:15:36 INFO Starting test for batch with bad protobuf
+2018-08-28 15:15:36 INFO Starting test for batch with bad protobuf
+2018-08-28 15:15:37 INFO Starting Test for Intkey and Xo as payload
+2018-08-28 15:15:37 INFO Creating intkey batches
+2018-08-28 15:15:37 INFO Creating batches for transactions 1trn/batch
+2018-08-28 15:15:37 INFO Creating keys for xo users
+2018-08-28 15:15:37 INFO Sending sawtooth keygen aditya --force
+2018-08-28 15:15:37 INFO Sending sawtooth keygen singh --force
+2018-08-28 15:15:37 INFO Submitting xo batches to the handlers
+2018-08-28 15:15:37 INFO Sending xo create game-1 --username aditya --url http://10.223.155.43:8008 --wait 300
