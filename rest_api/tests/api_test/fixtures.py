@@ -51,7 +51,6 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
                   
                   
-
 @pytest.fixture(scope="function")
 def break_genesis(request):
     """Setup Function for deleting the genesis data
@@ -131,6 +130,27 @@ def invalid_batch():
             LOGGER.info(response['error']['message'])
     
     return data
+
+@pytest.fixture(scope="function")
+def setup_empty_batch():
+    signer = get_signer()
+    transactions = [create_intkey_transaction("set", [] , 50 , signer)]
+    transaction_signatures = [t.header_signature for t in transactions]
+
+    header = BatchHeader(
+        signer_public_key=signer.get_public_key().as_hex(),
+        transaction_ids=[])
+
+    header_bytes = header.SerializeToString()
+
+    signature = signer.sign(header_bytes)
+
+    batch = Batch(
+        header=header_bytes,
+        transactions=[],
+        header_signature=signature)
+    
+    return batch
 
 
 @pytest.fixture(scope="function")

@@ -197,7 +197,6 @@ def get_signer():
     crypto_factory = CryptoFactory(context)
     return crypto_factory.new_signer(private_key)
 
-
 def make_intkey_address(name):
     return INTKEY_ADDRESS_PREFIX + hashlib.sha512(
         name.encode('utf-8')).hexdigest()[-64:]
