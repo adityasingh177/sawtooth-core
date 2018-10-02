@@ -132,11 +132,9 @@ def invalid_batch():
     return data
 
 @pytest.fixture(scope="function")
-def setup_empty_batch():
+def setup_empty_trxs_batch():
     signer = get_signer()
-    transactions = [create_intkey_transaction("set", [] , 50 , signer)]
-    transaction_signatures = [t.header_signature for t in transactions]
-
+    
     header = BatchHeader(
         signer_public_key=signer.get_public_key().as_hex(),
         transaction_ids=[])

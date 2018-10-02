@@ -18,7 +18,10 @@ import logging
 import json
 import urllib.request
 import urllib.error
-   
+import aiohttp
+import asyncio
+
+
 from utils import get_state_list, get_state_address
 from fixtures import invalid_batch
 
@@ -52,26 +55,63 @@ HEAD_LENGTH = 128
 class TestStateList(RestApiBaseTest):
     """This class tests the state list with different parameters
     """
-    def test_api_get_state_list(self, setup):
+    async def test_api_get_state_list(self, setup):
         """Tests the state list by submitting intkey batches
         """
+        address = setup['address']
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_address = setup['state_address'][0]
+        expected_link =  "{}/state?head={}&start={}&limit=100".format(address, expected_head,\
+                                                                      expected_address)
+        print(expected_link)
+        print(expected_head)
+        
+        async with aiohttp.ClientSession() as session:        
+            async with session.get(url='http://10.223.155.43:8008/state', raise_for_status=True) as data:
+                response = await data.json()
+        
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(response)
+        
+              
+        state_list = response['data'][::-1]
+        print(response['head'])
+                      
+        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
+    
+    async def test_api_get_state_list_head(self, setup):   
+        """Tests that GET /state is reachable with head parameter 
+        """
+        LOGGER.info("Starting test for state with head parameter")
+  
+        address = setup['address']
         signer_key = setup['signer_key']
         expected_head = setup['expected_head']
         expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
-               
-        try:   
-            response = get_state_list()
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is Unreachable")
+        expected_head = setup['expected_head']
+        state_address = setup['state_address'][0]
+        expected_link =  "{}/state?head={}&start={}&limit=100".format(address, expected_head,\
+                                                                      state_address)
         
-        state_list = response['data'][:-1]  
-                      
-        self.assert_valid_head(response , expected_head)
+        async with aiohttp.ClientSession() as session:        
+            async with session.get(url='http://10.223.155.43:8008/state') as data:
+                response = await data.json()
+                print(response.status)
+                        
+        state_list = response['data'][:-1] 
+
+        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
+                  
+        assert response['head'] == expected_head , "request is not correct"
+    
                               
     def test_api_get_state_list_invalid_batch(self, invalid_batch):
-        """Tests that transactions are submitted and committed for
-        each block that are created by submitting invalid intkey batches
+        """Tests that state is not updated for when
+           submitting invalid intkey batches
         """    
         batches = invalid_batch['expected_batches']
         try:
@@ -80,22 +120,10 @@ class TestStateList(RestApiBaseTest):
             data = json.loads(error.fp.read().decode('utf-8'))
             LOGGER.info(data['error']['title'])
             LOGGER.info(data['error']['message'])
+        
+        self.assert_valid_head(response , expected_head)
             
-    def test_api_get_state_list_head(self, setup):   
-        """Tests that GET /state is reachable with head parameter 
-        """
-        LOGGER.info("Starting test for state with head parameter")
-        expected_head = setup['expected_head']
-                  
-        try:
-            response = get_state_list(head_id=expected_head)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-                  
-        assert response['head'] == expected_head , "request is not correct"
+    
            
     def test_api_get_state_list_bad_head(self, setup):   
         """Tests that GET /state is unreachable with bad head parameter 

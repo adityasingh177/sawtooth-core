@@ -39,7 +39,6 @@ class SSH_CLIENT:
     def get_channel(self):
         channel = self.sshClient.invoke_shell()
         channel = self.sshClient.get_transport().open_session()
-        print(channel)
         channel.get_pty()
         return channel
         

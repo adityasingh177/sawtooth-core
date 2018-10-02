@@ -21,6 +21,7 @@ import logging
 import urllib
 import json
 import os
+import time
 
 from sawtooth_signing import create_context
 from sawtooth_signing import CryptoFactory
@@ -204,6 +205,7 @@ def setup(request):
     
     LOGGER.info("Submitting batches to the handlers")
     
+    
     for batch in post_batch_list:
         try:
             response = post_batch(batch)
@@ -213,7 +215,13 @@ def setup(request):
             LOGGER.info(response['error']['title'])
             LOGGER.info(response['error']['message'])
     
-                
+    
+    for batch in expected_batches:
+        response = get_batch_statuses([batch])
+        status = response['data'][0]['status']
+    
+    time.sleep(3)
+      
     block_list = get_blocks()
     data['block_list'] = block_list
     batch_list = get_batches()
@@ -224,9 +232,11 @@ def setup(request):
     data['transaction_ids'] = transaction_ids
     block_ids = [block['header_signature'] for block in block_list['data']]
     data['block_ids'] = block_ids[:-1]
+    print(block_ids)
     batch_ids = [block['header']['batch_ids'][0] for block in block_list['data']]
     data['batch_ids'] = batch_ids
     expected_head = block_ids[0]
+    print(expected_head)
     data['expected_head'] = expected_head
     state_addresses = [state['address'] for state in get_state_list()['data']]
     data['state_address'] = state_addresses

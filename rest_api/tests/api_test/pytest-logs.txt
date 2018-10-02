@@ -1,44 +1,191 @@
-2018-08-28 15:15:20 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:20 INFO Creating batches for transactions 1trn/batch
-2018-08-28 15:15:20 INFO Submitting batches to the handlers
-2018-08-28 15:15:20 INFO Rest Api is not reachable
-2018-08-28 15:15:21 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:21 INFO Creating batches for transactions 1trn/batch
-2018-08-28 15:15:21 INFO Rest Api is not reachable
-2018-08-28 15:15:22 INFO Rest Api is Unreachable
-2018-08-28 15:15:22 INFO Invalid Resource Id
-2018-08-28 15:15:22 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: s
-2018-08-28 15:15:22 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:22 INFO Submitting batches to the handlers
-2018-08-28 15:15:22 INFO Rest Api is not reachable
-2018-08-28 15:15:23 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:23 INFO Creating batches for transactions 1trn/batch
-2018-08-28 15:15:23 INFO Submitting batches to the handlers
-2018-08-28 15:15:23 INFO Rest Api is not reachable
-2018-08-28 15:15:23 INFO Rest Api is Unreachable
-2018-08-28 15:15:23 INFO Bad Receipts Request
-2018-08-28 15:15:23 INFO Requests for transaction receipts sent as a POST must have a JSON formatted body with an array of at least one id string.
-2018-08-28 15:15:23 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:23 INFO Submitting batches to the handlers
-2018-08-28 15:15:23 INFO Rest Api is not reachable
-2018-08-28 15:15:23 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:23 INFO Creating batches for transactions 1trn/batch
-2018-08-28 15:15:23 INFO Rest Api is not reachable
-2018-08-28 15:15:24 INFO Connected (version 2.0, client OpenSSH_7.2p2)
-2018-08-28 15:15:24 INFO Authentication (password) successful!
-2018-08-28 15:15:24 INFO Starting Intkey Workload
-2018-08-28 15:15:34 INFO Starting test for batch post
-2018-08-28 15:15:34 INFO Creating intkey transactions with set operations
-2018-08-28 15:15:34 INFO Creating batches for transactions 1trn/batch
-2018-08-28 15:15:34 INFO Submitting batches to the handlers
-2018-08-28 15:15:34 INFO <html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1>Server got itself in trouble</body></html>
-2018-08-28 15:15:36 INFO Starting test for batch with bad protobuf
-2018-08-28 15:15:36 INFO Starting test for batch with bad protobuf
-2018-08-28 15:15:37 INFO Starting Test for Intkey and Xo as payload
-2018-08-28 15:15:37 INFO Creating intkey batches
-2018-08-28 15:15:37 INFO Creating batches for transactions 1trn/batch
-2018-08-28 15:15:37 INFO Creating keys for xo users
-2018-08-28 15:15:37 INFO Sending sawtooth keygen aditya --force
-2018-08-28 15:15:37 INFO Sending sawtooth keygen singh --force
-2018-08-28 15:15:37 INFO Submitting xo batches to the handlers
-2018-08-28 15:15:37 INFO Sending xo create game-1 --username aditya --url http://10.223.155.43:8008 --wait 300
+2018-09-03 11:33:26 INFO Creating intkey transactions with set operations
+2018-09-03 11:33:26 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:33:26 INFO Submitting batches to the handlers
+2018-09-03 11:33:29 INFO Starting test for batch with head parameter
+2018-09-03 11:33:29 INFO Starting test for batch with bad head parameter
+2018-09-03 11:33:29 INFO Invalid Resource Id
+2018-09-03 11:33:29 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:33:29 INFO Starting test for batch with id parameter
+2018-09-03 11:33:29 INFO Starting test for batch with bad id parameter
+2018-09-03 11:33:29 INFO Invalid Resource Id
+2018-09-03 11:33:29 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:33:29 INFO Starting test for batch with head and id parameter
+2018-09-03 11:33:29 INFO Starting test for batch with paging parameters
+2018-09-03 11:33:29 INFO Invalid Paging Query
+2018-09-03 11:33:29 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:33:29 INFO Starting test for batch with paging parameters
+2018-09-03 11:33:29 INFO Starting test for batch with invalid start parameter
+2018-09-03 11:33:29 INFO Invalid Paging Query
+2018-09-03 11:33:29 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:33:29 INFO Starting test for batch with bad limit parameter
+2018-09-03 11:33:29 INFO Invalid Count Query
+2018-09-03 11:33:29 INFO The 'count' query parameter must be a positive, non-zero integer.
+2018-09-03 11:33:29 INFO Starting test for batch with bad head parameter
+2018-09-03 11:33:30 INFO Invalid Resource Id
+2018-09-03 11:33:30 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:33:30 INFO Starting test for batch with bad head parameter
+2018-09-03 11:33:30 INFO Starting test for batch with bad head parameter
+2018-09-03 11:33:30 INFO Invalid Resource Id
+2018-09-03 11:33:30 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:33:30 INFO Id Query Invalid or Missing
+2018-09-03 11:33:30 INFO Requests for batch statuses sent as a GET request must have an 'id' query parameter with a comma-separated list of at least one batch id.
+2018-09-03 11:33:30 INFO Creating intkey transactions with set operations
+2018-09-03 11:33:30 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:39:30 INFO Starting test for blocks with head parameter
+2018-09-03 11:39:30 INFO Starting test for blocks with bad head parameter
+2018-09-03 11:39:30 INFO Rest Api is not reachable
+2018-09-03 11:39:30 INFO Starting test for blocks with id parameter
+2018-09-03 11:39:30 INFO Starting test for blocks with bad id parameter
+2018-09-03 11:39:30 INFO Rest Api is not reachable
+2018-09-03 11:39:30 INFO Starting test for blocks with head and id parameter
+2018-09-03 11:39:30 INFO Starting test for blocks with paging parameters
+2018-09-03 11:39:30 INFO Invalid Paging Query
+2018-09-03 11:39:30 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:39:30 INFO Starting test for blocks with paging parameters
+2018-09-03 11:39:30 INFO Invalid Paging Query
+2018-09-03 11:39:30 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:39:30 INFO Starting test for batch with invalid start parameter
+2018-09-03 11:39:30 INFO Invalid Paging Query
+2018-09-03 11:39:30 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:39:30 INFO Starting test for batch with invalid start parameter
+2018-09-03 11:39:30 INFO Invalid Paging Query
+2018-09-03 11:39:30 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:39:30 INFO Starting test for batch with bad limit parameter
+2018-09-03 11:39:30 INFO Invalid Count Query
+2018-09-03 11:39:30 INFO The 'count' query parameter must be a positive, non-zero integer.
+2018-09-03 11:39:30 INFO Starting test for batch with bad head parameter
+2018-09-03 11:39:37 INFO Starting test for blocks/{block_id}
+2018-09-03 11:39:37 INFO Starting test for blocks/{bad_block_id}
+2018-09-03 11:39:37 INFO Rest Api not reachable
+2018-09-03 11:39:37 INFO Invalid Resource Id
+2018-09-03 11:39:37 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:39:37 INFO Rest Api is Unreachable
+2018-09-03 11:39:37 INFO Invalid Resource Id
+2018-09-03 11:39:37 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: s
+2018-09-03 11:39:38 INFO Creating intkey transactions with set operations
+2018-09-03 11:39:38 INFO Submitting batches to the handlers
+2018-09-03 11:39:42 INFO Creating intkey transactions with set operations
+2018-09-03 11:39:42 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:39:42 INFO Submitting batches to the handlers
+2018-09-03 11:39:44 INFO Rest Api is Unreachable
+2018-09-03 11:39:44 INFO Bad Receipts Request
+2018-09-03 11:39:44 INFO Requests for transaction receipts sent as a POST must have a JSON formatted body with an array of at least one id string.
+2018-09-03 11:39:44 INFO Creating intkey transactions with set operations
+2018-09-03 11:39:44 INFO Submitting batches to the handlers
+2018-09-03 11:39:45 INFO Creating intkey transactions with set operations
+2018-09-03 11:39:45 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:39:45 INFO Starting test for state with head parameter
+2018-09-03 11:39:47 INFO Starting test for state with bad head parameter
+2018-09-03 11:39:47 INFO Rest Api is not reachable
+2018-09-03 11:39:47 INFO Starting test for state with address parameter
+2018-09-03 11:39:47 INFO Starting test for state with bad address parameter
+2018-09-03 11:39:47 INFO Rest Api is not reachable
+2018-09-03 11:39:47 INFO Starting test for state with paging parameters
+2018-09-03 11:39:47 INFO Invalid Paging Query
+2018-09-03 11:39:47 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:39:47 INFO Starting test for state with paging parameters
+2018-09-03 11:39:48 INFO Starting test for state with paging parameters
+2018-09-03 11:39:48 INFO Starting test for state with bad paging parameters
+2018-09-03 11:39:48 INFO Invalid Count Query
+2018-09-03 11:39:48 INFO The 'count' query parameter must be a positive, non-zero integer.
+2018-09-03 11:39:48 INFO Starting test for state with invalid start parameter
+2018-09-03 11:39:49 INFO Invalid Paging Query
+2018-09-03 11:39:49 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:39:49 INFO Starting test for state with bad limit parameter
+2018-09-03 11:39:49 INFO Invalid Count Query
+2018-09-03 11:39:49 INFO The 'count' query parameter must be a positive, non-zero integer.
+2018-09-03 11:39:49 INFO Starting test for state with bad head parameter
+2018-09-03 11:40:34 INFO Not able to access 
+2018-09-03 11:40:34 INFO Not able to access 
+2018-09-03 11:40:41 INFO Invalid State Address
+2018-09-03 11:40:41 INFO The state address submitted was invalid. To fetch specific state data, you must submit the full 70-character address.
+2018-09-03 11:40:41 INFO Starting test for transactions with head parameter
+2018-09-03 11:40:41 INFO Starting test for transactions with bad head parameter
+2018-09-03 11:40:41 INFO Rest Api is not reachable
+2018-09-03 11:40:41 INFO Invalid Resource Id
+2018-09-03 11:40:41 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:40:41 INFO Starting test for transactions with id parameter
+2018-09-03 11:40:41 INFO Starting test for transactions with bad id parameter
+2018-09-03 11:40:41 INFO Rest Api is not reachable
+2018-09-03 11:40:41 INFO Starting test for transactions with head and id parameter
+2018-09-03 11:40:42 INFO Starting test for transactions with paging parameters
+2018-09-03 11:40:42 INFO Invalid Paging Query
+2018-09-03 11:40:42 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:40:42 INFO Starting test for transactions with bad paging parameters
+2018-09-03 11:40:42 INFO Invalid Count Query
+2018-09-03 11:40:42 INFO The 'count' query parameter must be a positive, non-zero integer.
+2018-09-03 11:40:42 INFO Starting test for transactions with invalid start parameter
+2018-09-03 11:40:42 INFO Invalid Paging Query
+2018-09-03 11:40:42 INFO Paging request failed as written. One or more of the 'min', 'max', or 'count' query parameters were invalid or out of range.
+2018-09-03 11:40:42 INFO Starting test for transactions with bad limit parameter
+2018-09-03 11:40:42 INFO Invalid Count Query
+2018-09-03 11:40:42 INFO The 'count' query parameter must be a positive, non-zero integer.
+2018-09-03 11:40:42 INFO Starting test for transactions with list reversed
+2018-09-03 11:40:42 INFO Starting test for transaction/{transaction_id}
+2018-09-03 11:40:42 INFO Starting test for transactions/{transaction_id}
+2018-09-03 11:40:42 INFO Rest Api not reachable
+2018-09-03 11:40:42 INFO Invalid Resource Id
+2018-09-03 11:40:42 INFO Blockchain items are identified by 128 character hex-strings. A submitted block, batch, or transaction id was invalid: f
+2018-09-03 11:40:42 INFO Starting Test for multiple validators
+2018-09-03 11:40:42 DEBUG starting thread (client mode): 0xa0836b38
+2018-09-03 11:40:42 DEBUG Local version/idstring: SSH-2.0-paramiko_2.4.1
+2018-09-03 11:40:42 DEBUG Remote version/idstring: SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.4
+2018-09-03 11:40:42 INFO Connected (version 2.0, client OpenSSH_7.2p2)
+2018-09-03 11:40:42 DEBUG kex algos:['curve25519-sha256@libssh.org', 'ecdh-sha2-nistp256', 'ecdh-sha2-nistp384', 'ecdh-sha2-nistp521', 'diffie-hellman-group-exchange-sha256', 'diffie-hellman-group14-sha1'] server key:['ssh-rsa', 'rsa-sha2-512', 'rsa-sha2-256', 'ecdsa-sha2-nistp256', 'ssh-ed25519'] client encrypt:['chacha20-poly1305@openssh.com', 'aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'aes128-gcm@openssh.com', 'aes256-gcm@openssh.com'] server encrypt:['chacha20-poly1305@openssh.com', 'aes128-ctr', 'aes192-ctr', 'aes256-ctr', 'aes128-gcm@openssh.com', 'aes256-gcm@openssh.com'] client mac:['umac-64-etm@openssh.com', 'umac-128-etm@openssh.com', 'hmac-sha2-256-etm@openssh.com', 'hmac-sha2-512-etm@openssh.com', 'hmac-sha1-etm@openssh.com', 'umac-64@openssh.com', 'umac-128@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'] server mac:['umac-64-etm@openssh.com', 'umac-128-etm@openssh.com', 'hmac-sha2-256-etm@openssh.com', 'hmac-sha2-512-etm@openssh.com', 'hmac-sha1-etm@openssh.com', 'umac-64@openssh.com', 'umac-128@openssh.com', 'hmac-sha2-256', 'hmac-sha2-512', 'hmac-sha1'] client compress:['none', 'zlib@openssh.com'] server compress:['none', 'zlib@openssh.com'] client lang:[''] server lang:[''] kex follows?False
+2018-09-03 11:40:42 DEBUG Kex agreed: ecdh-sha2-nistp256
+2018-09-03 11:40:42 DEBUG HostKey agreed: ecdsa-sha2-nistp256
+2018-09-03 11:40:42 DEBUG Cipher agreed: aes128-ctr
+2018-09-03 11:40:42 DEBUG MAC agreed: hmac-sha2-256
+2018-09-03 11:40:42 DEBUG Compression agreed: none
+2018-09-03 11:40:42 DEBUG kex engine KexNistp256 specified hash_algo <built-in function openssl_sha256>
+2018-09-03 11:40:42 DEBUG Switch to new keys ...
+2018-09-03 11:40:42 DEBUG userauth is OK
+2018-09-03 11:40:42 INFO Authentication (password) successful!
+2018-09-03 11:40:42 DEBUG [chan 0] Max packet in: 32768 bytes
+2018-09-03 11:40:42 DEBUG Received global request "hostkeys-00@openssh.com"
+2018-09-03 11:40:42 DEBUG Rejecting "hostkeys-00@openssh.com" global request from server.
+2018-09-03 11:40:42 DEBUG [chan 0] Max packet out: 32768 bytes
+2018-09-03 11:40:42 DEBUG Secsh channel 0 opened.
+2018-09-03 11:40:42 DEBUG [chan 0] Sesch channel 0 request ok
+2018-09-03 11:40:42 DEBUG [chan 0] Sesch channel 0 request ok
+2018-09-03 11:40:42 DEBUG [chan 1] Max packet in: 32768 bytes
+2018-09-03 11:40:42 DEBUG [chan 1] Max packet out: 32768 bytes
+2018-09-03 11:40:42 DEBUG Secsh channel 1 opened.
+2018-09-03 11:40:42 DEBUG [chan 0] EOF sent (0)
+2018-09-03 11:40:42 DEBUG [chan 1] Sesch channel 1 request ok
+2018-09-03 11:40:42 INFO Starting Intkey Transaction processor
+2018-09-03 11:40:42 INFO Starting Intkey Workload
+2018-09-03 11:40:42 DEBUG Ignoring message for dead channel 0
+2018-09-03 11:40:42 DEBUG Ignoring message for dead channel 0
+2018-09-03 11:40:52 INFO Stopping Intkey Workload
+2018-09-03 11:40:52 DEBUG [chan 1] Sesch channel 1 request ok
+2018-09-03 11:40:52 DEBUG EOF in transport thread
+2018-09-03 11:41:02 INFO Starting test for batch post
+2018-09-03 11:41:03 INFO Creating intkey transactions with set operations
+2018-09-03 11:41:03 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:41:03 INFO Submitting batches to the handlers
+2018-09-03 11:41:05 INFO Batch is committed
+2018-09-03 11:41:05 INFO Block is created for the respective batch
+2018-09-03 11:41:07 INFO Batch is committed
+2018-09-03 11:41:07 INFO Block is created for the respective batch
+2018-09-03 11:41:08 INFO Checking Consensus on block number 1
+2018-09-03 11:41:08 INFO Starting test for batch with bad protobuf
+2018-09-03 11:41:08 INFO No Batches Submitted
+2018-09-03 11:41:08 INFO The protobuf BatchList you submitted was empty and contained no Batches. You must submit at least one Batch.
+2018-09-03 11:41:08 INFO Starting test for batch with bad protobuf
+2018-09-03 11:41:08 INFO Protobuf Not Decodable
+2018-09-03 11:41:08 INFO The protobuf BatchList you submitted was malformed and could not be read.
+2018-09-03 11:41:08 INFO Starting test for batch post
+2018-09-03 11:41:08 INFO Creating intkey transactions with set operations
+2018-09-03 11:41:08 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:41:08 INFO Submitting batches to the handlers
+2018-09-03 11:41:08 INFO Batches must be submitted in a BatchList protobuf binary, with a 'Content-Type' header of 'application/octet-stream'.
+2018-09-03 11:41:08 INFO Batches must be submitted in a BatchList protobuf binary, with a 'Content-Type' header of 'application/octet-stream'.
+2018-09-03 11:41:08 INFO Batches must be submitted in a BatchList protobuf binary, with a 'Content-Type' header of 'application/octet-stream'.
+2018-09-03 11:41:08 INFO Starting test for batch post
+2018-09-03 11:41:08 INFO Creating intkey transactions with set operations
+2018-09-03 11:41:08 INFO Creating batches for transactions 1trn/batch
+2018-09-03 11:41:08 INFO Submitting batches to the handlers
+2018-09-03 11:47:08 INFO Starting test for batch post
+2018-09-03 11:47:09 INFO Creating intkey transactions with set operations
+2018-09-03 11:47:09 INFO Creating batches for transactions 1trn/batch

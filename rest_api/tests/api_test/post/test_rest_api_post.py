@@ -49,7 +49,7 @@ from payload import get_signer, create_intkey_transaction, create_batch,\
 
 from base import RestApiBaseTest
 
-from fixtures import setup_empty_batch
+from fixtures import setup_empty_trxs_batch
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -335,16 +335,16 @@ class TestPost(RestApiBaseTest):
                 assert e.code == 400
         final_state_length = len(get_state_list())
         assert initial_state_length == final_state_length
+        
 
-    def test_api_post_empty_transaction_batch(self, setup_empty_batch):
-        batch = setup_empty_batch
+    def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
+        batch = setup_empty_trxs_batch
         post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
         
         for batch in post_batch_list:
             response = post_batch(batch)
-            print(response)
+
            
-                    
     def test_api_post_batch_different_signer(self, setup):
         signer_trans = get_signer() 
         intkey=create_intkey_transaction("set",[],50,signer_trans)
@@ -355,7 +355,6 @@ class TestPost(RestApiBaseTest):
         for batc in batch_list:
             try:
                 response = post_batch(batc)
-                print(response)
             except urllib.error.HTTPError as error:
                 LOGGER.info("Rest Api is not reachable")
                 data = json.loads(error.fp.read().decode('utf-8'))

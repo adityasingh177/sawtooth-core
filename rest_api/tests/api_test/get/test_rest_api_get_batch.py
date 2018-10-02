@@ -328,6 +328,7 @@ class TestBatchList(RestApiBaseTest):
         limit = setup['limit']
         address = setup['address']
         expected_batches = setup_batches[::-1]
+        print(expected_batches)
              
         expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)
@@ -340,6 +341,9 @@ class TestBatchList(RestApiBaseTest):
             assert response.code == 400
           
         batches = response['data'][:-1]
+        
+        for b in batches:
+            print(b)
         
                           
         self.assert_check_batch_seq(batches, expected_batches, 

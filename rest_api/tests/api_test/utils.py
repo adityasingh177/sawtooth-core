@@ -30,8 +30,7 @@ import requests
 import hashlib
 import os
 import time
-import socket
-import netifaces
+import aiohttp
 
     
 LOGGER = logging.getLogger(__name__)

@@ -15,6 +15,7 @@
 import aiohttp
 from base64 import b64decode
 
+
 CONSENSUS_ALGO = b'Devmode'
 FAMILY_NAME = 'intkey'
 FAMILY_VERSION = '1.0'
@@ -263,10 +264,15 @@ class RestApiBaseTest(object):
             self.assert_signer_public_key(txn, signer_key)
             self.assert_batcher_public_key(txn, signer_key)
         
-    def assert_check_state_seq(self, state, expected):
+    def assert_check_state_seq(self, response, expected):
         """Asserts state is updated properly
         """
-        pass
+        self.assertEqual(len(proto_entries), len(json_entries))
+        for pb_leaf, js_leaf in zip(proto_entries, json_entries):
+            self.assertIn('address', js_leaf)
+            self.assertIn('data', js_leaf)
+            self.assertEqual(pb_leaf.address, js_leaf['address'])
+            self.assertEqual(pb_leaf.data, b64decode(js_leaf['data']))
     
     def wait_until_status(url, status_code=200, tries=5):
         """Pause the program until the given url returns the required status.
