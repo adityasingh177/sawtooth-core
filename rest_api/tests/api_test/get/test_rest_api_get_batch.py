@@ -580,7 +580,8 @@ class TestBatchStatusesList(RestApiBaseTest):
     def test_api_get_batch_statuses_unknown(self, setup):
         address = setup['address']
         expected_batches = setup['expected_batches']
-        unknown_batch = expected_batches[0]
+        batch = expected_batches[0]
+        unknown_batch = batch[:1] + "b" + batch[1+1:]
         status = "UNKNOWN"
 
         expected_link = '{}/batch_statuses?id={}'.format(address, unknown_batch)

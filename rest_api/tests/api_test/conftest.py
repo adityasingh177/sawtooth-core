@@ -232,11 +232,9 @@ def setup(request):
     data['transaction_ids'] = transaction_ids
     block_ids = [block['header_signature'] for block in block_list['data']]
     data['block_ids'] = block_ids[:-1]
-    print(block_ids)
     batch_ids = [block['header']['batch_ids'][0] for block in block_list['data']]
     data['batch_ids'] = batch_ids
     expected_head = block_ids[0]
-    print(expected_head)
     data['expected_head'] = expected_head
     state_addresses = [state['address'] for state in get_state_list()['data']]
     data['state_address'] = state_addresses
