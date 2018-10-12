@@ -20,7 +20,9 @@ import urllib.request
 import urllib.error
 
  
-from fixtures import break_genesis, invalid_batch
+from fixtures import break_genesis, invalid_batch, setup_batch_statuses_10,\
+                     setup_batch_statuses_15
+
 from utils import get_batches, get_batch_id, post_batch,\
                   get_batch_statuses, post_batch_statuses,\
                   _create_expected_link, _get_batch_list
@@ -431,36 +433,28 @@ class TestBatchGet(RestApiBaseTest):
 class TestBatchStatusesList(RestApiBaseTest):
     """This class tests the batch status list with different parameters
     """
-    def test_api_post_batch_status_15ids(self, setup):   
+    def test_api_post_batch_status_15ids(self, setup_batch_statuses_15):   
         """verifies that POST /batches_statuses with more than 15 ids
         """
         LOGGER.info("Starting test for batch with bad head parameter")
         data = {}
-        batch_ids = setup['batch_ids']
-        data['batch_ids'] = batch_ids
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        data_str=json.dumps(data['batch_ids']).encode()
+        batch_ids = setup_batch_statuses_15['batch_ids']
+        data_str=json.dumps(batch_ids).encode()
                         
         try:
             response = post_batch_statuses(data_str)
-            assert response['data'][0]['status'] == "COMMITTED"
+            for resp in response['data']:
+                assert resp['status'] == "COMMITTED"
         except urllib.error.HTTPError as error:
             assert response.code == 400
    
-    def test_api_post_batch_status_10ids(self, setup):   
+    def test_api_post_batch_status_10ids(self, setup_batch_statuses_10):   
         """verifies that POST /batches_status with less than 15 ids
         """
-        LOGGER.info("Starting test for batch with bad head parameter")
-        data = {}
-        values = []
-        batch_ids = setup['batch_ids']
-        data['batch_ids'] = batch_ids
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        for i in range(10):
-            values.append(data['batch_ids'][i])
-        data_str=json.dumps(values).encode()
+        LOGGER.info("Starting test for post batch statuses with less than 15 ids")
+        batch_ids = setup_batch_statuses_10['batch_ids']
+            
+        data_str=json.dumps(batch_ids).encode()
                         
         try:
             response = post_batch_statuses(data_str)

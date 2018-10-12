@@ -219,9 +219,7 @@ def setup(request):
     for batch in expected_batches:
         response = get_batch_statuses([batch])
         status = response['data'][0]['status']
-    
-    time.sleep(3)
-      
+          
     block_list = get_blocks()
     data['block_list'] = block_list
     batch_list = get_batches()

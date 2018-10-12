@@ -336,7 +336,7 @@ class TestTransactionList(RestApiBaseTest):
         except urllib.error.HTTPError as error:
             LOGGER.info("Transaction count not able to collect")
     
-class TesttransactionGet(RestApiBaseTest):
+class TestTransactionGet(RestApiBaseTest):
     def test_api_get_transaction_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 
         """
