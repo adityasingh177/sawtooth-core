@@ -133,60 +133,6 @@ def invalid_batch():
     return data
 
 
-@pytest.fixture(scope="function")
-def setup_batch_statuses_10():
-    data = {}
-    signer = get_signer()
-    expected_trxns  = {}
-    expected_batches = []
-    transaction_list = []
-    initial_state_length = len(get_state_list())
-    address = _get_client_address()
-    
-    
-    txns = [create_intkey_transaction("set", [] , 50 , signer) for i in range(10)]
-
-    for txn in txns:
-        dict = MessageToDict(
-                txn,
-                including_default_value_fields=True,
-                preserving_proto_field_name=True)
-                
-        expected_trxns['trxn_id'] = [dict['header_signature']]
-        expected_trxns['payload'] = [dict['payload']]
-                    
-    LOGGER.info("Creating batches for transactions 1trn/batch")
-
-    batches = [create_batch([txn], signer) for txn in txns]
-
-    for batch in batches:
-        dict = MessageToDict(
-                batch,
-                including_default_value_fields=True,
-                preserving_proto_field_name=True)
-
-        batch_id = dict['header_signature']
-        expected_batches.append(batch_id)
-    
-    length_batches = len(expected_batches)
-    length_transactions = len(expected_trxns)
-    
-    post_batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches]
-        
-    LOGGER.info("Submitting batches to the handlers")
-    
-    for batch in post_batch_list:
-        response = post_batch(batch)
-        try:
-            response = post_batch(batch)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-    
-    data['batch_ids'] = expected_batches
-    return data
 
 @pytest.fixture(scope="function")
 def setup_empty_trxs_batch():
@@ -208,60 +154,7 @@ def setup_empty_trxs_batch():
     return batch
 
 
-@pytest.fixture(scope="function")
-def setup_batch_statuses_15():
-    data = {}
-    signer = get_signer()
-    expected_trxns  = {}
-    expected_batches = []
-    transaction_list = []
-    initial_state_length = len(get_state_list())
-    address = _get_client_address()
-    
-    
-    txns = [create_intkey_transaction("set", [] , 50 , signer) for i in range(15)]
 
-    for txn in txns:
-        dict = MessageToDict(
-                txn,
-                including_default_value_fields=True,
-                preserving_proto_field_name=True)
-                
-        expected_trxns['trxn_id'] = [dict['header_signature']]
-        expected_trxns['payload'] = [dict['payload']]
-                    
-    LOGGER.info("Creating batches for transactions 1trn/batch")
-
-    batches = [create_batch([txn], signer) for txn in txns]
-
-    for batch in batches:
-        dict = MessageToDict(
-                batch,
-                including_default_value_fields=True,
-                preserving_proto_field_name=True)
-
-        batch_id = dict['header_signature']
-        expected_batches.append(batch_id)
-    
-    length_batches = len(expected_batches)
-    length_transactions = len(expected_trxns)
-    
-    post_batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches]
-        
-    LOGGER.info("Submitting batches to the handlers")
-    
-    for batch in post_batch_list:
-        response = post_batch(batch)
-        try:
-            response = post_batch(batch)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-    
-    data['batch_ids'] = expected_batches
-    return data
 
 @pytest.fixture(scope="function")
 def setup_empty_trxs_batch():

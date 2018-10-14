@@ -13,6 +13,7 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 import aiohttp
+import logging
 from base64 import b64decode
 
 
@@ -22,6 +23,9 @@ FAMILY_VERSION = '1.0'
 DEFAULT_LIMIT = 100
 TRACE = False
 NONCE = ''
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class RestApiBaseTest(object):
@@ -132,6 +136,8 @@ class RestApiBaseTest(object):
         """Asserts a response has a link url string with an 
            expected ending
         """
+        print(response['link'])
+        print(expected_link)
         assert 'link' in response
         assert response['link'] == expected_link
         self.assert_valid_url(response['link'], expected_link)
@@ -189,10 +195,12 @@ class RestApiBaseTest(object):
         assert isinstance(data, list)
         self.assert_items(data, dict)
     
-    def assert_valid_data_list(self, response, expected_length):
+    def assert_valid_data_length(self, response, expected_length):
         """Asserts a response has a data list of dicts of an 
            expected length.
         """
+        LOGGER.info(len(response))
+        LOGGER.info(expected_length)
         assert len(response) == expected_length
                         
     def assert_check_block_seq(self, blocks, expected_batches, expected_txns):

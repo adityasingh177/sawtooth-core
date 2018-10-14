@@ -55,6 +55,7 @@ LOGGER.setLevel(logging.INFO)
 
 
 LIMIT = 100
+BATCH_SIZE = 1
                   
  
 def pytest_addoption(parser):
@@ -164,10 +165,7 @@ def setup(request):
 
     LOGGER.info("Creating intkey transactions with set operations")
     
-    txns = [
-        create_intkey_transaction("set", [] , 50 , signer),
-        create_intkey_transaction("set", [] , 50 , signer),
-    ]
+    txns = [create_intkey_transaction("set", [] , 50 , signer) for i in range(BATCH_SIZE)]
 
     for txn in txns:
         dict = MessageToDict(

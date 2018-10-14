@@ -64,20 +64,15 @@ class TestStateList(RestApiBaseTest):
         expected_address = setup['state_address'][0]
         expected_link =  "{}/state?head={}&start={}&limit=100".format(address, expected_head,\
                                                                       expected_address)
-        print(expected_link)
-        print(expected_head)
-        
-        async with aiohttp.ClientSession() as session:        
-            async with session.get(url='http://10.223.155.43:8008/state', raise_for_status=True) as data:
-                response = await data.json()
-        
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(response)
-        
-              
-        state_list = response['data'][::-1]
-        print(response['head'])
-                      
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/state', raise_for_status=True) as data:
+                    response = await data.json()
+        except urllib.error.HTTPError as error:
+            LOGGER.info("Rest Api is Unreachable")
+            
+                  
+        state_list = response['data'][::-1]                      
         self.assert_valid_head(response, expected_head)
         self.assert_valid_link(response, expected_link)
     
@@ -95,19 +90,14 @@ class TestStateList(RestApiBaseTest):
         state_address = setup['state_address'][0]
         expected_link =  "{}/state?head={}&start={}&limit=100".format(address, expected_head,\
                                                                       state_address)
+        params={'head': expected_head}
         
         async with aiohttp.ClientSession() as session:        
-            async with session.get(url='http://10.223.155.43:8008/state') as data:
+            async with session.get(url='http://10.223.155.43:8008/state',params=params) as data:
                 response = await data.json()
-                print(response.status)
                         
-        state_list = response['data'][:-1] 
-
         self.assert_valid_head(response, expected_head)
-        self.assert_valid_link(response, expected_link)
-                  
-        assert response['head'] == expected_head , "request is not correct"
-    
+        self.assert_valid_link(response, expected_link)    
                               
     def test_api_get_state_list_invalid_batch(self, invalid_batch):
         """Tests that state is not updated for when
