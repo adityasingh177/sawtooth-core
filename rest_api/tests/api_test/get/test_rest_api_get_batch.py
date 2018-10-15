@@ -29,7 +29,9 @@ from utils import get_batches, get_batch_id, post_batch,\
 
 from base import RestApiBaseTest
 
-pytestmark = [pytest.mark.get , pytest.mark.batch]
+pytestmark = [pytest.mark.get , pytest.mark.batch, pytest.mark.second]
+
+
 
   
 LOGGER = logging.getLogger(__name__)
@@ -368,10 +370,8 @@ class TestBatchList(RestApiBaseTest):
           
         batches = response['data'][:-1]
         
-        for b in batches:
-            print(b)
-        
-                          
+
+                              
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)

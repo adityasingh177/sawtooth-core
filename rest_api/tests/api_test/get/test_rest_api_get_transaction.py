@@ -18,6 +18,7 @@ import logging
 import json
 import urllib.request
 import urllib.error
+import aiohttp
 
 from fixtures import break_genesis
 
@@ -25,7 +26,8 @@ from utils import get_transactions, get_transaction_id
 
 from base import RestApiBaseTest
 
-pytestmark = [pytest.mark.get , pytest.mark.transactions]
+pytestmark = [pytest.mark.get , pytest.mark.transactions, pytest.mark.first]
+
 
   
 LOGGER = logging.getLogger(__name__)
@@ -47,7 +49,7 @@ HEAD_LENGTH = 128
   
 
 class TestTransactionList(RestApiBaseTest):
-    def test_api_get_transaction_list(self, setup):
+    async def test_api_get_transaction_list(self, setup):
         """Tests the transaction list after submitting intkey batches
         """
         signer_key = setup['signer_key']
@@ -56,28 +58,34 @@ class TestTransactionList(RestApiBaseTest):
         expected_length = setup['expected_trn_length']
         payload = setup['payload'][0]
         address = setup['address']
+        start = setup['start']
+        limit = setup['limit']
         start = expected_txns[::-1][0]
          
         expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
-                         expected_head, start, LIMIT)
+                         expected_head, start, limit)
+        
+        paging_link = '{}/transactions?head={}&start={}'.format(address,\
+                         expected_head, start)
            
-        try:   
-            response = get_transactions()
-        except urllib.error.HTTPError as error:
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
                  
         txns = response['data'][:-1]
           
-#         self.assert_check_transaction_seq(txns, expected_txns, 
-#                                           payload, signer_key)
-#         self.assert_valid_head(response , expected_head)
-#         self.assert_valid_paging(response)
+        self.assert_check_transaction_seq(txns, expected_txns, 
+                                          payload, signer_key)
+        self.assert_valid_head(response , expected_head)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
          
              
-    def test_api_get_transaction_list_head(self, setup):   
+    async def test_api_get_transaction_list_head(self, setup):   
         """Tests that GET /transactions is reachable with head parameter 
         """
         LOGGER.info("Starting test for transactions with head parameter")
@@ -88,40 +96,45 @@ class TestTransactionList(RestApiBaseTest):
         payload = setup['payload'][0]
         address = setup['address']
         start = expected_txns[::-1][0]
+        limit = setup['limit']
          
         expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
-                         expected_head, start, LIMIT)
+                         expected_head, start, limit)
                           
+        params={'head': expected_head}
+                    
         try:
-            response = get_transactions(head_id=expected_head)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
                               
         txns = response['data'][:-1]
           
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
            
-    def test_api_get_transaction_list_bad_head(self, setup):   
+    async def test_api_get_transaction_list_bad_head(self, setup):   
         """Tests that GET /transactions is unreachable with bad head parameter 
         """       
         LOGGER.info("Starting test for transactions with bad head parameter")
+        params={'head': BAD_HEAD}
                        
         try:
-            response = get_transactions(head_id=BAD_HEAD)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
          
-        self.assert_valid_error(data, INVALID_RESOURCE_ID)
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
                 
-    def test_api_get_transaction_list_id(self, setup):   
+    async def test_api_get_transaction_list_id(self, setup):   
         """Tests that GET /transactions is reachable with id as parameter 
         """
         LOGGER.info("Starting test for transactions with id parameter")
@@ -136,14 +149,20 @@ class TestTransactionList(RestApiBaseTest):
         transaction_ids   =  setup['transaction_ids']
         expected_id = transaction_ids[0]
         expected_length = len([expected_id])
+        limit = setup['limit']
          
         expected_link = '{}/transactions?head={}&start={}&limit={}&id={}'.format(address,\
-                         expected_head, start, LIMIT, expected_id)
+                         expected_head, start, limit, expected_id)
                       
+        params={'id': expected_id}
+                    
         try:
-            response = get_transactions(id=expected_id)
-        except:
-            LOGGER.info("Rest Api is not reachable")
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
                      
                      
         txns = response['data'][:-1]
@@ -151,21 +170,23 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_check_transaction_seq(txns, expected_txns, 
                                           payload, signer_key) 
                  
-    def test_api_get_transaction_list_bad_id(self, setup):   
+    async def test_api_get_transaction_list_bad_id(self, setup):   
         """Tests that GET /transactions is unreachable with bad id parameter 
         """
         LOGGER.info("Starting test for transactions with bad id parameter")
-        bad_id = 'f' 
                        
+        params={'head': BAD_ID}
+                          
         try:
-            response = get_transactions(head_id=bad_id)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is not reachable")
-            data = json.loads(error.fp.read().decode('utf-8'))
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
          
-        self.assert_valid_error(data, INVALID_RESOURCE_ID)
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
                
-    def test_api_get_transaction_list_head_and_id(self, setup):   
+    async def test_api_get_transaction_list_head_and_id(self, setup):   
         """Tests GET /transactions is reachable with head and id as parameters 
         """
         LOGGER.info("Starting test for transactions with head and id parameter")
@@ -180,14 +201,20 @@ class TestTransactionList(RestApiBaseTest):
         transaction_ids   =  setup['transaction_ids']
         expected_id = transaction_ids[0]
         expected_length = len([expected_id])
+        limit = setup['limit']
                  
         expected_link = '{}/transactions?head={}&start={}&limit={}&id={}'.format(address,\
-                         expected_head, start, LIMIT, expected_id)
+                         expected_head, start, limit, expected_id)
                                 
-        try:       
-            response = get_transactions(head_id=expected_head , id=expected_id)
-        except:
-            LOGGER.info("Rest Api not reachable")
+        params={'head':expected_head,'id':expected_id}
+                    
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/batches', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
                      
                        
         txns = response['data'][:-1]
@@ -196,7 +223,7 @@ class TestTransactionList(RestApiBaseTest):
                                           payload, signer_key)
         self.assert_valid_head(response , expected_head)
                 
-    def test_api_get_paginated_transaction_list(self, setup):   
+    async def test_api_get_paginated_transaction_list(self, setup):   
         """Tests GET /transactions is reachbale using paging parameters 
         """
         LOGGER.info("Starting test for transactions with paging parameters")
@@ -206,172 +233,237 @@ class TestTransactionList(RestApiBaseTest):
         start = 1
         limit = 1
                     
+        params={'limit':1, 'start':1}
+                          
         try:
-            response = get_transactions(start=start , limit=limit)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
-         
-        self.assert_valid_error(data, INVALID_PAGING_QUERY)
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+          
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
+    
+    async def test_api_get_transaction_list_limit(self, setup):   
+        """Tests GET /batches is reachable using paging parameters 
+        """
+        LOGGER.info("Starting test for batch with paging parameters")
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_txns = setup['expected_txns']
+        expected_length = setup['expected_trn_length']
+        payload = setup['payload'][0]
+        address = setup['address']
+        start = expected_txns[::-1][0]
+        transaction_ids   =  setup['transaction_ids']
+        expected_id = transaction_ids[0]
+        expected_length = len([expected_id])
+        limit = setup['limit']
+        
+        params={'limit':1}
+        
+        expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
+                         expected_head, start, 1)
+                      
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
+        
+        
+        txns = response['data'][:-1]
+                                 
+        self.assert_check_transaction_seq(txns, expected_txns, 
+                                          payload, signer_key)
+          
+        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
       
-    def test_api_get_transaction_bad_paging(self, setup):   
+    async def test_api_get_transaction_bad_paging(self, setup):   
         """Tests GET /transactions is reachbale using bad paging parameters 
         """
         LOGGER.info("Starting test for transactions with bad paging parameters")
-        batch_ids   =  setup['batch_ids']
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        start = -1
-        limit = -1
+        params = {'start':-1 , 'limit':-1}
                     
         try:
-            response = get_transactions(start=start , limit=limit)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
          
-        self.assert_valid_error(data, INVALID_COUNT_QUERY)
+        self.assert_valid_error(response, INVALID_COUNT_QUERY)
                  
-    def test_api_get_transaction_list_invalid_start(self, setup):   
+    async def test_api_get_transaction_list_invalid_start(self, setup):   
         """Tests that GET /transactions is unreachable with invalid start parameter 
         """
-        LOGGER.info("Starting test for transactions with invalid start parameter")
-        batch_ids   =  setup['batch_ids']
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        start = -1
-                         
-        try:  
-            response = get_transactions(start=start)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+        LOGGER.info("Starting test for transactions with invalid start parameter")                       
+        params = {'start':-1 }
+                    
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
          
-        self.assert_valid_error(data, INVALID_PAGING_QUERY)
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
           
-    def test_api_get_transaction_list_invalid_limit(self, setup):   
+    async def test_api_get_transaction_list_invalid_limit(self, setup):   
         """Tests that GET /transactions is unreachable with bad limit parameter 
         """
-        LOGGER.info("Starting test for transactions with bad limit parameter")
-        batch_ids = setup['batch_ids']
-        expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        limit = 0
-                     
-        try:  
-            response = get_transactions(limit=limit)
-        except urllib.error.HTTPError as error:
-            data = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(data['error']['title'])
-            LOGGER.info(data['error']['message'])
+        LOGGER.info("Starting test for transactions with bad limit parameter")                   
+        params = {'limit': 0 }
+                    
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
          
-        self.assert_valid_error(data, INVALID_COUNT_QUERY)
+        self.assert_valid_error(response, INVALID_COUNT_QUERY)
       
                      
-    def test_api_get_transaction_list_reversed(self, setup):   
+    async def test_api_get_transaction_list_reversed(self, setup):   
         """verifies that GET /transactions with list reversed
         """
         LOGGER.info("Starting test for transactions with list reversed")
-        batch_ids = setup['batch_ids']
+        signer_key = setup['signer_key']
         expected_head = setup['expected_head']
-        expected_id = batch_ids[0]
-        reverse = True
+        expected_txns = setup['expected_txns']
+        expected_length = setup['expected_trn_length']
+        payload = setup['payload'][0]
+        address = setup['address']
+        start = expected_txns[::-1][0]
+        transaction_ids   =  setup['transaction_ids']
+        expected_id = transaction_ids[0]
+        expected_length = len([expected_id])
+        limit = setup['limit']
+        expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
+                         expected_head, start, limit)
+         
+        params = 'reverse'
                          
         try:
-            response = get_transactions(reverse=reverse)
-        except urllib.error.HTTPError as error:
-            assert response.code == 400
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
                         
         assert response['paging']['start'] == None ,  "request is not correct"
         assert response['paging']['limit'] == None ,  "request is not correct"
         assert bool(response['data']) == True
     
-    def test_api_get_transactions_link_val(self, setup):
+    async def test_api_get_transactions_link_val(self, setup):
         """Tests/ validate the transactions parameters with transactions, head, start and limit
         """
         try:
-            transactions_list = get_transactions()
-            for link in transactions_list:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            for link in response:
                 if(link == 'link'):
-                    assert 'head' in transactions_list['link']
-                    assert 'start' in transactions_list['link']  
-                    assert 'limit' in transactions_list['link'] 
-                    assert 'transactions' in transactions_list['link']  
+                    assert 'head' in response['link']
+                    assert 'start' in response['link']  
+                    assert 'limit' in response['link'] 
+                    assert 'transactions' in response['link']  
         except urllib.error.HTTPError as error:
             assert response.code == 400
             LOGGER.info("Link is not proper for transactions and parameters are missing")
     
-    def test_api_get_transactions_key_params(self, setup):
+    async def test_api_get_transactions_key_params(self, setup):
         """Tests/ validate the state key parameters with data, head, link and paging               
         """
-        response = get_transactions()
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
+        
         assert 'link' in response
         assert 'data' in response
         assert 'paging' in response
         assert 'head' in response
     
-    def test_api_get_transaction_id_length(self, setup):
+    async def test_api_get_transaction_id_length(self, setup):
         """Tests the transaction id length should be 128 hex character long 
         """   
         try:
-            transaction_list = get_transactions()
-            for trans in transaction_list['data']:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                    response = await data.json()
+            
+            for trans in response['data']:
                 transaction_ids = trans['header_signature']
                 head_len = len(transaction_ids)
-        except urllib.error.HTTPError as error:
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Transaction id length is not 128 hex character long")
         assert head_len == HEAD_LENGTH
     
-    def test_rest_api_check_transactions_count(self, setup):
+    async def test_rest_api_check_transactions_count(self, setup):
         """Tests transaction count from transaction list 
         """
         count =0
         try:
-            batch_list = get_transactions()
-            for batch in enumerate(batch_list['data']):
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            for trans in enumerate(response['data']):
                 count = count+1
-        except urllib.error.HTTPError as error:
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Transaction count not able to collect")
     
 class TestTransactionGet(RestApiBaseTest):
-    def test_api_get_transaction_id(self, setup):
+    async def test_api_get_transaction_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is reachable 
         """
         LOGGER.info("Starting test for transaction/{transaction_id}")
+        signer_key = setup['signer_key']
         expected_head = setup['expected_head']
-        expected_id = setup['transaction_ids'][0]
+        expected_txns = setup['expected_txns']
+        expected_id = expected_txns[0]
         address = setup['address']
+        payload = setup['payload']
         expected_length = 1
         
         expected_link = '{}/transactions/{}'.format(address,expected_id)
                          
         try:
-            response = get_transaction_id(transaction_id=expected_id)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message']) 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions/{}'.format(expected_id), 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
+                                      
+        txns = response['data']
         
-        self.assert_valid_link(response, expected_link)  
-        assert bool(response['data']) == True   
+        self.assert_check_transaction_seq(txns, expected_txns, 
+                                          payload, signer_key)
+        self.assert_valid_link(response, expected_link)   
           
-    def test_api_get_transaction_bad_id(self, setup):
+    async def test_api_get_transaction_bad_id(self, setup):
         """Tests that GET /transactions/{transaction_id} is not reachable
            with bad id
         """
-        LOGGER.info("Starting test for transactions/{transaction_id}")
+        LOGGER.info("Starting test for transactions/{bad_id}")
         try:
-            response = get_transaction_id(transaction_id=BAD_ID)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-        
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/transactions/{}'.format(BAD_ID)) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+          
         self.assert_valid_error(response, INVALID_RESOURCE_ID)
 
                  

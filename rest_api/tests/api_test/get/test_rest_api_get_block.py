@@ -18,13 +18,15 @@ import logging
 import json
 import urllib.request
 import urllib.error
+import aiohttp
    
 from utils import get_blocks, get_block_id, get_batches, get_transactions
  
 from base import RestApiBaseTest
  
  
-pytestmark = [pytest.mark.get , pytest.mark.block]
+pytestmark = [pytest.mark.get , pytest.mark.block, pytest.mark.fourth]
+
 
 
 START = 1
@@ -51,360 +53,462 @@ LOGGER.setLevel(logging.INFO)
 class TestBlockList(RestApiBaseTest):
     """This class tests the blocks list with different parameters
     """
-    def test_api_get_block_list(self, setup):
+    async def test_api_get_block_list(self, setup):
         """Tests the block list by submitting intkey batches
         """
         signer_key = setup['signer_key']
         expected_head = setup['expected_head']
         expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
+        start = setup['start']
+        limit = setup['limit']
+        address = setup['address']
+        payload = setup['payload']
+        
+        expected_link = '{}/blocks?head={}&start={}&limit={}'.format(address,\
+                         expected_head, start, limit)
+        
+        paging_link = '{}/blocks?head={}&start={}'.format(address,\
+                         expected_head, start)
                
-        try:   
-            response = get_blocks()
-        except urllib.error.HTTPError as error:
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
             
-        blocks = response['data'][:-1]  
+        blocks = response['data'][:-1] 
+        
+        self.assert_check_block_seq(blocks,expected_batches,
+                                    expected_txns,payload,signer_key)
+        self.assert_valid_head(response, expected_head)
                              
-    def test_api_get_block_list_head(self, setup):   
+    async def test_api_get_block_list_head(self, setup):   
         """Tests that GET /blocks is reachable with head parameter 
         """
         LOGGER.info("Starting test for blocks with head parameter")
         expected_head = setup['expected_head']
+        params={'head': expected_head}
                   
         try:
-            response = get_blocks(head_id=expected_head)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-                  
-        assert response['head'] == expected_head , "request is not correct"
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
+        
+        blocks = response['data'][:-1]                  
+        self.assert_valid_head(response, expected_head)
            
-    def test_api_get_block_list_bad_head(self, setup):   
+    async def test_api_get_block_list_bad_head(self, setup):   
         """Tests that GET /blocks is unreachable with bad head parameter 
         """       
         LOGGER.info("Starting test for blocks with bad head parameter")
                        
+        params={'head': BAD_HEAD}
+                          
         try:
-            batch_list = get_blocks(head_id=BAD_HEAD)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-         
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+        
         self.assert_valid_error(response, INVALID_RESOURCE_ID)
                 
-    def test_api_get_block_list_id(self, setup):   
+    async def test_api_get_block_list_id(self, setup):   
         """Tests that GET /blocks is reachable with id as parameter 
         """
         LOGGER.info("Starting test for blocks with id parameter")
-                       
+        signer_key = setup['signer_key']
         block_ids   =  setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
+        expected_batches = setup['expected_batches']
+        expected_txns = setup['expected_txns']
+        address = setup['address']
+        payload = setup['payload']
+        
+        expected_link = '{}/blocks?head={}&start&limit=0&id={}'.format(address,\
+                         expected_head, expected_id)
                       
+        params={'id': expected_id}
+                    
         try:
-            response = get_blocks(id=expected_id)
-        except:
-            LOGGER.info("Rest Api is not reachable")
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
+        
+        blocks = response['data'][:-1] 
                      
-                     
-        assert response['head'] == expected_head, "request is not correct"
-        assert response['paging']['start'] == None , "request is not correct"
-        assert response['paging']['limit'] == None , "request is not correct"
+        self.assert_check_block_seq(blocks,expected_batches,
+                                    expected_txns,payload,signer_key)
+        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
                  
-    def test_api_get_block_list_bad_id(self, setup):   
+    async def test_api_get_block_list_bad_id(self, setup):   
         """Tests that GET /blocks is unreachable with bad id parameter 
         """
         LOGGER.info("Starting test for blocks with bad id parameter")
-        bad_id = 'f' 
                        
+        params={'head': BAD_ID}
+                          
         try:
-            batch_list = get_blocks(head_id=bad_id)
-        except urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api is not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-         
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+          
         self.assert_valid_error(response, INVALID_RESOURCE_ID)
                
-    def test_api_get_block_list_head_and_id(self, setup):   
-        """Tests GET /blocks is reachable with head and id as parameters 
-        """
-        LOGGER.info("Starting test for blocks with head and id parameter")
-        block_ids =  setup['block_ids']
-        expected_head = setup['expected_head']
-        expected_id = block_ids[0]
-                        
-                 
-        response = get_blocks(head_id=expected_head , id=expected_id)
-                       
-        assert response['head'] == expected_head , "head is not matching"
-        assert response['paging']['start'] == None ,  "start parameter is not correct"
-        assert response['paging']['limit'] == None ,  "request is not correct"
-        assert bool(response['data']) == True
-                 
+             
                 
-    def test_api_get_paginated_block_list(self, setup):   
+    async def test_api_get_paginated_block_list(self, setup):   
         """Tests GET /blocks is reachable using paging parameters 
         """
         LOGGER.info("Starting test for blocks with paging parameters")
         block_ids   =  setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
-        start = 1
-        limit = 1
                     
+        params={'limit':1, 'start':1}
+                          
         try:
-            response = get_blocks(start=start , limit=limit, id=expected_id)
-        except urllib.error.HTTPError as error:
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-         
-        self.assert_valid_error(response, INVALID_PAGING_QUERY)
-    
-    def test_api_get_block_list_start_id(self, setup):   
-        """Tests GET /blocks is reachable using paging parameters 
-        """
-        LOGGER.info("Starting test for blocks with paging parameters")
-        block_ids   =  setup['block_ids']
-        expected_head = setup['expected_head']
-        expected_id = block_ids[0]
-        start = 1
-        limit = 1
-                    
-        try:
-            response = get_blocks(start=start , limit=limit, id=expected_id)
-        except urllib.error.HTTPError as error:
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-         
-        self.assert_valid_error(response, INVALID_PAGING_QUERY)
-                 
-    def test_api_get_block_list_invalid_start(self, setup):   
-        """Tests that GET /blocks is unreachable with invalid start parameter 
-        """
-        LOGGER.info("Starting test for batch with invalid start parameter")
-        block_ids   =  setup['block_ids']
-        expected_head = setup['expected_head']
-        expected_id = block_ids[0]
-        start = -1
-                         
-        try:  
-            response = get_blocks(start=start)
-        except urllib.error.HTTPError as error:
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-         
-        self.assert_valid_error(response, INVALID_PAGING_QUERY)
-    
-    def test_api_get_block_list_limit(self, setup):   
-        """Tests that GET /blocks is unreachable with invalid start parameter 
-        """
-        LOGGER.info("Starting test for batch with invalid start parameter")
-        block_ids   =  setup['block_ids']
-        expected_head = setup['expected_head']
-        expected_id = block_ids[0]
-        start = -1
-                         
-        try:  
-            response = get_blocks(start=start)
-        except urllib.error.HTTPError as error:
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-         
-        self.assert_valid_error(response, INVALID_PAGING_QUERY)
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
           
-    def test_api_get_block_list_invalid_limit(self, setup):   
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
+    
+    async def test_api_get_block_list_limit(self, setup):   
+        """Tests GET /batches is reachable using paging parameters 
+        """
+        LOGGER.info("Starting test for batch with paging parameters")
+        signer_key = setup['signer_key']
+        expected_head = setup['expected_head']
+        expected_batches = setup['expected_batches']
+        expected_txns = setup['expected_txns']
+        start = setup['start']
+        limit = setup['limit']
+        address = setup['address']
+        payload = setup['payload']
+        params={'limit':1}
+        
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
+        
+        blocks = response['data'][:-1]
+        
+        self.assert_check_block_seq(blocks,expected_batches,
+                                    expected_txns,payload,signer_key)
+        self.assert_valid_head(response, expected_head)
+                                 
+                 
+    async def test_api_get_block_list_invalid_start(self, setup):   
+        """Tests that GET /blocks is unreachable with invalid start parameter 
+        """
+        LOGGER.info("Starting test for block with invalid start parameter")
+        block_ids   =  setup['block_ids']
+        expected_head = setup['expected_head']
+        expected_id = block_ids[0]
+        params={'start':-1}
+                          
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+          
+        self.assert_valid_error(response, INVALID_PAGING_QUERY)
+    
+          
+    async def test_api_get_block_list_invalid_limit(self, setup):   
         """Tests that GET /blocks is unreachable with bad limit parameter 
         """
-        LOGGER.info("Starting test for batch with bad limit parameter")
+        LOGGER.info("Starting test for block with bad limit parameter")
         block_ids = setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
-        limit = 0
-                     
-        try:  
-            response = get_blocks(limit=limit)
-        except urllib.error.HTTPError as error:
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-         
+        params={'limit':0}
+                          
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+
         self.assert_valid_error(response, INVALID_COUNT_QUERY)
     
                      
-    def test_api_get_block_list_reversed(self, setup):   
+    async def test_api_get_block_list_reversed(self, setup):   
         """verifies that GET /blocks is unreachable with bad head parameter 
         """
-        LOGGER.info("Starting test for batch with bad head parameter")
+        LOGGER.info("Starting test for blocks with reversed list")
         block_ids = setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
-        reverse = True
                          
+        params = 'reverse'
+                           
         try:
-            response = get_blocks(reverse=reverse)
-        except urllib.error.HTTPError as error:
-            assert response.code == 400
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
                         
         assert response['head'] == expected_head , "request is not correct"
         assert response['paging']['start'] == None ,  "request is not correct"
         assert response['paging']['limit'] == None ,  "request is not correct"
         assert bool(response['data']) == True
     
-    def test_api_get_block_link_val(self, setup):
+    async def test_api_get_block_link_val(self, setup):
         """Tests/ validate the block parameters with blocks, head, start and limit
         """
         try:
-            block_list = get_blocks()
-            for link in block_list:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+
+            for link in response:
                 if(link == 'link'):
-                    assert 'head' in block_list['link']
-                    assert 'start' in block_list['link']  
-                    assert 'limit' in block_list['link'] 
-                    assert 'blocks' in block_list['link']  
-        except urllib.error.HTTPError as error:
-            assert response.code == 400
+                    assert 'head' in response['link']
+                    assert 'start' in response['link']  
+                    assert 'limit' in response['link'] 
+                    assert 'blocks' in response['link']  
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
             LOGGER.info("Link is not proper for state and parameters are missing")
     
-    def test_api_get_block_key_params(self, setup):
+    async def test_api_get_block_key_params(self, setup):
         """Tests/ validate the block key parameters with data, head, link and paging               
         """
-        response = get_blocks()
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+        
         assert 'link' in response
         assert 'data' in response
         assert 'paging' in response
         assert 'head' in response
     
-    def test_api_get_each_batch_id_length(self, setup):
+    async def test_api_get_each_block_batch_id_length(self, setup):
         """Tests the each batch id length should be 128 hex character long 
         """   
         try:
-            block_list = get_blocks()
-            for batch in block_list['data']:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks',
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            for batch in response['data']:
                 expected_head = batch['header']['batch_ids'][0]
                 head_len = len(expected_head)
-        except urllib.error.HTTPError as error:
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Batch id length is not 128 hex character long")
         assert head_len == HEAD_LENGTH     
         
-    def test_api_get_first_block_id_length(self, setup):
+    async def test_api_get_first_block_id_length(self, setup):
         """Tests the first block id length should be 128 hex character long 
         """   
         try: 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
             for block_list in get_blocks():
                 batch_list = get_batches()
                 for block in batch_list:
                     expected_head = batch_list['head']
                     head_len = len(expected_head)
-        except urllib.error.HTTPError as error:
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Block id length is not 128 hex character long")
         assert head_len == HEAD_LENGTH
     
-    def test_rest_api_check_post_max_batches(self, setup):
+    async def test_rest_api_check_post_max_batches(self, setup):
         """Tests that allow max post batches in block
         Handled max 100 batches post in block and handle for extra batch
         """
-        block_list = get_blocks()['data']
-        for batchcount, _ in enumerate(block_list, start=1):
-            if batchcount == MAX_BATCH_IN_BLOCK:
-                print("Max 100 Batches are present in Block") 
+        try: 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            block_list = response['data']
+            for batchcount, _ in enumerate(block_list, start=1):
+                if batchcount == MAX_BATCH_IN_BLOCK:
+                    print("Max 100 Batches are present in Block")
+        
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error) 
            
-    def test_rest_api_check_head_signature(self, setup):
+    async def test_rest_api_check_head_signature(self, setup):
         """Tests that head signature of each batch of the block 
         should be not none 
         """
-        block_list = get_blocks()['data']
-        head_signature = [block['batches'][0]['header_signature'] for block in block_list]
-        for i, _ in enumerate(block_list):
-            head_sig = json.dumps(head_signature[i]).encode('utf8')
-            assert head_signature[i] is not None, "Head signature is available for all batches in block"   
+        try: 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks',
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            block_list = response['data']
+            head_signature = [block['batches'][0]['header_signature'] for block in block_list]
+            for i, _ in enumerate(block_list):
+                head_sig = json.dumps(head_signature[i]).encode('utf8')
+                assert head_signature[i] is not None, "Head signature is available for all batches in block"   
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error) 
     
-    def test_rest_api_check_family_version(self, setup):
+    async def test_rest_api_check_family_version(self, setup):
         """Test batch transaction family version should be present 
         for each transaction header
         """
-        block_list = get_blocks()['data']
-        family_version = [block['batches'][0]['transactions'][0]['header']['family_version'] for block in block_list]
-        for i, _ in enumerate(block_list):
-            assert family_version[i] is not None, "family version present for all batches in block"
+        try: 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            block_list = response['data']
+            family_version = [block['batches'][0]['transactions'][0]['header']['family_version'] for block in block_list]
+            for i, _ in enumerate(block_list):
+                assert family_version[i] is not None, "family version present for all batches in block"
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
         
-    def test_rest_api_check_input_output_content(self,setup):
+    async def test_rest_api_check_input_output_content(self,setup):
         """Test batch input and output content should be same for
         each batch and unique from other
         """
-        block_list = get_blocks()['data']  
-        txn_input = [block['batches'][0]['transactions'][0]['header']['inputs'][0] for block in block_list]
-        txn_output = [block['batches'][0]['transactions'][0]['header']['outputs'][0] for block in block_list]
-        if(txn_input == txn_output):
-            return True
-    def test_rest_api_check_signer_public_key(self, setup):
+        try: 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+            
+            block_list = response['data']  
+            txn_input = [block['batches'][0]['transactions'][0]['header']['inputs'][0] for block in block_list]
+            txn_output = [block['batches'][0]['transactions'][0]['header']['outputs'][0] for block in block_list]
+            if(txn_input == txn_output):
+                return True
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+            
+    async def test_rest_api_check_signer_public_key(self, setup):
         """Tests that signer public key is calculated for a block
         properly
         """
-        block_list = get_blocks()['data']   
-        signer_public_key = [block['batches'][0]['header']['signer_public_key'] for block in block_list]
-        assert signer_public_key is not None, "signer public key is available"
+        try: 
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        
+            block_list = response['data']   
+            signer_public_key = [block['batches'][0]['header']['signer_public_key'] for block in block_list]
+            assert signer_public_key is not None, "signer public key is available"
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
     
-    def test_rest_api_check_blocks_count(self, setup):
+    async def test_rest_api_check_blocks_count(self, setup):
         """Tests blocks count from block list 
         """
         count =0
         try:
-            block_list = get_blocks()
-            for block in enumerate(block_list['data']):
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            for block in enumerate(response['data']):
                 count = count+1
-        except urllib.error.HTTPError as error:
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("BLock count not able to collect")
     
-    def test_rest_api_blk_content_head_signature(self, setup):
+    async def test_rest_api_blk_content_head_signature(self, setup):
         """Tests that head signature of each batch of the block
         should be not none
         """
         try:
-            block_list = get_blocks()
-            for batch in block_list['data']:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+                    
+            for batch in response['data']:
                 batch_list = get_batches()
                 for block in batch_list:
                     transaction_list = get_transactions()
                     for trans in transaction_list['data']:
                         head_signature = trans['header_signature']
-        except urllib.error.HTTPError as error:
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Header signature is missing in some of the batches")    
         assert head_signature is not None, "Head signature is available for all batches in block"
         
 class TestBlockGet(RestApiBaseTest):
-    def test_api_get_block_id(self, setup):
+    async def test_api_get_block_id(self, setup):
         """Tests that GET /blocks/{block_id} is reachable 
         """
         LOGGER.info("Starting test for blocks/{block_id}")
+        signer_key = setup['signer_key']
         expected_head = setup['expected_head']
-        expected_block_id  = setup['block_ids'][0]
+        expected_id  = setup['block_ids'][0]
+        expected_batches = setup['expected_batches']
+        expected_txns = setup['expected_txns']
+        payload = setup['payload']
+        address = setup['address']
+        expected_link = '{}/blocks/{}'.format(address, expected_id)
                          
         try:
-            response = get_block_id(block_id=expected_block_id)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])    
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks/{}'.format(expected_id), 
+                                       raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable") 
+        
+        blocks = response['data']  
+        
+        self.assert_check_block_seq(blocks,expected_batches,
+                                    expected_txns,payload,signer_key)
           
-    def test_api_get_bad_block_id(self, setup):
+    async def test_api_get_bad_block_id(self, setup):
         """Tests that GET /blocks/{bad_block_id} is not reachable
            with bad id
         """
         LOGGER.info("Starting test for blocks/{bad_block_id}")
                  
         try:
-            response = get_block_id(block_id=BAD_ID)
-        except  urllib.error.HTTPError as error:
-            LOGGER.info("Rest Api not reachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/blocks/{}'.format(BAD_ID)) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+          
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
 

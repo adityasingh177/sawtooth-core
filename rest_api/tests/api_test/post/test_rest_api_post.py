@@ -64,7 +64,7 @@ WRONG_CONTENT_TYPE = 43
 
 BLOCK_TO_CHECK_CONSENSUS = 1
 
-pytestmark = pytest.mark.post
+pytestmark = [pytest.mark.post,pytest.mark.last]
 
 
 class TestPost(RestApiBaseTest):
@@ -362,6 +362,114 @@ class TestPost(RestApiBaseTest):
                 LOGGER.info(data['error']['message'])
                 assert data['error']['code'] == 30
                 assert data['error']['title'] =='Submitted Batches Invalid'
+    
+    def test_rest_api_post_no_endpoint(self, setup):
+        
+        signer_trans = get_signer() 
+        intkey=create_intkey_transaction("set",[],50,signer_trans)
+        translist=[intkey]
+        batch= create_batch(translist,signer_trans)
+        batch_list=[BatchList(batches=[batch]).SerializeToString()]
+        for batc in batch_list:
+            try:
+                response = post_batch_no_endpoint(batc)
+            except urllib.error.HTTPError as e:
+                errdata = e.file.read().decode("utf-8")
+                errcode = e.code
+            assert errcode == 404
+
+
+
+class TestPostMulTxns(RestApiBaseTest):
+    
+    def test_txn_invalid_addr(self, setup_invalid_txns):
+        initial_batch_length = setup_invalid_txns['initial_batch_length']
+        expected_batch_length = setup_invalid_txns['expected_batch_length']
+        initial_trn_length = setup_invalid_txns['initial_trn_length']
+        expected_trn_length = setup_invalid_txns['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invalid_txns['response'] == 'INVALID'
+        
+    def test_txn_invalid_min(self, setup_invalid_txns_min):
+        initial_batch_length = setup_invalid_txns_min['initial_batch_length']
+        expected_batch_length = setup_invalid_txns_min['expected_batch_length']
+        initial_trn_length = setup_invalid_txns_min['initial_trn_length']
+        expected_trn_length = setup_invalid_txns_min['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invalid_txns_min['response'] == 'INVALID'
+        
+    def test_txn_invalid_max(self, setup_invalid_txns_max):
+        initial_batch_length = setup_invalid_txns_max['initial_batch_length']
+        expected_batch_length = setup_invalid_txns_max['expected_batch_length']
+        initial_trn_length = setup_invalid_txns_max['initial_trn_length']
+        expected_trn_length = setup_invalid_txns_max['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invalid_txns_max['response'] == 'INVALID'
+        
+    def test_txn_valid_invalid_txns(self, setup_valinv_txns):
+        #data=Txns.setup_batch_valinv_txns()
+        initial_batch_length = setup_valinv_txns['initial_batch_length']
+        expected_batch_length = setup_valinv_txns['expected_batch_length']
+        initial_trn_length = setup_valinv_txns['initial_trn_length']
+        expected_trn_length = setup_valinv_txns['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_valinv_txns['response'] == 'INVALID'
+        
+    def test_txn_invalid_valid_txns(self, setup_invval_txns):     
+        initial_batch_length = setup_invval_txns['initial_batch_length']
+        expected_batch_length = setup_invval_txns['expected_batch_length']
+        initial_trn_length = setup_invval_txns['initial_trn_length']
+        expected_trn_length = setup_invval_txns['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invval_txns['response'] == 'INVALID'
+       
+    def test_txn_same_txns(self, setup_same_txns):
+        initial_batch_length = setup_same_txns['initial_batch_length']
+        expected_batch_length = setup_same_txns['expected_batch_length']
+        initial_trn_length = setup_same_txns['initial_trn_length']
+        expected_trn_length = setup_same_txns['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_same_txns['code'] == 30
+    
+    def test_api_sent_commit_txns(self, setup_valid_txns):
+        expected_transaction=setup_valid_txns['expected_txns']
+         
+        transaction_id=str(expected_transaction)[2:-2]
+        try:   
+             response = get_reciepts(transaction_id)
+             assert transaction_id == response['data'][0]['id'] 
+             assert response['data'][0]['state_changes'][0]['type'] == "SET"    
+        except urllib.error.HTTPError as error:
+             LOGGER.info("Rest Api is Unreachable")
+             response = json.loads(error.fp.read().decode('utf-8'))
+             LOGGER.info(response['error']['title'])
+             LOGGER.info(response['error']['message'])
+             assert response['error']['code'] == RECEIPT_NOT_FOUND
+             assert response['error']['title'] == 'Invalid Resource Id'
+    
+    def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
+        initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
+        expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
+        initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
+        expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invalid_txns_fn['code'] == 17
+    
+    def test_txn_invalid_bad_addr(self, setup_invalid_invaddr):
+        initial_batch_length = setup_invalid_invaddr['initial_batch_length']
+        expected_batch_length = setup_invalid_invaddr['expected_batch_length']
+        initial_trn_length = setup_invalid_invaddr['initial_trn_length']
+        expected_trn_length = setup_invalid_invaddr['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invalid_invaddr['code'] == 17
     
 
         

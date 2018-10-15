@@ -18,6 +18,7 @@ import logging
 import json
 import urllib.request
 import urllib.error
+import aiohttp
   
 from utils import get_peers
 
@@ -33,15 +34,17 @@ PEER_LIST = []
 class TestPeerList(RestApiBaseTest):
     """This class tests the peer list with different parameters
     """
-    def test_api_get_peer_list(self, setup):
+    async def test_api_get_peer_list(self, setup):
         """Tests the peer list 
         """
         address = setup['address']
         expected_link = '{}/peers'.format(address)
         
-        try:   
-            response = get_peers()
-        except urllib.error.HTTPError as error:
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='http://10.223.155.43:8008/peers', raise_for_status=True) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
         
         self.assert_valid_link(response, expected_link)

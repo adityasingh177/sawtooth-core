@@ -203,7 +203,7 @@ class RestApiBaseTest(object):
         LOGGER.info(expected_length)
         assert len(response) == expected_length
                         
-    def assert_check_block_seq(self, blocks, expected_batches, expected_txns):
+    def assert_check_block_seq(self, blocks, expected_batches, expected_txns, payload, signer_key):
         """Asserts block is constructed properly after submitting batches
         """
         if not isinstance(blocks, list):
@@ -220,8 +220,7 @@ class RestApiBaseTest(object):
             batches = block['batches']
             assert isinstance(batches, list)
             assert len(batches) == 1
-            assert isinstance(batches, dict)
-            self.assert_check_batch_seq(batches, expected_batch, expected_txn)
+            self.assert_check_batch_seq(batches, expected_batch, expected_txn, payload, signer_key)
             
     def assert_check_batch_seq(self, batches, expected_batches, expected_txns, 
                                payload, signer_key):
