@@ -28,7 +28,7 @@ from fixtures import setup_batch_multiple_transaction
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
   
-pytestmark = [pytest.mark.get , pytest.mark.receipts]
+pytestmark = [pytest.mark.get , pytest.mark.receipts, pytest.mark.fifth]
 
 RECEIPT_NOT_FOUND = 80
 RECEIPT_WRONG_CONTENT_TYPE = 81
