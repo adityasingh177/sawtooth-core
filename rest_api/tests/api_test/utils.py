@@ -435,3 +435,16 @@ def _get_transaction_list(response):
         transaction_list += data_list
             
     return transaction_list
+
+
+def post_batch_no_endpoint(batch, headers="None"):
+    if headers=="True":
+        headers = {'Content-Type': 'application/json'}
+    else:
+        headers = {'Content-Type': 'application/octet-stream'}
+
+    response = query_rest_api(
+        '/', data=batch, headers=headers)
+
+    response = submit_request('{}&wait={}'.format(response['link'], WAIT))
+    return response
