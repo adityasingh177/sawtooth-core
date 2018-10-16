@@ -83,7 +83,6 @@ class IntKeyPayload(object):
         return self._sha512
     
 class Transactions:
-         
     def __init__(self, invalidtype):
         self.signer = get_signer()
         self.data = {}
@@ -357,8 +356,6 @@ class Transactions:
             header_signature=signature)
     
         return transaction
-    
-    
     
 
 def create_intkey_transaction(verb, deps, count, signer):
