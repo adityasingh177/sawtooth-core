@@ -55,7 +55,7 @@ LOGGER.setLevel(logging.INFO)
 
 
 LIMIT = 100
-BATCH_SIZE = 1
+BATCH_SIZE = 15
                   
  
 def pytest_addoption(parser):
@@ -239,5 +239,4 @@ def setup(request):
     data['address'] = address
     data['limit'] = LIMIT
     data['start'] = expected_batches[::-1][0]
-    data['family_name']=[block['batches'][0]['transactions'][0]['header']['family_name'] for block in block_list['data']]
     return data

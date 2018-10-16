@@ -153,28 +153,6 @@ def setup_empty_trxs_batch():
     
     return batch
 
-
-
-
-@pytest.fixture(scope="function")
-def setup_empty_trxs_batch():
-    signer = get_signer()
-    
-    header = BatchHeader(
-        signer_public_key=signer.get_public_key().as_hex(),
-        transaction_ids=[])
-
-    header_bytes = header.SerializeToString()
-
-    signature = signer.sign(header_bytes)
-
-    batch = Batch(
-        header=header_bytes,
-        transactions=[],
-        header_signature=signature)
-    
-    return batch
-
 @pytest.fixture(scope="function")
 def setup_batch_multiple_transaction():
     data = {}
@@ -214,6 +192,82 @@ def setup_batch_multiple_transaction():
         LOGGER.info(data['error']['message'])    
     
     return expected_trxns
+
+
+@pytest.fixture(scope="function")
+def setup_invval_txns(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="addr")
+    data = Txns.get_batch_invval_txns()
+    return data
+
+
+@pytest.fixture(scope="function")
+def setup_invalid_txns(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="addr")
+    data = Txns.get_batch_invalid_txns()
+    return data
+
+
+@pytest.fixture(scope="function")
+def setup_invalid_invaddr(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="invaddr")
+    data = Txns.get_batch_invalid_txns()
+    return data
+
+
+@pytest.fixture(scope="function")
+def setup_same_txns(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="addr")
+    data = Txns.get_batch_same_txns()
+    return data
+
+@pytest.fixture(scope="function")
+def setup_invalid_txns_min(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="min")
+    data = Txns.get_batch_invalid_txns()
+    return data
+
+@pytest.fixture(scope="function")
+def setup_invalid_txns_max(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="max")
+    data = Txns.get_batch_invalid_txns()
+    return data
+
+@pytest.fixture(scope="function")
+def setup_valid_txns(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="addr")
+    data = Txns.get_batch_valid_txns()
+    return data
+
+@pytest.fixture(scope="function")
+def setup_invalid_txns_fn(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="fn")
+    data = Txns.get_batch_invalid_txns_fam_name()
+    return data
 
 
 

@@ -32,8 +32,6 @@ from base import RestApiBaseTest
 pytestmark = [pytest.mark.get , pytest.mark.batch, pytest.mark.second]
 
 
-
-  
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
