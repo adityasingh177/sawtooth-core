@@ -345,17 +345,15 @@ class TestBatchList(RestApiBaseTest):
         LOGGER.info("Starting test for batch list as reversed")
         signer_key = setup['signer_key']
         expected_head = setup['expected_head']
-        setup_batches = setup['expected_batches']
+        expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
         expected_length = setup['expected_batch_length']
         payload = setup['payload']                       
-        start = setup['start']
+        start = setup['batch_ids'][::-1][0]
         limit = setup['limit']
         address = setup['address']
-        expected_batches = setup_batches[::-1]
-        print(expected_batches)
              
-        expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
+        expected_link = '{}/batches?head={}&start={}&limit={}&reverse'.format(address,\
                          expected_head, start, limit)
          
         params = 'reverse'
@@ -368,17 +366,16 @@ class TestBatchList(RestApiBaseTest):
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
           
-        batches = response['data'][:-1]
+        batches = response['data'][::-1][:-1]
         
 
-                              
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)
           
         self.assert_valid_head(response, expected_head)
         self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response)
+        self.assert_valid_paging(response, expected_link)
     
     async def test_api_get_batch_key_params(self, setup):
         """Tests/ validate the block key parameters with data, head, link and paging               
