@@ -19,7 +19,6 @@ import json
 import urllib.request
 import urllib.error
   
-from conftest import setup
 from utils import get_state_list, get_reciepts, post_receipts
 from base import RestApiBaseTest
   
