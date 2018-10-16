@@ -41,7 +41,8 @@ from sawtooth_rest_api.protobuf.transaction_pb2 import Transaction
 
 from utils import post_batch, get_state_list , get_blocks , get_transactions, \
                   get_batches , get_state_address, check_for_consensus,\
-                  _get_node_list, _get_node_chains, post_batch_no_endpoint
+                  _get_node_list, _get_node_chains, post_batch_no_endpoint,\
+                  get_reciepts
                   
 
 from payload import get_signer, create_intkey_transaction, create_batch,\
