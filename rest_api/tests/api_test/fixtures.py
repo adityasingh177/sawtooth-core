@@ -193,6 +193,15 @@ def setup_batch_multiple_transaction():
     
     return expected_trxns
 
+@pytest.fixture(scope="function")
+def setup_valinv_txns(request):
+    """Setup method for posting batches and returning the 
+       response
+    """
+    Txns=Transactions(invalidtype="addr")
+    data = Txns.get_batch_valinv_txns()
+    return data
+
 
 @pytest.fixture(scope="function")
 def setup_invval_txns(request):
