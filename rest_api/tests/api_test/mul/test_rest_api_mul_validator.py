@@ -14,11 +14,6 @@
 # ------------------------------------------------------------------------------
 import pytest
 import logging
-import subprocess
-import paramiko
-import re
-import fabric
-
 
 from google.protobuf.json_format import MessageToDict
 
@@ -28,19 +23,8 @@ from utils import  _get_client_address, _send_cmd, _get_node_list, \
                    
 
 from payload import get_signer, create_intkey_transaction, create_batch
-            
-from workload import Workload
-from test_ssh import SSH_CLIENT
-from consensus import Consensus
-
-
-logging.getLogger("paramiko").setLevel(logging.INFO) 
-  
+              
 WAIT_TIME = 10
-PORT = 22
-USERNAME = 'test'
-PASSWORD = 'aditya9971'
-  
 BLOCK_TO_CHECK_CONSENSUS = 1
 
 pytestmark = pytest.mark.mul
