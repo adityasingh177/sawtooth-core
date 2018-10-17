@@ -100,7 +100,6 @@ class RestApiBaseTest(object):
         """Asserts response has consensus as parameter
         """
         assert 'consensus' in response
-        assert response['consensus'] == CONSENSUS_ALGO
     
     def assert_state_root_hash(self, response):
         """Asserts the response has state root hash
