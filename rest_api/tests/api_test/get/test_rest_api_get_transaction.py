@@ -70,7 +70,7 @@ class TestTransactionList(RestApiBaseTest):
            
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', 
+                async with session.get(url='{}/transactions'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -105,7 +105,7 @@ class TestTransactionList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                async with session.get(url='{}/transactions'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -123,11 +123,12 @@ class TestTransactionList(RestApiBaseTest):
         """Tests that GET /transactions is unreachable with bad head parameter 
         """       
         LOGGER.info("Starting test for transactions with bad head parameter")
+        address = setup['address']
         params={'head': BAD_HEAD}
                        
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                async with session.get(url='{}/transactions'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -158,7 +159,7 @@ class TestTransactionList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                async with session.get(url='{}/transactions'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -174,12 +175,12 @@ class TestTransactionList(RestApiBaseTest):
         """Tests that GET /transactions is unreachable with bad id parameter 
         """
         LOGGER.info("Starting test for transactions with bad id parameter")
-                       
+        address = setup['address']
         params={'head': BAD_ID}
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                async with session.get(url='{}/transactions'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -210,7 +211,7 @@ class TestTransactionList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/batches', params=params, 
+                async with session.get(url='{}/transactions'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -227,6 +228,7 @@ class TestTransactionList(RestApiBaseTest):
         """Tests GET /transactions is reachbale using paging parameters 
         """
         LOGGER.info("Starting test for transactions with paging parameters")
+        address = setup['address']
         batch_ids   =  setup['batch_ids']
         expected_head = setup['expected_head']
         expected_id = batch_ids[0]
@@ -237,7 +239,7 @@ class TestTransactionList(RestApiBaseTest):
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                async with session.get(url='{}/transactions'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -267,7 +269,7 @@ class TestTransactionList(RestApiBaseTest):
                       
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                async with session.get(url='{}/transactions'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -287,11 +289,12 @@ class TestTransactionList(RestApiBaseTest):
         """Tests GET /transactions is reachbale using bad paging parameters 
         """
         LOGGER.info("Starting test for transactions with bad paging parameters")
+        address = setup['address']
         params = {'start':-1 , 'limit':-1}
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                async with session.get(url='{}/transactions'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -301,12 +304,13 @@ class TestTransactionList(RestApiBaseTest):
     async def test_api_get_transaction_list_invalid_start(self, setup):   
         """Tests that GET /transactions is unreachable with invalid start parameter 
         """
-        LOGGER.info("Starting test for transactions with invalid start parameter")                       
+        LOGGER.info("Starting test for transactions with invalid start parameter")  
+        address = setup['address']                     
         params = {'start':-1 }
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                async with session.get(url='{}/transactions'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -316,12 +320,13 @@ class TestTransactionList(RestApiBaseTest):
     async def test_api_get_transaction_list_invalid_limit(self, setup):   
         """Tests that GET /transactions is unreachable with bad limit parameter 
         """
-        LOGGER.info("Starting test for transactions with bad limit parameter")                   
+        LOGGER.info("Starting test for transactions with bad limit parameter")
+        address = setup['address']                   
         params = {'limit': 0 }
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                async with session.get(url='{}/transactions'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -351,7 +356,7 @@ class TestTransactionList(RestApiBaseTest):
                          
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params, 
+                async with session.get(url='{}/transactions'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -364,9 +369,10 @@ class TestTransactionList(RestApiBaseTest):
     async def test_api_get_transactions_link_val(self, setup):
         """Tests/ validate the transactions parameters with transactions, head, start and limit
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                async with session.get(url='{}/transactions'.format(address), raise_for_status=True) as data:
                     response = await data.json()
                     
             for link in response:
@@ -382,9 +388,10 @@ class TestTransactionList(RestApiBaseTest):
     async def test_api_get_transactions_key_params(self, setup):
         """Tests/ validate the state key parameters with data, head, link and paging               
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                async with session.get(url='{}/transactions'.format(address), raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
@@ -396,10 +403,11 @@ class TestTransactionList(RestApiBaseTest):
     
     async def test_api_get_transaction_id_length(self, setup):
         """Tests the transaction id length should be 128 hex character long 
-        """   
+        """  
+        address = setup['address'] 
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                async with session.get(url='{}/transactions'.format(address), raise_for_status=True) as data:
                     response = await data.json()
             
             for trans in response['data']:
@@ -412,10 +420,11 @@ class TestTransactionList(RestApiBaseTest):
     async def test_rest_api_check_transactions_count(self, setup):
         """Tests transaction count from transaction list 
         """
+        address = setup['address']
         count =0
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', raise_for_status=True) as data:
+                async with session.get(url='{}/transactions'.format(address), raise_for_status=True) as data:
                     response = await data.json()
                     
             for trans in enumerate(response['data']):
@@ -440,7 +449,7 @@ class TestTransactionGet(RestApiBaseTest):
                          
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions/{}'.format(expected_id), 
+                async with session.get(url='{}/transactions/{}'.format(address,expected_id), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -457,15 +466,13 @@ class TestTransactionGet(RestApiBaseTest):
            with bad id
         """
         LOGGER.info("Starting test for transactions/{bad_id}")
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions/{}'.format(BAD_ID)) as data:
+                async with session.get(url='{}/transactions/{}'.format(address,BAD_ID)) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
           
         self.assert_valid_error(response, INVALID_RESOURCE_ID)
 
-                 
-         
-     

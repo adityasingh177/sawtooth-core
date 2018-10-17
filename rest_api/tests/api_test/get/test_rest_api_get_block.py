@@ -73,7 +73,7 @@ class TestBlockList(RestApiBaseTest):
                
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -89,12 +89,13 @@ class TestBlockList(RestApiBaseTest):
         """Tests that GET /blocks is reachable with head parameter 
         """
         LOGGER.info("Starting test for blocks with head parameter")
+        address = setup['address']
         expected_head = setup['expected_head']
         params={'head': expected_head}
                   
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                async with session.get(url='{}/blocks'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -107,12 +108,12 @@ class TestBlockList(RestApiBaseTest):
         """Tests that GET /blocks is unreachable with bad head parameter 
         """       
         LOGGER.info("Starting test for blocks with bad head parameter")
-                       
+        address = setup['address']
         params={'head': BAD_HEAD}
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params) as data:
+                async with session.get(url='{}/blocks'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -123,6 +124,7 @@ class TestBlockList(RestApiBaseTest):
         """Tests that GET /blocks is reachable with id as parameter 
         """
         LOGGER.info("Starting test for blocks with id parameter")
+        address = setup['address']
         signer_key = setup['signer_key']
         block_ids   =  setup['block_ids']
         expected_head = setup['expected_head']
@@ -139,7 +141,7 @@ class TestBlockList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                async with session.get(url='{}/blocks'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -156,12 +158,12 @@ class TestBlockList(RestApiBaseTest):
         """Tests that GET /blocks is unreachable with bad id parameter 
         """
         LOGGER.info("Starting test for blocks with bad id parameter")
-                       
+        address = setup['address']
         params={'head': BAD_ID}
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params) as data:
+                async with session.get(url='{}/blocks'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -174,6 +176,7 @@ class TestBlockList(RestApiBaseTest):
         """Tests GET /blocks is reachable using paging parameters 
         """
         LOGGER.info("Starting test for blocks with paging parameters")
+        address = setup['address']
         block_ids   =  setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
@@ -182,7 +185,7 @@ class TestBlockList(RestApiBaseTest):
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                async with session.get(url='{}/batches'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -205,7 +208,7 @@ class TestBlockList(RestApiBaseTest):
         
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                async with session.get(url='{}/blocks'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -222,6 +225,7 @@ class TestBlockList(RestApiBaseTest):
         """Tests that GET /blocks is unreachable with invalid start parameter 
         """
         LOGGER.info("Starting test for block with invalid start parameter")
+        address = setup['address']
         block_ids   =  setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
@@ -229,7 +233,7 @@ class TestBlockList(RestApiBaseTest):
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params) as data:
+                async with session.get(url='{}/blocks'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -241,6 +245,7 @@ class TestBlockList(RestApiBaseTest):
         """Tests that GET /blocks is unreachable with bad limit parameter 
         """
         LOGGER.info("Starting test for block with bad limit parameter")
+        address = setup['address']
         block_ids = setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
@@ -248,7 +253,7 @@ class TestBlockList(RestApiBaseTest):
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/batches', params=params) as data:
+                async with session.get(url='{}/batches'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -260,6 +265,7 @@ class TestBlockList(RestApiBaseTest):
         """verifies that GET /blocks is unreachable with bad head parameter 
         """
         LOGGER.info("Starting test for blocks with reversed list")
+        address = setup['address']
         block_ids = setup['block_ids']
         expected_head = setup['expected_head']
         expected_id = block_ids[0]
@@ -268,7 +274,7 @@ class TestBlockList(RestApiBaseTest):
                            
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', params=params, 
+                async with session.get(url='{}/blocks'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -282,9 +288,10 @@ class TestBlockList(RestApiBaseTest):
     async def test_api_get_block_link_val(self, setup):
         """Tests/ validate the block parameters with blocks, head, start and limit
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
 
@@ -301,9 +308,10 @@ class TestBlockList(RestApiBaseTest):
     async def test_api_get_block_key_params(self, setup):
         """Tests/ validate the block key parameters with data, head, link and paging               
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -316,10 +324,11 @@ class TestBlockList(RestApiBaseTest):
     
     async def test_api_get_each_block_batch_id_length(self, setup):
         """Tests the each batch id length should be 128 hex character long 
-        """   
+        """ 
+        address = setup['address']  
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks',
+                async with session.get(url='{}/blocks'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -333,9 +342,10 @@ class TestBlockList(RestApiBaseTest):
     async def test_api_get_first_block_id_length(self, setup):
         """Tests the first block id length should be 128 hex character long 
         """   
+        address = setup['address']
         try: 
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -352,9 +362,10 @@ class TestBlockList(RestApiBaseTest):
         """Tests that allow max post batches in block
         Handled max 100 batches post in block and handle for extra batch
         """
+        address = setup['address']
         try: 
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -370,9 +381,10 @@ class TestBlockList(RestApiBaseTest):
         """Tests that head signature of each batch of the block 
         should be not none 
         """
+        address = setup['address']
         try: 
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks',
+                async with session.get(url='{}/blocks'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -388,9 +400,10 @@ class TestBlockList(RestApiBaseTest):
         """Test batch transaction family version should be present 
         for each transaction header
         """
+        address = setup['address']
         try: 
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -405,9 +418,10 @@ class TestBlockList(RestApiBaseTest):
         """Test batch input and output content should be same for
         each batch and unique from other
         """
+        address = setup['address']
         try: 
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
             
@@ -423,9 +437,10 @@ class TestBlockList(RestApiBaseTest):
         """Tests that signer public key is calculated for a block
         properly
         """
+        address = setup['address']
         try: 
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         
@@ -438,10 +453,11 @@ class TestBlockList(RestApiBaseTest):
     async def test_rest_api_check_blocks_count(self, setup):
         """Tests blocks count from block list 
         """
+        address = setup['address']
         count =0
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -454,9 +470,10 @@ class TestBlockList(RestApiBaseTest):
         """Tests that head signature of each batch of the block
         should be not none
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks', 
+                async with session.get(url='{}/blocks'.format(address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -486,7 +503,7 @@ class TestBlockGet(RestApiBaseTest):
                          
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks/{}'.format(expected_id), 
+                async with session.get(url='{}/blocks/{}'.format(address,expected_id), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -502,10 +519,11 @@ class TestBlockGet(RestApiBaseTest):
            with bad id
         """
         LOGGER.info("Starting test for blocks/{bad_block_id}")
+        address = setup['address']
                  
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/blocks/{}'.format(BAD_ID)) as data:
+                async with session.get(url='{}/blocks/{}'.format(address,BAD_ID)) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)

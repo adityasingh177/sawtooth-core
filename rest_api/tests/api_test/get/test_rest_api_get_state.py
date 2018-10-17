@@ -67,7 +67,7 @@ class TestStateList(RestApiBaseTest):
                                                                       expected_address)
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', raise_for_status=True) as data:
+                async with session.get(url='{}/state'.format(address), raise_for_status=True) as data:
                     response = await data.json()
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
@@ -94,7 +94,7 @@ class TestStateList(RestApiBaseTest):
         params={'head': expected_head}
         
         async with aiohttp.ClientSession() as session:        
-            async with session.get(url='http://10.223.155.43:8008/state',params=params) as data:
+            async with session.get(url='{}/state'.format(address),params=params) as data:
                 response = await data.json()
                         
         self.assert_valid_head(response, expected_head)
@@ -103,18 +103,20 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_list_invalid_batch(self, invalid_batch):
         """Tests that state is not updated for when
            submitting invalid intkey batches
-        """    
+        """  
+        address = invalid_batch['address']  
         batches = invalid_batch['expected_batches']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state') as data:
+                async with session.get(url='{}/state'.format(address)) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")            
      
     async def test_api_get_state_list_bad_head(self, setup):   
         """Tests that GET /state is unreachable with bad head parameter 
-        """       
+        """   
+        address = setup['address']   
         LOGGER.info("Starting test for state with bad head parameter")
         bad_head = 'f' 
                        
@@ -122,7 +124,7 @@ class TestStateList(RestApiBaseTest):
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -133,14 +135,15 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_list_address(self, setup):   
         """Tests that GET /state is reachable with address parameter 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with address parameter")
         expected_head = setup['expected_head']
-        address = setup['state_address'][0]
-        params = {'address': address}
+        state_address = setup['state_address'][0]
+        params = {'address': state_address}
                                             
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -149,13 +152,14 @@ class TestStateList(RestApiBaseTest):
            
     async def test_api_get_state_list_bad_address(self, setup):   
         """Tests that GET /state is unreachable with bad address parameter 
-        """       
+        """  
+        address = setup['address']     
         LOGGER.info("Starting test for state with bad address parameter")
         params = {'address': BAD_ADDRESS}
                        
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -165,6 +169,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_paginated_state_list(self, setup):   
         """Tests GET /state is reachbale using paging parameters 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with paging parameters")
         batch_ids   =  setup['batch_ids']
         expected_head = setup['expected_head']
@@ -174,7 +179,7 @@ class TestStateList(RestApiBaseTest):
                           
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -184,6 +189,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_paginated_state_list_limit(self, setup):   
         """Tests GET /state is reachbale using paging parameters 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with paging parameters")
         batch_ids   =  setup['batch_ids']
         expected_head = setup['expected_head']
@@ -192,7 +198,7 @@ class TestStateList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params, 
+                async with session.get(url='{}/state'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -202,6 +208,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_paginated_state_list_start(self, setup):   
         """Tests GET /state is reachbale using paging parameters 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with paging parameters")
         batch_ids   =  setup['batch_ids']
         expected_head = setup['expected_head']
@@ -210,7 +217,7 @@ class TestStateList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params, 
+                async with session.get(url='{}/state'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -220,6 +227,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_list_bad_paging(self, setup):   
         """Tests GET /state is reachbale using bad paging parameters 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with bad paging parameters")
         batch_ids   =  setup['batch_ids']
         expected_head = setup['expected_head']
@@ -228,7 +236,7 @@ class TestStateList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/transactions', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -239,6 +247,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_list_invalid_start(self, setup):   
         """Tests that GET /state is unreachable with invalid start parameter 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with invalid start parameter")
         batch_ids   =  setup['batch_ids']
         expected_head = setup['expected_head']
@@ -247,7 +256,7 @@ class TestStateList(RestApiBaseTest):
                     
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -258,6 +267,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_list_invalid_limit(self, setup):   
         """Tests that GET /state is unreachable with bad limit parameter 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with bad limit parameter")
         batch_ids = setup['batch_ids']
         expected_head = setup['expected_head']
@@ -266,7 +276,7 @@ class TestStateList(RestApiBaseTest):
                      
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params) as data:
+                async with session.get(url='{}/state'.format(address), params=params) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
@@ -276,6 +286,7 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_list_reversed(self, setup):   
         """verifies that GET /state is unreachable with bad head parameter 
         """
+        address = setup['address']
         LOGGER.info("Starting test for state with bad head parameter")
         batch_ids = setup['batch_ids']
         expected_head = setup['expected_head']
@@ -284,7 +295,7 @@ class TestStateList(RestApiBaseTest):
                          
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state', params=params, 
+                async with session.get(url='{}/state'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -298,9 +309,10 @@ class TestStateList(RestApiBaseTest):
         """Tests the state data address with 6 hex characters long 
         namespace prefix
         """   
+        address = setup['address']
         try:   
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
             
@@ -313,10 +325,11 @@ class TestStateList(RestApiBaseTest):
             
     async def test_api_get_state_data_head_wildcard_character(self, setup):
         """Tests the state head with wildcard_character ***STL-1345***
-        """   
+        """
+        address = setup['address']   
         try:   
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -333,10 +346,11 @@ class TestStateList(RestApiBaseTest):
                 
     async def test_api_get_state_data_head_partial_character(self, setup):
         """Tests the state head with partial head address ***STL-1345***
-        """   
+        """  
+        address = setup['address'] 
         try:   
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -348,10 +362,11 @@ class TestStateList(RestApiBaseTest):
                 
     async def test_api_get_state_data_address_partial_character(self, setup):
         """Tests the state address with partial head address ***STL-1346***
-        """   
+        """ 
+        address = setup['address']  
         try:   
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -365,10 +380,11 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_data_address_length(self, setup):
         """Tests the state data address length is 70 hex character long
         with proper prefix namespace
-        """   
+        """ 
+        address = setup['address']  
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                       
@@ -384,9 +400,10 @@ class TestStateList(RestApiBaseTest):
         """Tests the state data address fail with odd hex character 
         address 
         """   
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -400,10 +417,11 @@ class TestStateList(RestApiBaseTest):
             
     async def test_api_get_state_data_address_with_reduced_length(self, setup):
         """Tests the state data address with reduced even length hex character long 
-        """   
+        """ 
+        address = setup['address']  
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                        
@@ -418,10 +436,11 @@ class TestStateList(RestApiBaseTest):
                     
     async def test_api_get_state_data_address_64_Hex(self, setup):
         """Tests the state data address with 64 hex give empty data 
-        """   
+        """  
+        address = setup['address'] 
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                        
@@ -437,10 +456,11 @@ class TestStateList(RestApiBaseTest):
                     
     async def test_api_get_state_data_address_alter_bytes(self, setup):
         """Tests the state data address with alter bytes give empty data 
-        """   
+        """  
+        address = setup['address'] 
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                        
@@ -459,9 +479,10 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_link_val(self, setup):
         """Tests/ validate the state parameters with state, head, start and limit
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -478,9 +499,10 @@ class TestStateList(RestApiBaseTest):
     async def test_api_get_state_key_params(self, setup):
         """Tests/ validate the state key parameters with data, head, link and paging               
         """
+        address = setup['address']
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -493,10 +515,11 @@ class TestStateList(RestApiBaseTest):
     
     async def test_api_get_each_state_head_length(self, setup):
         """Tests the each state head length should be 128 hex character long 
-        """   
+        """  
+        address = setup['address'] 
         try:   
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -510,10 +533,11 @@ class TestStateList(RestApiBaseTest):
     async def test_rest_api_check_state_count(self, setup):
         """Tests state count from state list 
         """
+        address = setup['address']
         count = 0
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state',
+                async with session.get(url='{}/state'.format(address),
                                        raise_for_status=True) as data:
                     response = await data.json()
                     
@@ -528,10 +552,11 @@ class TestStateGet(RestApiBaseTest):
     async def test_api_get_state_address(self, setup):
         """Tests/ validate the state key parameters with data, head, link and paging               
         """
-        address = setup['state_address'][0]
+        address = setup['address']
+        state_address = setup['state_address'][0]
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state/{}'.format(address), 
+                async with session.get(url='{}/state/{}'.format(address,state_address), 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
@@ -540,11 +565,11 @@ class TestStateGet(RestApiBaseTest):
     async def test_api_get_bad_address(self, setup):
         """Tests /state/{bad_state_address}                
         """
-
+        address = setup['address']
         LOGGER.info("Starting test for state/{bad_address}")
         try:
             async with aiohttp.ClientSession() as session:        
-                async with session.get(url='http://10.223.155.43:8008/state/{}'.format(BAD_ADDRESS)) as data:
+                async with session.get(url='{}/state/{}'.format(address,BAD_ADDRESS)) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
