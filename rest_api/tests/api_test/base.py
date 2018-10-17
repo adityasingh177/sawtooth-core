@@ -208,14 +208,12 @@ class RestApiBaseTest(object):
         if not isinstance(blocks, list):
                 blocks = [blocks]
         
-        consensus_algo = CONSENSUS_ALGO
         
         ep = list(zip(blocks, expected_batches, expected_txns))
         
         for block, expected_batch, expected_txn in ep:
             assert isinstance(block, dict)
             assert isinstance(block['header'], dict)
-            assert consensus_algo ==  b64decode(block['header']['consensus'])
             batches = block['batches']
             assert isinstance(batches, list)
             assert len(batches) == 1
