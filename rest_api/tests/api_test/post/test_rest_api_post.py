@@ -385,8 +385,7 @@ class TestPost(RestApiBaseTest):
 
 
 
-class TestPostMulTxns(RestApiBaseTest):
-    
+class TestPostMulTxns(RestApiBaseTest):    
     def test_txn_invalid_addr(self, setup_invalid_txns):
         initial_batch_length = setup_invalid_txns['initial_batch_length']
         expected_batch_length = setup_invalid_txns['expected_batch_length']
@@ -458,15 +457,7 @@ class TestPostMulTxns(RestApiBaseTest):
              assert response['error']['code'] == RECEIPT_NOT_FOUND
              assert response['error']['title'] == 'Invalid Resource Id'
     
-    def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
-        initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
-        expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
-        initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
-        expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
-        assert initial_batch_length < expected_batch_length
-        assert initial_trn_length < expected_trn_length
-        assert setup_invalid_txns_fn['code'] == 17
-    
+
     def test_txn_invalid_bad_addr(self, setup_invalid_invaddr):
         initial_batch_length = setup_invalid_invaddr['initial_batch_length']
         expected_batch_length = setup_invalid_invaddr['expected_batch_length']
@@ -475,6 +466,15 @@ class TestPostMulTxns(RestApiBaseTest):
         assert initial_batch_length < expected_batch_length
         assert initial_trn_length < expected_trn_length
         assert setup_invalid_invaddr['code'] == 17
+    
+    def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
+        initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
+        expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
+        initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
+        expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
+        assert setup_invalid_txns_fn['code'] == 17
     
 
         

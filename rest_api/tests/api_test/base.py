@@ -232,8 +232,11 @@ class RestApiBaseTest(object):
         
         if not isinstance(expected_txns, list):
                 expected_txns = [expected_txns]
+        
+        if not isinstance(payload, list):
+                payload = [payload]
                    
-        for batch, expected_batch , expected_txn in zip(batches, expected_batches , expected_txns):
+        for batch, expected_batch , expected_txn, payload in zip(batches, expected_batches , expected_txns, payload):
             assert expected_batch == batch['header_signature']
             assert isinstance(batch['header'], dict)
             txns = batch['transactions']
@@ -244,7 +247,7 @@ class RestApiBaseTest(object):
             self.assert_signer_public_key(batch, signer_key)
             self.assert_trace(batch)
             self.assert_check_transaction_seq(txns, expected_txn, 
-                                              payload[0], signer_key)
+                                              payload, signer_key)
             
 
     def assert_check_transaction_seq(self, txns, expected_ids, 
@@ -256,8 +259,12 @@ class RestApiBaseTest(object):
         
         if not isinstance(expected_ids, list):
                 expected_ids = [expected_ids]
+        
+        if not isinstance(payload, list):
+                payload = [payload]
+                
                                 
-        for txn, expected_id in zip(txns, expected_ids):
+        for txn, expected_id, payload in zip(txns, expected_ids, payload):
             assert expected_id == txn['header_signature']
             assert isinstance(txn['header'], dict)
             self.assert_payload(txn, payload)

@@ -56,11 +56,11 @@ class TestTransactionList(RestApiBaseTest):
         expected_head = setup['expected_head']
         expected_txns = setup['expected_txns']
         expected_length = setup['expected_trn_length']
-        payload = setup['payload'][0]
+        payload = setup['payload']
         address = setup['address']
         start = setup['start']
         limit = setup['limit']
-        start = expected_txns[::-1][0]
+        start = expected_txns[0]
          
         expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)
@@ -225,7 +225,7 @@ class TestTransactionList(RestApiBaseTest):
         self.assert_valid_head(response , expected_head)
                 
     async def test_api_get_paginated_transaction_list(self, setup):   
-        """Tests GET /transactions is reachbale using paging parameters 
+        """Tests GET /transactions is reachable using paging parameters 
         """
         LOGGER.info("Starting test for transactions with paging parameters")
         address = setup['address']

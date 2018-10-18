@@ -69,7 +69,7 @@ class TestBatchList(RestApiBaseTest):
         payload = setup['payload']
         start = setup['start']
         limit = setup['limit']
-        address = setup['address']        
+        address = setup['address']    
             
         expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)

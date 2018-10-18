@@ -172,10 +172,15 @@ def setup(request):
                 txn,
                 including_default_value_fields=True,
                 preserving_proto_field_name=True)
+        
+        if 'trxn_id' not in expected_trxns:
+            expected_trxns['trxn_id'] = []
+        if 'payload' not in expected_trxns:
+            expected_trxns['payload'] =[]
                 
-        expected_trxns['trxn_id'] = [dict['header_signature']]
-        expected_trxns['payload'] = [dict['payload']]
-                    
+        expected_trxns['trxn_id'].append(dict['header_signature'])
+        expected_trxns['payload'].append(dict['payload'])
+                        
     LOGGER.info("Creating batches for transactions 1trn/batch")
 
     batches = [create_batch([txn], signer) for txn in txns]

@@ -18,6 +18,7 @@ import logging
 import json
 import urllib.request
 import urllib.error
+import aiohttp
   
 from utils import get_state_list, get_reciepts, post_receipts
 from base import RestApiBaseTest
@@ -38,98 +39,110 @@ INVALID_RESOURCE_ID = 60
 class TestReceiptsList(RestApiBaseTest):
     """This class tests the receipt list with different parameters
     """
-    def test_api_get_reciept_invalid_id(self):
+    async def test_api_get_reciept_invalid_id(self,setup):
         """Tests the reciepts after submitting invalid transaction
         """
+        address = setup['address']  
         transaction_id="s"
-        try:   
-            response = get_reciepts(transaction_id)
-        except urllib.error.HTTPError as error:
+        params={'id':transaction_id}
+        
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='{}/receipts'.format(address),params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
-            LOGGER.info(response['error']['title'])
-            LOGGER.info(response['error']['message'])
-            assert response['error']['code'] == INVALID_RESOURCE_ID
-            assert response['error']['title'] == 'Invalid Resource Id'
+        
+        self.assert_valid_error(response, INVALID_RESOURCE_ID)
                  
-    def test_api_get_reciepts_multiple_transactions(self, setup):
+    async def test_api_get_reciepts_multiple_transactions(self, setup):
         """Test the get reciepts for multiple transaction.
         """
         transaction_list=""
         expected_txns = setup['expected_txns']
+        address = setup['address']  
+        print(expected_txns)
+        
         for txn in expected_txns:
             transaction_list=txn+","+transaction_list
          
         trans_list = str(transaction_list)[:-1]
+        params={'id':trans_list}
+        
         try:
-            response = get_reciepts(trans_list)
-        except urllib.error.HTTPError as error:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='{}/receipts'.format(address),params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-            response = json.loads(error.fp.read().decode('utf-8'))
+        
          
         for res,txn in zip(response['data'],reversed(expected_txns)):
            assert str(res['id']) == txn
             
-    def test_api_get_reciepts_single_transactions(self,setup):
+    async def test_api_get_reciepts_single_transactions(self,setup):
         """Tests get reciepts response for single transaction"""
          
         expected_transaction=setup['expected_txns']
-         
+        address = setup['address']
         transaction_id=str(expected_transaction)[2:-2]
-        try:   
-             response = get_reciepts(transaction_id)
-        except urllib.error.HTTPError as error:
-             LOGGER.info("Rest Api is Unreachable")
-             response = json.loads(error.fp.read().decode('utf-8'))
-             LOGGER.info(response['error']['title'])
-             LOGGER.info(response['error']['message'])
-             assert response['error']['code'] == RECEIPT_NOT_FOUND
-             assert response['error']['title'] == 'Invalid Resource Id'
+        params={'id':transaction_id}
+        
+        try:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url='{}/receipts'.format(address),params=params) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
          
-    def test_api_post_reciepts_single_transactions(self,setup):
+    async def test_api_post_reciepts_single_transactions(self,setup):
       """Test post reciepts response for single transaction"""
           
       expected_transaction=setup['expected_txns']
-         
-      transaction_json=json.dumps(expected_transaction).encode()
-      try:   
-           response = post_receipts(transaction_json)
-      except urllib.error.HTTPError as error:
-           LOGGER.info("Rest Api is Unreachable")
-           response = json.loads(error.fp.read().decode('utf-8'))
-           LOGGER.info(response['error']['title'])
-           LOGGER.info(response['error']['message'])
-           assert response['error']['code'] == INVALID_RESOURCE_ID
-           assert response['error']['title'] == 'Invalid Resource Id'
-          
-    def test_api_post_reciepts_invalid_transactions(self):
+      address = setup['address']
+      transaction_json=json.dumps(expected_transaction).encode()      
+      headers = {'content-type': 'application/json'}
+        
+      try:
+        async with aiohttp.ClientSession() as session:        
+            async with session.post(url='{}/receipts'.format(address),
+                                    data=transaction_json,headers=headers) as data:
+                response = await data.json()
+      except aiohttp.client_exceptions.ClientResponseError as error:
+        LOGGER.info(error)
+      
+            
+    async def test_api_post_reciepts_invalid_transactions(self,setup):
       """test reciepts post for invalid transaction"""
           
       expected_transaction="few"
+      address = setup['address']
       transaction_json=json.dumps(expected_transaction).encode()
-      try:   
-           response = post_receipts(transaction_json)
-      except urllib.error.HTTPError as error:
-           LOGGER.info("Rest Api is Unreachable")
-           response = json.loads(error.fp.read().decode('utf-8'))
-           LOGGER.info(response['error']['title'])
-           LOGGER.info(response['error']['message'])
-           assert response['error']['code'] == RECEIPT_BODY_INVALID
-           assert response['error']['title'] == 'Bad Receipts Request'
+      headers = {'content-type': 'application/json'}
+      
+      try:
+        async with aiohttp.ClientSession() as session:        
+            async with session.post(url='{}/receipts'.format(address),
+                                    data=transaction_json,headers=headers) as data:
+                response = await data.json()
+      except aiohttp.client_exceptions.ClientResponseError as error:
+        LOGGER.info(error)
           
-    def test_api_post_reciepts_multiple_transactions(self, setup):
+    async def test_api_post_reciepts_multiple_transactions(self, setup):
        """Test the post reciepts response for multiple transaction.
        """
-     
+       address = setup['address']
        expected_txns = setup['expected_txns']
-       
        json_list=json.dumps(expected_txns).encode() 
+       headers = {'content-type': 'application/json'}
 
        try:
-           response= post_receipts(json_list)
-       except urllib.error.HTTPError as error:
-           LOGGER.info("Rest Api is Unreachable")
-           response = json.loads(error.fp.read().decode('utf-8'))
+        async with aiohttp.ClientSession() as session:        
+            async with session.post(url='{}/receipts'.format(address),
+                                    data=json_list,headers=headers) as data:
+                response = await data.json()
+       except aiohttp.client_exceptions.ClientResponseError as error:
+        LOGGER.info(error)
            
        for res,txn in zip(response['data'], expected_txns):
            assert str(res['id']) == txn
