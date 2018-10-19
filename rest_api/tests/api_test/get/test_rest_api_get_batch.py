@@ -19,8 +19,6 @@ import json
 import urllib.request
 import urllib.error
 import aiohttp
-import asyncio
-import time
 
  
 from fixtures import break_genesis, invalid_batch
@@ -54,17 +52,12 @@ STATUS_ID_QUERY_INVALID = 66
 STATUS_BODY_INVALID = 43
 STATUS_WRONG_CONTENT_TYPE = 46
 WAIT = 10
-TIMEOUT=5
-
-async def fetch_url(url, session,params=None):
-    async with session.get(url) as response:
-        return await response.json()
 
 
 class TestBatchList(RestApiBaseTest):
     """This class tests the batch list with different parameters
     """
-    async def test_api_get_batch_list(self, setup):
+    def test_api_get_batch_list(self, setup):
         """Tests the batch list by submitting intkey batches
         """
         LOGGER.info("Starting tests for batch list")
@@ -76,39 +69,29 @@ class TestBatchList(RestApiBaseTest):
         payload = setup['payload']
         start = setup['start']
         limit = setup['limit']
-        address = setup['address']  
-        tasks=[]  
-        url = '{}/batches'.format(address)
+        address = setup['address']    
             
         expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)
         
         paging_link = '{}/batches?head={}&start={}'.format(address,\
                          expected_head, start)
-        
-        start_time = time.time()
                                          
-        try:
-            async with aiohttp.ClientSession() as session:        
-                    task = asyncio.ensure_future(fetch_url(url, session))
-                    tasks.append(task)
-                    response = await asyncio.gather(*tasks)
-        except aiohttp.client_exceptions.ClientResponseError as error:
+        try:   
+            response = get_batches()
+        except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is Unreachable")
-        
-        end_time = time.time()
-        print(end_time-start_time)
-                       
-        batches = _get_batch_list(response[0]) 
               
-        self.assert_valid_data(response[0])
-        self.assert_valid_head(response[0], expected_head) 
+        batches = _get_batch_list(response) 
+         
+        self.assert_valid_data(response)
+        self.assert_valid_head(response, expected_head) 
         self.assert_valid_data_length(batches, expected_length)
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)
-        self.assert_valid_link(response[0], expected_link)
-        self.assert_valid_paging(response[0], expected_link)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
             
     async def test_api_get_batch_list_head(self, setup):   
         """Tests that GET /batches is reachable with head parameter 
@@ -128,7 +111,6 @@ class TestBatchList(RestApiBaseTest):
                          expected_head, start, limit)
         
         params={'head': expected_head}
-        
                     
         try:
             async with aiohttp.ClientSession() as session:        
@@ -137,7 +119,6 @@ class TestBatchList(RestApiBaseTest):
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-        
                   
         batches = response['data'][:-1]
                     
