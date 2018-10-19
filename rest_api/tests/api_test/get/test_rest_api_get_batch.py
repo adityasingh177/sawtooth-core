@@ -52,6 +52,7 @@ STATUS_ID_QUERY_INVALID = 66
 STATUS_BODY_INVALID = 43
 STATUS_WRONG_CONTENT_TYPE = 46
 WAIT = 10
+TIMEOUT=5
 
 
 class TestBatchList(RestApiBaseTest):
@@ -83,7 +84,7 @@ class TestBatchList(RestApiBaseTest):
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-              
+                      
         batches = _get_batch_list(response) 
          
         self.assert_valid_data(response)
@@ -350,7 +351,7 @@ class TestBatchList(RestApiBaseTest):
         expected_batches = setup['expected_batches']
         expected_txns = setup['expected_txns']
         expected_length = setup['expected_batch_length']
-        payload = setup['payload']                       
+        payload = setup['payload']                    
         start = setup['batch_ids'][::-1][0]
         limit = setup['limit']
         address = setup['address']
@@ -359,6 +360,8 @@ class TestBatchList(RestApiBaseTest):
                          expected_head, start, limit)
          
         params = 'reverse'
+        
+        print(expected_batches)
                            
         try:
             async with aiohttp.ClientSession() as session:        
@@ -369,6 +372,8 @@ class TestBatchList(RestApiBaseTest):
             LOGGER.info("Rest Api is Unreachable")
           
         batches = response['data'][::-1][:-1]
+        
+        print(batches)
         
 
         self.assert_check_batch_seq(batches, expected_batches, 

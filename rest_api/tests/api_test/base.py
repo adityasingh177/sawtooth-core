@@ -208,10 +208,22 @@ class RestApiBaseTest(object):
         if not isinstance(blocks, list):
                 blocks = [blocks]
         
+        if not isinstance(expected_batches, list):
+                expected_batches = [expected_batches]
         
-        ep = list(zip(blocks, expected_batches, expected_txns))
+        if not isinstance(expected_batches, list):
+                expected_batches = [expected_batches]
         
-        for block, expected_batch, expected_txn in ep:
+        if not isinstance(expected_txns, list):
+                expected_txns = [expected_txns]
+        
+        if not isinstance(payload, list):
+                payload = [payload]
+        
+        
+        ep = list(zip(blocks, expected_batches, expected_txns, payload))
+        
+        for block, expected_batch, expected_txn, payload in ep:
             assert isinstance(block, dict)
             assert isinstance(block['header'], dict)
             batches = block['batches']

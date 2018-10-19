@@ -44,6 +44,7 @@ BLOCK_NOT_FOUND = 70
 HEAD_LENGTH = 128
 MAX_BATCH_IN_BLOCK = 100
 FAMILY_NAME = 'xo'
+TIMEOUT=5
  
    
 LOGGER = logging.getLogger(__name__)

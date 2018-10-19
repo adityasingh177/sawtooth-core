@@ -55,7 +55,7 @@ LOGGER.setLevel(logging.INFO)
 
 
 LIMIT = 100
-BATCH_SIZE = 1
+BATCH_SIZE = 2
                   
  
 def pytest_addoption(parser):

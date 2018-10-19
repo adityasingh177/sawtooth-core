@@ -46,6 +46,7 @@ INVALID_COUNT_QUERY  = 53
 VALIDATOR_NOT_READY  = 15
 TRANSACTION_NOT_FOUND = 72
 HEAD_LENGTH = 128
+TIMEOUT=5
   
 
 class TestTransactionList(RestApiBaseTest):
@@ -95,7 +96,7 @@ class TestTransactionList(RestApiBaseTest):
         expected_length = setup['expected_trn_length']
         payload = setup['payload'][0]
         address = setup['address']
-        start = expected_txns[::-1][0]
+        start = expected_txns[0]
         limit = setup['limit']
          
         expected_link = '{}/transactions?head={}&start={}&limit={}'.format(address,\
@@ -146,7 +147,7 @@ class TestTransactionList(RestApiBaseTest):
         expected_length = setup['expected_trn_length']
         payload = setup['payload'][0]
         address = setup['address']
-        start = expected_txns[::-1][0]
+        start = expected_txns[0]
         transaction_ids   =  setup['transaction_ids']
         expected_id = transaction_ids[0]
         expected_length = len([expected_id])
@@ -198,7 +199,7 @@ class TestTransactionList(RestApiBaseTest):
         expected_length = setup['expected_trn_length']
         payload = setup['payload'][0]
         address = setup['address']
-        start = expected_txns[::-1][0]
+        start = expected_txns[0]
         transaction_ids   =  setup['transaction_ids']
         expected_id = transaction_ids[0]
         expected_length = len([expected_id])
@@ -256,7 +257,7 @@ class TestTransactionList(RestApiBaseTest):
         expected_length = setup['expected_trn_length']
         payload = setup['payload'][0]
         address = setup['address']
-        start = expected_txns[::-1][0]
+        start = expected_txns[0]
         transaction_ids   =  setup['transaction_ids']
         expected_id = transaction_ids[0]
         expected_length = len([expected_id])
