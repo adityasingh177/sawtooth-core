@@ -19,6 +19,7 @@ import json
 import urllib.request
 import urllib.error
 import aiohttp
+import asyncio
 
  
 from fixtures import break_genesis, invalid_batch
@@ -53,11 +54,15 @@ STATUS_BODY_INVALID = 43
 STATUS_WRONG_CONTENT_TYPE = 46
 WAIT = 10
 
+async def fetch(url, session,params=None):
+    async with session.get(url) as response:
+        return await response.json()
+
 
 class TestBatchList(RestApiBaseTest):
     """This class tests the batch list with different parameters
     """
-    def test_api_get_batch_list(self, setup):
+    async def test_api_get_batch_list(self, setup):
         """Tests the batch list by submitting intkey batches
         """
         LOGGER.info("Starting tests for batch list")
@@ -69,7 +74,9 @@ class TestBatchList(RestApiBaseTest):
         payload = setup['payload']
         start = setup['start']
         limit = setup['limit']
-        address = setup['address']    
+        address = setup['address'] 
+        url='{}/batches'.format(address)  
+        tasks=[] 
             
         expected_link = '{}/batches?head={}&start={}&limit={}'.format(address,\
                          expected_head, start, limit)
@@ -77,21 +84,25 @@ class TestBatchList(RestApiBaseTest):
         paging_link = '{}/batches?head={}&start={}'.format(address,\
                          expected_head, start)
                                          
-        try:   
-            response = get_batches()
-        except urllib.error.HTTPError as error:
+        try:
+            async with aiohttp.ClientSession() as session: 
+                task = asyncio.ensure_future(fetch(url, session))
+                tasks.append(task)   
+                response = await asyncio.gather(*tasks)
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
+        
               
-        batches = _get_batch_list(response) 
+        batches = _get_batch_list(response[0]) 
          
-        self.assert_valid_data(response)
-        self.assert_valid_head(response, expected_head) 
+        self.assert_valid_data(response[0])
+        self.assert_valid_head(response[0], expected_head) 
         self.assert_valid_data_length(batches, expected_length)
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)
-        self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response, expected_link)
+        self.assert_valid_link(response[0], expected_link)
+        self.assert_valid_paging(response[0], expected_link)
             
     async def test_api_get_batch_list_head(self, setup):   
         """Tests that GET /batches is reachable with head parameter 

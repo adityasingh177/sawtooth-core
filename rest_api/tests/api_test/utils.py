@@ -354,6 +354,25 @@ def post_receipts(receipts):
     response = query_rest_api('/receipts', data=receipts, headers=headers)
     return response
 
+def state_count():
+    state_list = get_state_list()
+    count = len(state_list['data'])
+    try:
+        next_position = state_list['paging']['next_position']
+    except:
+        next_position = None
+    
+    while(next_position):
+        state_list = get_state_list(start=next_position)
+        try:
+            next_position = state_list['paging']['next_position']
+        except:
+            next_position = None
+        
+        count += len(state_list['data'])
+    return count  
+
+
 def batch_count():
     batch_list = get_batches()
     count = len(batch_list['data'])
@@ -371,6 +390,7 @@ def batch_count():
         
         count += len(batch_list['data'])
     return count   
+
 
 def transaction_count():
     transaction_list = get_transactions()
@@ -394,6 +414,7 @@ def _create_expected_link(expected_ids):
     for id in expected_ids:
         link = '{}/batch_statuses?id={},{}'.format(address, id)
     return link
+
 
 def _get_batch_list(response):
     batch_list = response['data']
@@ -435,6 +456,27 @@ def _get_transaction_list(response):
         transaction_list += data_list
             
     return transaction_list
+
+
+def _get_state_list(response):
+    state_list = response['data']
+    
+    try:
+        next_position = response['paging']['next_position']
+    except:
+        next_position = None
+        
+    while(next_position):
+        response = get_state_list(start=next_position)
+        data_list = response['data']
+        try:
+            next_position = response['paging']['next_position']
+        except:
+            next_position = None
+                      
+        state_list += data_list
+            
+    return state_list
 
 
 def post_batch_no_endpoint(batch, headers="None"):
