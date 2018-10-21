@@ -56,97 +56,15 @@ LOGGER.setLevel(logging.INFO)
 
 LIMIT = 100
 BATCH_SIZE = 2
-                  
- 
-def pytest_addoption(parser):
-    """Contains parsers for pytest cli commands
-    """
-    parser.addoption(
-        "--get", action="store_true", default=False, help="run get tests"
-    )
-     
-    parser.addoption(
-        "--post", action="store_true", default=False, help="run post tests"
-    )
-     
-    parser.addoption(
-        "--sn", action="store_true", default=False, help="run scenario based tests"
-    )
-    
-    parser.addoption("--batch", action="store", metavar="NAME",
-        help="only run batch tests."
-    )
-    
-    parser.addoption("--transaction", action="store", metavar="NAME",
-        help="only run transaction tests."
-    )
-    
-    parser.addoption("--state", action="store", metavar="NAME",
-        help="only run state tests."
-    )
-    
-    parser.addoption("--block", action="store", metavar="NAME",
-        help="only run state tests."
-    )
-     
-    parser.addoption("-E", action="store", metavar="NAME",
-        help="only run tests matching the environment NAME."
-    )
-     
-    parser.addoption("-N", action="store", metavar="NAME",
-        help="only run tests matching the Number."
-    )
-     
-    parser.addoption("-O", action="store", metavar="NAME",
-        help="only run tests matching the OS release version."
-    )
 
-   
-def pytest_collection_modifyitems(config, items):
-    """Filters tests based on markers when parameters passed
-       through the cli
-    """
-    try:
-        num = int(config.getoption("-N"))
-    except:
-        num = None
- 
-    selected_items = []
-    deselected_items = []
-    if config.getoption("--get"):        
-        for item in items:
-            for marker in list(item.iter_markers()):
-                if marker.name == 'get':
-                    selected_items.append(item)
-                else:
-                    deselected_items.append(item)
- 
-        items[:] = selected_items[:num]
-        return items
-    elif config.getoption("--post"):   
-        for item in items:
-            for marker in item.iter_markers():
-                if marker.name == 'post':
-                    selected_items.append(item)
-                else:
-                    deselected_items.append(item)
-  
-        items[:] = selected_items[:num]
-        return items
-    elif config.getoption("--sn"):  
-        for item in items:
-            for marker in item.iter_markers():
-                if marker.name == 'scenario':
-                    selected_items.append(item)
-                else:
-                    deselected_items.append(item)
-  
-        items[:] = selected_items[:num]
-        return items
-    else:
-        selected_items = items[:num]
-        items[:] = selected_items
-        return items
+def _create_transaction():
+    txns = [create_intkey_transaction("set", [] , 50 , signer) for i in range(BATCH_SIZE)]
+    return txns
+    
+
+def _create_batch():
+    batches = [create_batch([txn], signer) for txn in txns]
+    return batches
 
 @pytest.fixture(scope="session")
 def setup(request):
@@ -245,3 +163,94 @@ def setup(request):
     data['limit'] = LIMIT
     data['start'] = expected_batches[::-1][0]
     return data
+                  
+ 
+def pytest_addoption(parser):
+    """Contains parsers for pytest cli commands
+    """
+    parser.addoption(
+        "--get", action="store_true", default=False, help="run get tests"
+    )
+     
+    parser.addoption(
+        "--post", action="store_true", default=False, help="run post tests"
+    )
+     
+    parser.addoption(
+        "--sn", action="store_true", default=False, help="run scenario based tests"
+    )
+    
+    parser.addoption("--batch", action="store", metavar="NAME",
+        help="only run batch tests."
+    )
+    
+    parser.addoption("--transaction", action="store", metavar="NAME",
+        help="only run transaction tests."
+    )
+    
+    parser.addoption("--state", action="store", metavar="NAME",
+        help="only run state tests."
+    )
+    
+    parser.addoption("--block", action="store", metavar="NAME",
+        help="only run state tests."
+    )
+     
+    parser.addoption("-E", action="store", metavar="NAME",
+        help="only run tests matching the environment NAME."
+    )
+     
+    parser.addoption("-N", action="store", metavar="NAME",
+        help="only run tests matching the Number."
+    )
+     
+    parser.addoption("-O", action="store", metavar="NAME",
+        help="only run tests matching the OS release version."
+    )
+
+   
+def pytest_collection_modifyitems(config, items):
+    """Filters tests based on markers when parameters passed
+       through the cli
+    """
+    try:
+        num = int(config.getoption("-N"))
+    except:
+        num = None
+ 
+    selected_items = []
+    deselected_items = []
+    if config.getoption("--get"):        
+        for item in items:
+            for marker in list(item.iter_markers()):
+                if marker.name == 'get':
+                    selected_items.append(item)
+                else:
+                    deselected_items.append(item)
+ 
+        items[:] = selected_items[:num]
+        return items
+    elif config.getoption("--post"):   
+        for item in items:
+            for marker in item.iter_markers():
+                if marker.name == 'post':
+                    selected_items.append(item)
+                else:
+                    deselected_items.append(item)
+  
+        items[:] = selected_items[:num]
+        return items
+    elif config.getoption("--sn"):  
+        for item in items:
+            for marker in item.iter_markers():
+                if marker.name == 'scenario':
+                    selected_items.append(item)
+                else:
+                    deselected_items.append(item)
+  
+        items[:] = selected_items[:num]
+        return items
+    else:
+        selected_items = items[:num]
+        items[:] = selected_items
+        return items

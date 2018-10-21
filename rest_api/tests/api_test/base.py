@@ -16,6 +16,8 @@ import aiohttp
 import logging
 from base64 import b64decode
 
+from utils import _get_node_list
+
 
 CONSENSUS_ALGO = b'Devmode'
 FAMILY_NAME = 'intkey'
@@ -23,6 +25,7 @@ FAMILY_VERSION = '1.0'
 DEFAULT_LIMIT = 100
 TRACE = False
 NONCE = ''
+TRIES=5
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -31,7 +34,8 @@ LOGGER.setLevel(logging.INFO)
 class RestApiBaseTest(object):
     """Base class for Rest Api tests that simplifies making assertions
        for the test cases
-    """ 
+    """
+        
     def assert_status(self, response, status):
         for data in response['data']:
             assert data['status'] == status
@@ -333,7 +337,7 @@ class RestApiBaseTest(object):
         raise AssertionError(
             "{} is not available within {} attempts".format(url, tries))
 
-    def wait_for_rest_apis(endpoints, tries=5):
+    def wait_for_rest_apis(endpoints, tries=TRIES):
         """Pause the program until all the given REST API endpoints are available.
     
         Args:
