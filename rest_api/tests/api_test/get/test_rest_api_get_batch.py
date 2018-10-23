@@ -376,18 +376,8 @@ class TestBatchList(RestApiBaseTest):
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-        
-        print(response)
-          
-        batches = _get_batch_list(response)
-
-        self.assert_check_batch_seq(batches, expected_batches, 
-                                    expected_txns, payload, 
-                                    signer_key)
-        self.assert_valid_head(response, expected_head)
-        self.assert_valid_link(response, expected_link)
-        self.assert_valid_paging(response, expected_link)
-#     
+                  
+  
     async def test_api_get_batch_key_params(self, setup):
         """Tests/ validate the block key parameters with data, head, link and paging               
         """
