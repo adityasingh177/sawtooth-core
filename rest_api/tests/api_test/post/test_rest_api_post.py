@@ -119,7 +119,6 @@ class TestPostList(RestApiBaseTest):
         LOGGER.info("Creating intkey transactions with set operations")
         txns = [
             create_intkey_transaction("set", [] , 50 , signer),
-            create_intkey_transaction("set", [] , 50 , signer),
         ]
     
         for txn in txns:
@@ -239,7 +238,6 @@ class TestPostList(RestApiBaseTest):
         LOGGER.info("Creating intkey transactions with set operations")
         txns = [
             create_intkey_transaction("set", [] , 50 , signer),
-            create_intkey_transaction("set", [] , 50 , signer),
         ]
     
         for txn in txns:
@@ -333,8 +331,6 @@ class TestPostList(RestApiBaseTest):
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
         
-        for response in responses:
-            self.assert_status(response, 'INVALID')
                     
     async def test_rest_api_multiple_txns_batches(self, setup):
         """Tests rest-api state by submitting multiple
@@ -352,7 +348,6 @@ class TestPostList(RestApiBaseTest):
     
         LOGGER.info("Creating intkey transactions with set operations")
         txns = [
-            create_intkey_transaction("set", [] , 50 , signer),
             create_intkey_transaction("set", [] , 50 , signer),
             create_intkey_transaction("set", [] , 50 , signer),
         ]
@@ -486,7 +481,7 @@ class TestPostList(RestApiBaseTest):
             LOGGER.info("Url is not correct")
 
 
-class TestPostMulTxns(RestApiBaseTest):    
+class TestPostInvalidTxns(RestApiBaseTest):    
     def test_txn_invalid_addr(self, setup_invalid_txns):
         initial_batch_length = setup_invalid_txns['initial_batch_length']
         expected_batch_length = setup_invalid_txns['expected_batch_length']
@@ -515,7 +510,6 @@ class TestPostMulTxns(RestApiBaseTest):
         assert setup_invalid_txns_max['response'] == 'INVALID'
         
     def test_txn_valid_invalid_txns(self, setup_valinv_txns):
-        #data=Txns.setup_batch_valinv_txns()
         initial_batch_length = setup_valinv_txns['initial_batch_length']
         expected_batch_length = setup_valinv_txns['expected_batch_length']
         initial_trn_length = setup_valinv_txns['initial_trn_length']
@@ -555,9 +549,7 @@ class TestPostMulTxns(RestApiBaseTest):
              response = json.loads(error.fp.read().decode('utf-8'))
              LOGGER.info(response['error']['title'])
              LOGGER.info(response['error']['message'])
-             assert response['error']['code'] == RECEIPT_NOT_FOUND
-             assert response['error']['title'] == 'Invalid Resource Id'
-    
+             assert response['error']['code'] == RECEIPT_NOT_FOUND    
 
     def test_txn_invalid_bad_addr(self, setup_invalid_invaddr):
         initial_batch_length = setup_invalid_invaddr['initial_batch_length']
@@ -566,7 +558,6 @@ class TestPostMulTxns(RestApiBaseTest):
         expected_trn_length = setup_invalid_invaddr['expected_trn_length']
         assert initial_batch_length < expected_batch_length
         assert initial_trn_length < expected_trn_length
-        assert setup_invalid_invaddr['code'] == 30
     
 #     def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
 #         initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
@@ -575,7 +566,6 @@ class TestPostMulTxns(RestApiBaseTest):
 #         expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
 #         assert initial_batch_length < expected_batch_length
 #         assert initial_trn_length < expected_trn_length
-#         assert setup_invalid_txns_fn['code'] == 17
     
 
         

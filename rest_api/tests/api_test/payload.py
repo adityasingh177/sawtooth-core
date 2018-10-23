@@ -225,17 +225,15 @@ class Transactions:
                 batch_id = dict['header_signature']
                 expected_batches.append(batch_id)
                 self.data['response'] = response['data'][0]['status'] 
+                print(response)
         except urllib.error.HTTPError as error:
             LOGGER.info("Rest Api is not reachable")
             json_data = json.loads(error.fp.read().decode('utf-8'))
-            #print(json_data['error']['code'])
-            #print(json_data['error']['message'])
             LOGGER.info(json_data['error']['title'])
             LOGGER.info(json_data['error']['message']) 
             LOGGER.info(json_data['error']['code'])             
             self.data['code'] = json_data['error']['code'] 
-        #receipts = get_reciepts(expected_trxns['trxn_id'])
-        #print(receipts)
+
         self.state_addresses = [state['address'] for state in get_state_list()['data']]
         self.data['state_address'] = self.state_addresses
         self.data['initial_batch_length'] = initial_batch_length
