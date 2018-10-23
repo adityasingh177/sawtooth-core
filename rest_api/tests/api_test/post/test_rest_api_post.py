@@ -111,7 +111,6 @@ class TestPostList(RestApiBaseTest):
         signer = get_signer()
         expected_trxn_ids  = []
         expected_batch_ids = []
-        initial_state_length = state_count()
         address = _get_client_address()
         url='{}/batches'.format(address)
         tasks=[]
@@ -156,12 +155,11 @@ class TestPostList(RestApiBaseTest):
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
         
-        final_state_length = state_count()        
         block_batch_ids = [block['header']['batch_ids'][0] for block in get_blocks()['data']]
         state_addresses = [state['address'] for state in get_state_list()['data']]
         state_head_list = [get_state_address(address)['head'] for address in state_addresses]
         committed_transaction_list = get_transactions()['data']
-            
+                    
         for response in responses:
             if response['data'][0]['status'] == 'COMMITTED':
                 LOGGER.info('Batch is committed')
@@ -169,9 +167,7 @@ class TestPostList(RestApiBaseTest):
                 for batch in expected_batch_ids:
                     if batch in block_batch_ids:
                         LOGGER.info("Block is created for the respective batch")
-                
-                assert final_state_length ==  initial_state_length + len(expected_batch_ids)
-     
+                     
             elif response['data'][0]['status'] == 'INVALID':
                 LOGGER.info('Batch is not committed')
      
@@ -182,9 +178,7 @@ class TestPostList(RestApiBaseTest):
                 for batch in batch_ids:
                     if batch not in block_batch_ids:
                         LOGGER.info("Block is not created for the respective batch")
-                
-                assert final_state_length ==  initial_state_length
-            
+                            
         node_list = _get_node_list()
         chains = _get_node_chains(node_list)
         assert check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS) == True
@@ -341,7 +335,6 @@ class TestPostList(RestApiBaseTest):
         signer = get_signer()
         expected_trxn_ids  = []
         expected_batch_ids = []
-        initial_state_length = state_count()
         address = _get_client_address()
         url='{}/batches'.format(address)
         tasks=[]
@@ -386,9 +379,7 @@ class TestPostList(RestApiBaseTest):
                 responses = await asyncio.gather(*tasks)
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
-        
-        final_state_length = state_count()
-        
+                
         block_batch_ids = [block['header']['batch_ids'][0] for block in get_blocks()['data']]
         state_addresses = [state['address'] for state in get_state_list()['data']]
         state_head_list = [get_state_address(address)['head'] for address in state_addresses]
@@ -401,9 +392,7 @@ class TestPostList(RestApiBaseTest):
                 for batch in expected_batch_ids:
                     if batch in block_batch_ids:
                         LOGGER.info("Block is created for the respective batch")
-                
-                assert final_state_length ==  initial_state_length + len(expected_batch_ids)
-     
+                     
             elif response['data'][0]['status'] == 'INVALID':
                 LOGGER.info('Batch is not committed')
      
@@ -414,29 +403,27 @@ class TestPostList(RestApiBaseTest):
                 for batch in expected_batch_ids:
                     if batch not in block_batch_ids:
                         LOGGER.info("Block is not created for the respective batch")
-                
-                assert final_state_length ==  initial_state_length
-            
+                            
         node_list = _get_node_list()
         chains = _get_node_chains(node_list)
         assert check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS) == True
         
 
-    async def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
-        address = _get_client_address()
-        url='{}/batches'.format(address)
-        tasks=[]
-        batch = setup_empty_trxs_batch
-        post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
-         
-        try:
-            async with aiohttp.ClientSession() as session: 
-                for batch in post_batch_list:
-                    task = asyncio.ensure_future(async_post_batch(url,session,data=batch))
-                    tasks.append(task)
-                response = await asyncio.gather(*tasks)
-        except aiohttp.client_exceptions.ClientResponseError as error:
-            LOGGER.info("Rest Api is Unreachable")
+#     async def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
+#         address = _get_client_address()
+#         url='{}/batches'.format(address)
+#         tasks=[]
+#         batch = setup_empty_trxs_batch
+#         post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
+#          
+#         try:
+#             async with aiohttp.ClientSession() as session: 
+#                 for batch in post_batch_list:
+#                     task = asyncio.ensure_future(async_post_batch(url,session,data=batch))
+#                     tasks.append(task)
+#                 response = await asyncio.gather(*tasks)
+#         except aiohttp.client_exceptions.ClientResponseError as error:
+#             LOGGER.info("Rest Api is Unreachable")
 
            
     async def test_api_post_batch_different_signer(self, setup):
