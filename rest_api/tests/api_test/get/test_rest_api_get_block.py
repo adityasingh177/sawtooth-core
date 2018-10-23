@@ -480,7 +480,7 @@ class TestBlockList(RestApiBaseTest):
                     
             for batch in response['data']:
                 batch_list = get_batches()
-                for block in batch_list:
+                for batch in batch_list:
                     transaction_list = get_transactions()
                     for trans in transaction_list['data']:
                         head_signature = trans['header_signature']

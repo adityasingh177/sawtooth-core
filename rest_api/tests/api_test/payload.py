@@ -226,7 +226,6 @@ class Transactions:
                 expected_batches.append(batch_id)
                 self.data['response'] = response['data'][0]['status'] 
         except urllib.error.HTTPError as error:
-            
             LOGGER.info("Rest Api is not reachable")
             json_data = json.loads(error.fp.read().decode('utf-8'))
             #print(json_data['error']['code'])

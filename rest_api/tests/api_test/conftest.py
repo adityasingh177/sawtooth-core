@@ -45,7 +45,7 @@ from utils import get_batches,  get_transactions, get_state_address, post_batch,
                   get_state_list , _delete_genesis , _start_validator, \
                   _stop_validator , _create_genesis , _get_client_address, \
                   _stop_settings_tp, _start_settings_tp, _get_client_address, batch_count, transaction_count,\
-                  get_batch_statuses
+                  get_batch_statuses, state_count
 
 from payload import get_signer, create_intkey_transaction , create_batch
                   
@@ -55,7 +55,7 @@ LOGGER.setLevel(logging.INFO)
 
 
 LIMIT = 100
-BATCH_SIZE = 2
+BATCH_SIZE = 1
 
 def _create_transaction():
     txns = [create_intkey_transaction("set", [] , 50 , signer) for i in range(BATCH_SIZE)]
@@ -71,12 +71,13 @@ def setup(request):
     """Setup method for posting batches and returning the 
        response
     """
+    LOGGER.info("Starting setup method for test cases")
     data = {}
     signer = get_signer()
     expected_trxns  = {}
     expected_batches = []
     transaction_list = []
-    initial_state_length = len(get_state_list())
+    initial_state_length = state_count()
     initial_batch_length = batch_count()
     initial_transaction_length = transaction_count()
     address = _get_client_address()

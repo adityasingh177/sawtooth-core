@@ -70,6 +70,7 @@ BATCH_QUEUE_FULL = 31
 INVALID_BATCH = 30
 WRONG_CONTENT_TYPE = 43
 WAIT=300
+RECEIPT_NOT_FOUND = 80
 
 BLOCK_TO_CHECK_CONSENSUS = 1
 
@@ -156,6 +157,7 @@ class TestPostList(RestApiBaseTest):
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
         
+        final_state_length = state_count()        
         block_batch_ids = [block['header']['batch_ids'][0] for block in get_blocks()['data']]
         state_addresses = [state['address'] for state in get_state_list()['data']]
         state_head_list = [get_state_address(address)['head'] for address in state_addresses]
@@ -168,6 +170,8 @@ class TestPostList(RestApiBaseTest):
                 for batch in expected_batch_ids:
                     if batch in block_batch_ids:
                         LOGGER.info("Block is created for the respective batch")
+                
+                assert final_state_length ==  initial_state_length + len(expected_batch_ids)
      
             elif response['data'][0]['status'] == 'INVALID':
                 LOGGER.info('Batch is not committed')
@@ -179,12 +183,11 @@ class TestPostList(RestApiBaseTest):
                 for batch in batch_ids:
                     if batch not in block_batch_ids:
                         LOGGER.info("Block is not created for the respective batch")
+                
+                assert final_state_length ==  initial_state_length
             
-         
-        final_state_length = state_count()
         node_list = _get_node_list()
         chains = _get_node_chains(node_list)
-        assert final_state_length ==  initial_state_length + len(expected_batch_ids)
         assert check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS) == True
         
     async def test_rest_api_no_batches(self):
@@ -389,6 +392,8 @@ class TestPostList(RestApiBaseTest):
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
         
+        final_state_length = state_count()
+        
         block_batch_ids = [block['header']['batch_ids'][0] for block in get_blocks()['data']]
         state_addresses = [state['address'] for state in get_state_list()['data']]
         state_head_list = [get_state_address(address)['head'] for address in state_addresses]
@@ -401,6 +406,8 @@ class TestPostList(RestApiBaseTest):
                 for batch in expected_batch_ids:
                     if batch in block_batch_ids:
                         LOGGER.info("Block is created for the respective batch")
+                
+                assert final_state_length ==  initial_state_length + len(expected_batch_ids)
      
             elif response['data'][0]['status'] == 'INVALID':
                 LOGGER.info('Batch is not committed')
@@ -409,33 +416,32 @@ class TestPostList(RestApiBaseTest):
                     message = response['data'][0]['invalid_transactions'][0]['message']
                     LOGGER.info(message)
      
-                for batch in batch_ids:
+                for batch in expected_batch_ids:
                     if batch not in block_batch_ids:
                         LOGGER.info("Block is not created for the respective batch")
+                
+                assert final_state_length ==  initial_state_length
             
-         
-        final_state_length = state_count()
         node_list = _get_node_list()
         chains = _get_node_chains(node_list)
-        assert final_state_length ==  initial_state_length + len(expected_batch_ids)
         assert check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS) == True
         
 
-#     async def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
-#         address = _get_client_address()
-#         url='{}/batches'.format(address)
-#         tasks=[]
-#         batch = setup_empty_trxs_batch
-#         post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
-#         
-#         try:
-#             async with aiohttp.ClientSession() as session: 
-#                 for batch in post_batch_list:
-#                     task = asyncio.ensure_future(async_post_batch(url,session,data=batch))
-#                     tasks.append(task)
-#                 response = await asyncio.gather(*tasks)
-#         except aiohttp.client_exceptions.ClientResponseError as error:
-#             LOGGER.info("Rest Api is Unreachable")
+    async def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
+        address = _get_client_address()
+        url='{}/batches'.format(address)
+        tasks=[]
+        batch = setup_empty_trxs_batch
+        post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
+         
+        try:
+            async with aiohttp.ClientSession() as session: 
+                for batch in post_batch_list:
+                    task = asyncio.ensure_future(async_post_batch(url,session,data=batch))
+                    tasks.append(task)
+                response = await asyncio.gather(*tasks)
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
 
            
     async def test_api_post_batch_different_signer(self, setup):
@@ -560,16 +566,16 @@ class TestPostMulTxns(RestApiBaseTest):
         expected_trn_length = setup_invalid_invaddr['expected_trn_length']
         assert initial_batch_length < expected_batch_length
         assert initial_trn_length < expected_trn_length
-        assert setup_invalid_invaddr['code'] == 17
+        assert setup_invalid_invaddr['code'] == 30
     
-    def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
-        initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
-        expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
-        initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
-        expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
-        assert initial_batch_length < expected_batch_length
-        assert initial_trn_length < expected_trn_length
-        assert setup_invalid_txns_fn['code'] == 17
+#     def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
+#         initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
+#         expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
+#         initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
+#         expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
+#         assert initial_batch_length < expected_batch_length
+#         assert initial_trn_length < expected_trn_length
+#         assert setup_invalid_txns_fn['code'] == 17
     
 
         

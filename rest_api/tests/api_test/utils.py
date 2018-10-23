@@ -421,18 +421,24 @@ def _get_batch_list(response):
     
     try:
         next_position = response['paging']['next_position']
+        print(next_position)
     except:
         next_position = None
         
     while(next_position):
         response = get_batches(start=next_position)
+        print(response)
         data_list = response['data']
         try:
             next_position = response['paging']['next_position']
         except:
             next_position = None
+        
+        print(next_position)
                       
         batch_list += data_list
+    
+    print(batch_list)
             
     return batch_list
 
