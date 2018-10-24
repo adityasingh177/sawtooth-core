@@ -142,18 +142,18 @@ def setup(request):
         response = get_batch_statuses([batch])
         status = response['data'][0]['status']
           
-    block_list = get_blocks()
-    data['block_list'] = block_list
     batch_list = get_batches()
+    data['batch_ids'] = [batch['header_signature'] for batch in batch_list['data']]
     data['batch_list'] = batch_list
     transaction_list = get_transactions()
     data['transaction_list'] = transaction_list
     transaction_ids = [trans['header_signature'] for trans in transaction_list['data']]
     data['transaction_ids'] = transaction_ids
+    block_list = get_blocks()
+    data['block_list'] = block_list
     block_ids = [block['header_signature'] for block in block_list['data']]
     data['block_ids'] = block_ids[:-1]
     batch_ids = [block['header']['batch_ids'][0] for block in block_list['data']]
-    data['batch_ids'] = batch_ids
     expected_head = block_ids[0]
     data['expected_head'] = expected_head
     state_addresses = [state['address'] for state in get_state_list()['data']]
