@@ -409,21 +409,21 @@ class TestPostList(RestApiBaseTest):
         assert check_for_consensus(chains , BLOCK_TO_CHECK_CONSENSUS) == True
         
 
-#     async def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
-#         address = _get_client_address()
-#         url='{}/batches'.format(address)
-#         tasks=[]
-#         batch = setup_empty_trxs_batch
-#         post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
-#          
-#         try:
-#             async with aiohttp.ClientSession() as session: 
-#                 for batch in post_batch_list:
-#                     task = asyncio.ensure_future(async_post_batch(url,session,data=batch))
-#                     tasks.append(task)
-#                 response = await asyncio.gather(*tasks)
-#         except aiohttp.client_exceptions.ClientResponseError as error:
-#             LOGGER.info("Rest Api is Unreachable")
+    async def test_api_post_empty_trxns_list(self, setup_empty_trxs_batch):
+        address = _get_client_address()
+        url='{}/batches'.format(address)
+        tasks=[]
+        batch = setup_empty_trxs_batch
+        post_batch_list = [BatchList(batches=[batch]).SerializeToString()]
+          
+        try:
+            async with aiohttp.ClientSession() as session: 
+                for batch in post_batch_list:
+                    task = asyncio.ensure_future(async_post_batch(url,session,data=batch))
+                    tasks.append(task)
+                response = await asyncio.gather(*tasks)
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable")
 
            
     async def test_api_post_batch_different_signer(self, setup):
@@ -546,13 +546,13 @@ class TestPostInvalidTxns(RestApiBaseTest):
         assert initial_batch_length < expected_batch_length
         assert initial_trn_length < expected_trn_length
     
-#     def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
-#         initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
-#         expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
-#         initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
-#         expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
-#         assert initial_batch_length < expected_batch_length
-#         assert initial_trn_length < expected_trn_length
+    def test_txn_invalid_family_name(self, setup_invalid_txns_fn):
+        initial_batch_length = setup_invalid_txns_fn['initial_batch_length']
+        expected_batch_length = setup_invalid_txns_fn['expected_batch_length']
+        initial_trn_length = setup_invalid_txns_fn['initial_trn_length']
+        expected_trn_length = setup_invalid_txns_fn['expected_trn_length']
+        assert initial_batch_length < expected_batch_length
+        assert initial_trn_length < expected_trn_length
     
 
         
