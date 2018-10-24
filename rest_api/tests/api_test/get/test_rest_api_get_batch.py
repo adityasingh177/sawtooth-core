@@ -370,12 +370,24 @@ class TestBatchList(RestApiBaseTest):
         params = 'reverse'
                                            
         try:
-            async with aiohttp.ClientSession() as session:        
+            async with aiohttp.ClientSession() as session:
                 async with session.get(url='{}/batches'.format(address), params=params, 
                                        raise_for_status=True) as data:
                     response = await data.json()
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
+                               
+        
+        batches = response['data'][::-1][:-1]
+        
+
+        self.assert_check_batch_seq(batches, expected_batches, 
+                                    expected_txns, payload, 
+                                    signer_key)
+          
+        self.assert_valid_head(response, expected_head)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
                   
   
     async def test_api_get_batch_key_params(self, setup):
