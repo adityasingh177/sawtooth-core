@@ -361,8 +361,6 @@ class TestBatchList(RestApiBaseTest):
         expected_length = setup['expected_batch_length']
         payload = setup['payload']                    
         start = setup['batch_ids'][::-1][0]
-        print(setup['batch_ids'])
-        print(start)
         limit = setup['limit']
         address = setup['address']
              

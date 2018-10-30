@@ -237,8 +237,3 @@ def setup_invalid_txns_fn(request):
     Txns=Transactions(invalidtype="fn")
     data = Txns.get_batch_invalid_txns_fam_name()
     return data
-
-
-
-
-    

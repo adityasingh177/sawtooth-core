@@ -437,9 +437,7 @@ def _get_batch_list(response):
         print(next_position)
                       
         batch_list += data_list
-    
-    print(batch_list)
-            
+                
     return batch_list
 
 

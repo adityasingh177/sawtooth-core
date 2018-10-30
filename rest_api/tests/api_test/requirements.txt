@@ -1,0 +1,6 @@
+pytest==3.9.1
+pytest-aiohttp==0.3.0
+pytest-json-report==0.7.0
+pytest-metadata==1.7.0
+pytest-ordering==0.5
+
