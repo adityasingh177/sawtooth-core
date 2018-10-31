@@ -217,8 +217,6 @@ class Setup:
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info(error)
 
-   
-
 @pytest.fixture(scope="session")
 def setup(request):
     """Setup method for posting batches and returning the 
