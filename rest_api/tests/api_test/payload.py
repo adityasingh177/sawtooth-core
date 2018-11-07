@@ -45,15 +45,183 @@ from sawtooth_rest_api.protobuf.transaction_pb2 import Transaction
 
 from google.protobuf.message import DecodeError
 from google.protobuf.json_format import MessageToDict
-from utils import batch_count, transaction_count, get_batch_statuses, post_batch, get_reciepts,get_transactions, get_state_list
+
+from utils import get_batches,  get_transactions, get_state_address, post_batch, get_blocks,\
+                  get_state_list, _get_client_address, \
+                  batch_count, transaction_count,\
+                  get_batch_statuses, state_count
 
 INTKEY_ADDRESS_PREFIX = hashlib.sha512(
     'intkey'.encode('utf-8')).hexdigest()[0:6]
     
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
-    
+ 
+LIMIT = 100 
 WAIT = 300
+BATCH_SIZE = 1
+WORD_COUNT=50
+
+class Setup:
+    def __init__(self):
+        self.data = {}
+        self.signer= get_signer()
+        self.address = _get_client_address()
+        self.url='{}/batches'.format(self.address) 
+        
+    def _create_transactions(self):
+        LOGGER.info("Creating intkey transactions with set operations")
+        txns = [create_intkey_transaction("set", [] , WORD_COUNT , self.signer) for i in range(BATCH_SIZE)]
+        return txns
+        
+    
+    def _create_batches(self,txns):
+        LOGGER.info("Creating batches for transactions 1trn/batch")
+        batches = [create_batch([txn], self.signer) for txn in txns]
+        return batches
+    
+    def _create_batch_list(self,batches):
+        batch_list = [BatchList(batches=[batch]).SerializeToString() for batch in batches] 
+        return batch_list
+    
+    
+    def _batch_statuses(self,expected_batches):
+        LOGGER.info("Batch statuses for the created batches")
+        for batch in expected_batches:
+            response = get_batch_statuses([batch])
+            status = response['data'][0]['status']
+            LOGGER.info(status)
+            
+    
+    def _expected_batch_ids(self,batches):
+        LOGGER.info("Expected batch ids")
+        expected_batches = []
+        for batch in batches:
+            dict = MessageToDict(
+                    batch,
+                    including_default_value_fields=True,
+                    preserving_proto_field_name=True)
+    
+            batch_id = dict['header_signature']
+            expected_batches.append(batch_id)
+        return expected_batches
+    
+    
+    def _expected_txn_ids(self,txns):
+        LOGGER.info("Expected transaction ids")
+        expected_txns  = {}
+        for txn in txns:
+            dict = MessageToDict(
+                    txn,
+                    including_default_value_fields=True,
+                    preserving_proto_field_name=True)
+            
+            if 'trxn_id' not in expected_txns:
+                expected_txns['trxn_id'] = []
+            if 'payload' not in expected_txns:
+                expected_txns['payload'] =[]
+                    
+            expected_txns['trxn_id'].append(dict['header_signature'])
+            expected_txns['payload'].append(dict['payload'])
+        return expected_txns
+    
+    
+    def _submit_batches(self,batch_list):
+        LOGGER.info("Submitting batches to the route handlers")
+        for batch in batch_list:
+            try:
+                response = post_batch(batch)
+            except urllib.error.HTTPError as error:
+                LOGGER.info("Rest Api is not reachable")
+                response = json.loads(error.fp.read().decode('utf-8'))
+                LOGGER.info(response['error']['title'])
+                LOGGER.info(response['error']['message'])
+        return response
+    
+    
+    def _initial_count(self):
+        LOGGER.info("Calculating the initial count of batches,transactions, state before submission of batches")
+        data = self.data
+        data['state_length'] = state_count()
+        data['transaction_length'] = transaction_count()
+        data['batch_length'] = batch_count()
+        return data
+        
+    
+    def _expected_count(self,txns,batches):
+        LOGGER.info("Calculating the expected count of batches, transactions, state")
+        data = self.data
+        self._initial_count()
+        expected_txns=self._expected_txn_ids(txns)
+        expected_batches=self._expected_batch_ids(batches)
+        length_batches = len(expected_batches)
+        length_transactions = len(expected_txns['trxn_id'])
+        data['expected_batch_length'] = data['batch_length'] + length_batches
+        data['expected_trn_length'] = data['transaction_length'] + length_transactions
+        return data
+        
+    
+    def _expected_data(self,txns,batches):
+        LOGGER.info("Gathering expected data before submission of batches")
+        data = self.data
+        self._expected_count(txns,batches)
+        expected_txns=self._expected_txn_ids(txns)
+        expected_batches=self._expected_batch_ids(batches)
+                
+        data['expected_txns'] = expected_txns['trxn_id'][::-1]
+        data['payload'] = expected_txns['payload'][::-1]
+        data['expected_batches'] = expected_batches[::-1]
+        data['signer_key'] = self.signer.get_public_key().as_hex()
+        return data
+    
+    def _post_data(self,txns,batches):
+        LOGGER.info("Gathering data post submission of batches")
+        data = self.data
+        expected_batches=self._expected_batch_ids(batches)
+        batch_list = get_batches()
+        data['batch_list'] = batch_list
+        data['batch_ids'] = [batch['header_signature'] for batch in batch_list['data']]
+        transaction_list = get_transactions()
+        data['transaction_list'] = transaction_list
+        data['transaction_ids'] = [trans['header_signature'] for trans in transaction_list['data']]
+        block_list = get_blocks()
+        data['block_list'] = block_list
+        block_ids = [block['header_signature'] for block in block_list['data']]
+        data['block_ids'] = block_ids[:-1]
+        expected_head = block_ids[0]
+        data['expected_head'] = expected_head
+        state_addresses = [state['address'] for state in get_state_list()['data']]
+        data['state_address'] = state_addresses
+        state_head_list = [get_state_address(address)['head'] for address in state_addresses]
+        data['state_head'] = state_head_list
+        data['address'] = self.address
+        data['limit'] = LIMIT
+        data['start'] = expected_batches[::-1][0]
+        return data
+        
+    async def async_fetch_url(url, session,params=None):
+        try:
+            async with session.get(url) as response:
+                return await response.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+            
+    
+    async def async_post_batch(url, session, data, params=None,headers=None):
+        if headers:
+            headers=headers
+        else:
+            headers = {'Content-Type': 'application/octet-stream'}
+        try:
+            async with session.post(url,data=data,headers=headers) as response:
+                data = await response.json()
+                if 'link' in data:
+                    link = data['link']
+                    return await async_fetch_url('{}&wait={}'.format(link, WAIT),session)
+                else:
+                    return data
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
 
 
 class IntKeyPayload(object):
