@@ -17,7 +17,7 @@ import asyncio
 import logging
 from base64 import b64decode
 
-from utils import _get_node_list, fetch_url
+from utils import _get_node_list
 
 
 CONSENSUS_ALGO = b'Devmode'
@@ -36,10 +36,34 @@ class BaseTest(object):
         async with aiohttp.ClientSession() as session:
             return session
     
+    async def fetch_url(url, session,params=None):
+        try:
+            async with session.get(url) as response:
+                return await response.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+            
+    
+    async def post_batch(url, session, data, params=None,headers=None):
+        if headers:
+            headers=headers
+        else:
+            headers = {'Content-Type': 'application/octet-stream'}
+        try:
+            async with session.post(url,data=data,headers=headers) as response:
+                data = await response.json()
+                if 'link' in data:
+                    link = data['link']
+                    return await async_fetch_url('{}&wait={}'.format(link, WAIT),session)
+                else:
+                    return data
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info(error)
+    
     async def create_tasks(self,url,session):
         tasks=[]
         try:
-            task = asyncio.ensure_future(fetch_url(url, session))
+            task = asyncio.ensure_future(self.fetch_url(url, session))
             tasks.append(task)
         except:
             LOGGER.info("Rest Api is Unreachable") 
