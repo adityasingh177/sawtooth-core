@@ -38,6 +38,13 @@ LOGGER.setLevel(logging.INFO)
     
 WAIT = 300
 
+async def fetch_url(url, session,params=None):
+    try:
+        async with session.get(url) as response:
+            return await response.json()
+    except aiohttp.client_exceptions.ClientResponseError as error:
+        LOGGER.info(error)
+
 
 def get_blocks(head_id=None , id=None , start=None , limit=None , reverse=None):  
     if all(v is not None for v in [head_id , id]):

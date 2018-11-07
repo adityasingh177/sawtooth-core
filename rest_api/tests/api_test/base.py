@@ -13,10 +13,11 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 import aiohttp
+import asyncio
 import logging
 from base64 import b64decode
 
-from utils import _get_node_list
+from utils import _get_node_list, fetch_url
 
 
 CONSENSUS_ALGO = b'Devmode'
@@ -30,8 +31,33 @@ TRIES=5
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 
+class BaseTest(object):
+    async def get_session(self):
+        async with aiohttp.ClientSession() as session:
+            return session
+    
+    async def create_tasks(self,url,session):
+        tasks=[]
+        try:
+            task = asyncio.ensure_future(fetch_url(url, session))
+            tasks.append(task)
+        except:
+            LOGGER.info("Rest Api is Unreachable") 
+        
+        return tasks
+    
+    async def send_request(self,url,param=None):
+        try:
+            async with aiohttp.ClientSession() as session:
+                tasks = await self.create_tasks(url,session)
+                response = await asyncio.gather(*tasks)
+        except aiohttp.client_exceptions.ClientResponseError as error:
+            LOGGER.info("Rest Api is Unreachable") 
+        return response
+        
+        
 
-class RestApiBaseTest(object):
+class RestApiBaseTest(BaseTest):
     """Base class for Rest Api tests that simplifies making assertions
        for the test cases
     """
@@ -39,6 +65,12 @@ class RestApiBaseTest(object):
     def assert_status(self, response, status):
         for data in response['data']:
             assert data['status'] == status
+    
+    def assert_count(self, expected_count, count):
+        assert expected_count == count
+    
+    def assert_code(self,code, response):
+        assert code == response.code
 
     def assert_equal(self, response, data):
         assert response == data
