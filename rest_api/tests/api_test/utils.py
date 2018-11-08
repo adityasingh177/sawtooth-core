@@ -362,6 +362,9 @@ def post_receipts(receipts):
     return response
 
 def state_count():
+    print("Starting Count of State")
+    import time
+    start_time = time.time()
     state_list = get_state_list()
     count = len(state_list['data'])
     try:
@@ -377,10 +380,14 @@ def state_count():
             next_position = None
         
         count += len(state_list['data'])
+    print(time.time()-start_time)
     return count  
 
 
 def batch_count():
+    print("Starting Count of Batches")
+    import time
+    start_time = time.time()
     batch_list = get_batches()
     count = len(batch_list['data'])
     try:
@@ -396,10 +403,15 @@ def batch_count():
             next_position = None
         
         count += len(batch_list['data'])
+    
+    print(time.time()-start_time)
     return count   
 
 
 def transaction_count():
+    print("Starting Count of transactions")
+    import time
+    start_time = time.time()
     transaction_list = get_transactions()
     count = len(transaction_list['data'])
     try:
@@ -415,6 +427,7 @@ def transaction_count():
             next_position = None
         
         count += len(transaction_list['data'])
+    print(time.time()-start_time)
     return count 
 
 def _create_expected_link(expected_ids):
@@ -424,27 +437,26 @@ def _create_expected_link(expected_ids):
 
 
 def _get_batch_list(response):
+    print("Starting gathering response of batches")
+    import time
+    start_time = time.time()
     batch_list = response['data']
     
     try:
         next_position = response['paging']['next_position']
-        print(next_position)
     except:
         next_position = None
         
     while(next_position):
         response = get_batches(start=next_position)
-        print(response)
         data_list = response['data']
         try:
             next_position = response['paging']['next_position']
         except:
             next_position = None
-        
-        print(next_position)
-                      
+                              
         batch_list += data_list
-                
+    print(time.time()-start_time)           
     return batch_list
 
 

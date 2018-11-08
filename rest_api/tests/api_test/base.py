@@ -54,7 +54,7 @@ class BaseTest(object):
                 data = await response.json()
                 if 'link' in data:
                     link = data['link']
-                    return await async_fetch_url('{}&wait={}'.format(link, WAIT),session)
+                    return await self.fetch_url('{}&wait={}'.format(link, WAIT),session)
                 else:
                     return data
         except aiohttp.client_exceptions.ClientResponseError as error:

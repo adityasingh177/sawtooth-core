@@ -127,7 +127,9 @@ class Setup:
     
     
     def _submit_batches(self,batch_list):
-        LOGGER.info("Submitting batches to the route handlers")
+        print("Submitting batches to the route handlers")
+        import time
+        start_time = time.time()
         for batch in batch_list:
             try:
                 response = post_batch(batch)
@@ -136,6 +138,7 @@ class Setup:
                 response = json.loads(error.fp.read().decode('utf-8'))
                 LOGGER.info(response['error']['title'])
                 LOGGER.info(response['error']['message'])
+        print(time.time()-start_time)
         return response
     
     
@@ -175,7 +178,9 @@ class Setup:
         return data
     
     def _post_data(self,txns,batches):
-        LOGGER.info("Gathering data post submission of batches")
+        print("Gathering data post submission of batches")
+        import time
+        start_time = time.time()
         data = self.data
         expected_batches=self._expected_batch_ids(batches)
         batch_list = get_batches()
@@ -250,6 +255,33 @@ class IntKeyPayload(object):
             self._sha512 = hashlib.sha512(self.to_cbor()).hexdigest()
         return self._sha512
     
+
+class XOPayload(object):
+    def create_users(self,users):
+        for username in users:
+            _send_cmd('sawtooth keygen {} --force'.format(username))
+        
+    def create_game(self, game, user,address):
+        cmd = 'xo create game-1 --username {}'.format(user)
+        _send_cmd(cmd)
+        
+    def take_game(self, game, user, position,address):
+        cmd = 'xo take game-1 {} --username {}'.format(position,user)
+        _send_cmd(cmd)
+    
+    def list_game(self):
+        cmd = 'xo list'
+        _send_cmd(cmd)
+    
+    def show_game(self,game,address):
+        cmd = 'xo show game-1'.format(game,address)
+        
+    def delete_game(self,game,address):
+        cmd = 'xo delete game-1 --username {}'.format(user)
+        _send_cmd(cmd)
+        
+
+
 class Transactions:
     def __init__(self, invalidtype):
         self.signer = get_signer()

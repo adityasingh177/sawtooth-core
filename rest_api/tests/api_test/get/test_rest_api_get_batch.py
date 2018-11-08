@@ -79,20 +79,22 @@ class TestBatchList(RestApiBaseTest):
         
                                                  
         try:
-            response = await self.send_request(url)
-        except:
+            async with aiohttp.ClientSession() as session:        
+                async with session.get(url=url) as data:
+                    response = await data.json()
+        except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable")
             
-        batches = _get_batch_list(response[0]) 
+        batches = _get_batch_list(response) 
           
-        self.assert_valid_data(response[0])
-        self.assert_valid_head(response[0], expected_head) 
+        self.assert_valid_data(response)
+        self.assert_valid_head(response, expected_head) 
         self.assert_valid_data_length(batches, expected_length)
         self.assert_check_batch_seq(batches, expected_batches, 
                                     expected_txns, payload, 
                                     signer_key)
-        self.assert_valid_link(response[0], expected_link)
-        self.assert_valid_paging(response[0], expected_link)
+        self.assert_valid_link(response, expected_link)
+        self.assert_valid_paging(response, expected_link)
             
     async def test_api_get_batch_list_head(self, setup):   
         """Tests that GET /batches is reachable with head parameter 
