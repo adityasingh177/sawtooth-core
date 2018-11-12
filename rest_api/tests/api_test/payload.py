@@ -203,30 +203,6 @@ class Setup:
         data['limit'] = LIMIT
         data['start'] = expected_batches[::-1][0]
         return data
-        
-    async def async_fetch_url(url, session,params=None):
-        try:
-            async with session.get(url) as response:
-                return await response.json()
-        except aiohttp.client_exceptions.ClientResponseError as error:
-            LOGGER.info(error)
-            
-    
-    async def async_post_batch(url, session, data, params=None,headers=None):
-        if headers:
-            headers=headers
-        else:
-            headers = {'Content-Type': 'application/octet-stream'}
-        try:
-            async with session.post(url,data=data,headers=headers) as response:
-                data = await response.json()
-                if 'link' in data:
-                    link = data['link']
-                    return await async_fetch_url('{}&wait={}'.format(link, WAIT),session)
-                else:
-                    return data
-        except aiohttp.client_exceptions.ClientResponseError as error:
-            LOGGER.info(error)
 
 
 class IntKeyPayload(object):
@@ -280,8 +256,7 @@ class XOPayload(object):
         cmd = 'xo delete game-1 --username {}'.format(user)
         _send_cmd(cmd)
         
-
-
+        
 class Transactions:
     def __init__(self, invalidtype):
         self.signer = get_signer()

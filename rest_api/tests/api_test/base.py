@@ -78,13 +78,19 @@ class BaseTest(object):
         except aiohttp.client_exceptions.ClientResponseError as error:
             LOGGER.info("Rest Api is Unreachable") 
         return response
-        
-        
+
 
 class RestApiBaseTest(BaseTest):
     """Base class for Rest Api tests that simplifies making assertions
        for the test cases
     """
+    async def send_get(self,url,param):
+        response = await self.send_request(url, param)
+        return response
+    
+    async def send_post(self,url,data):
+        response = await self.send_request(url, data)
+        return response
         
     def assert_status(self, response, status):
         for data in response['data']:
