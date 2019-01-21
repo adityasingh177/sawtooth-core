@@ -1,0 +1,6 @@
+2018-12-27 01:49:17 INFO Starting Setup method for posting batches using intkey as payload
+2018-12-27 01:49:17 INFO Creating intkey transactions with set operations
+2018-12-27 01:49:17 INFO Creating batches for transactions 1trn/batch
+2018-12-27 01:49:17 INFO Gathering expected data before submission of batches
+2018-12-27 01:49:17 INFO Calculating the expected count of batches, transactions, state
+2018-12-27 01:49:17 INFO Calculating the initial count of batches,transactions, state before submission of batches
