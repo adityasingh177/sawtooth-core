@@ -20,9 +20,9 @@ import json
 
 from google.protobuf.json_format import MessageToDict
 
-from sawtooth_validation.transactions import \
-                         SmallBankDependentTxns, \
+from transactions import SmallBankDependentTxns, \
                          SupplyChainDependentTxns
+                         
  
     
 LOGGER = logging.getLogger(__name__)
@@ -128,7 +128,7 @@ def setup_supply_agent(request):
             preserving_proto_field_name=True)
     txn_id=dict['header_signature'] 
     
-    txn2=dep_txns._create_agent('agent2')
+    txn2=dep_txns._create_agent('agent2',deps=[txn_id])
     batch2=dep_txns.create_batch([txn2])
     batch_list=[batch1,batch2]
     return batch_list
